@@ -67,11 +67,17 @@ type Settings struct {
 	MaxRequests uint32
 
 	// Interval is the period to clear counts in closed state.
-	// Default: 0 (counts are cleared only on state transitions).
+	//
+	// Valid range: >= 0 (negative values will panic)
+	// Default: 0 (counts are cleared only on state transitions)
+	// Common values: 60s for time-based windows, 0 for event-based
 	Interval time.Duration
 
 	// Timeout is the duration to wait before transitioning from open to half-open.
-	// Default: 60 seconds if set to 0.
+	//
+	// Valid range: > 0 recommended
+	// Default: 60 seconds if set to 0
+	// Common values: 10s-120s depending on service recovery time
 	Timeout time.Duration
 
 	// ReadyToTrip is called when counts are updated in closed state.
@@ -90,19 +96,44 @@ type Settings struct {
 	// --- Adaptive Settings (AutoBreaker Extensions) ---
 
 	// AdaptiveThreshold enables percentage-based failure thresholds.
-	// When true, ReadyToTrip uses failure rate instead of absolute counts.
-	// Default: false (use static thresholds for backward compatibility).
+	// When true, the circuit breaker uses failure rate (percentage) instead of absolute failure counts.
+	// This makes the same configuration work across different traffic levels.
+	//
+	// Example: With 5% threshold:
+	//   Production (1000 req/s): Trips at 50 failures/s
+	//   Staging (10 req/s):      Trips at 0.5 failures/s
+	//   Dev (1 req/min):         Trips at 0.05 failures/min
+	//
+	// Default: false (uses static ConsecutiveFailures > 5 for backward compatibility)
 	AdaptiveThreshold bool
 
 	// FailureRateThreshold is the failure rate (0.0-1.0) that triggers circuit open.
 	// Only used when AdaptiveThreshold is true.
-	// Default: 0.05 (5% failure rate).
+	//
+	// Valid range: (0, 1) exclusive - values outside this range will panic
+	// Default: 0.05 (5% failure rate) if set to 0
+	// Recommended values:
+	//   0.01 (1%)  = Strict, for critical services with low error tolerance
+	//   0.05 (5%)  = Balanced, good default for most services
+	//   0.10 (10%) = Lenient, for services with higher acceptable error rates
+	//
+	// The threshold is traffic-proportional: it works equally well at any request rate.
 	FailureRateThreshold float64
 
 	// MinimumObservations is the minimum number of requests before adaptive logic activates.
-	// Prevents false positives on low traffic.
+	// Prevents false positives during low traffic periods.
 	// Only used when AdaptiveThreshold is true.
-	// Default: 20 requests.
+	//
+	// Valid range: > 0 recommended (though 0 will use default)
+	// Default: 20 requests if set to 0
+	// Recommended values:
+	//   10-20   = For high-traffic services with quick feedback
+	//   20-50   = Balanced, prevents premature tripping
+	//   50-100  = For services where you want high confidence before tripping
+	//
+	// Example: With MinimumObservations=20 and FailureRateThreshold=0.05:
+	//   First 19 requests: Circuit won't trip regardless of failure rate
+	//   20+ requests: Circuit trips if failure rate exceeds 5%
 	MinimumObservations uint32
 }
 
@@ -148,7 +179,23 @@ var (
 )
 
 // New creates a new circuit breaker with the given settings.
+// It panics if adaptive threshold settings are invalid.
 func New(settings Settings) *CircuitBreaker {
+	// Validate adaptive threshold settings
+	if settings.AdaptiveThreshold {
+		// FailureRateThreshold must be in (0, 1) exclusive range if explicitly set
+		if settings.FailureRateThreshold != 0 {
+			if settings.FailureRateThreshold <= 0 || settings.FailureRateThreshold >= 1 {
+				panic("autobreaker: FailureRateThreshold must be in range (0, 1)")
+			}
+		}
+	}
+
+	// Validate Interval (can be 0 for no reset, but not negative)
+	if settings.Interval < 0 {
+		panic("autobreaker: Interval cannot be negative")
+	}
+
 	cb := &CircuitBreaker{
 		name:                 settings.Name,
 		maxRequests:          settings.MaxRequests,

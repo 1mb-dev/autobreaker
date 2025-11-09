@@ -63,6 +63,124 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestConfigurationValidation(t *testing.T) {
+	tests := []struct {
+		name        string
+		settings    Settings
+		shouldPanic bool
+		panicMsg    string
+	}{
+		{
+			name: "valid adaptive settings",
+			settings: Settings{
+				Name:                 "test",
+				AdaptiveThreshold:    true,
+				FailureRateThreshold: 0.05,
+				MinimumObservations:  20,
+			},
+			shouldPanic: false,
+		},
+		{
+			name: "adaptive with zero threshold (uses default)",
+			settings: Settings{
+				Name:                 "test",
+				AdaptiveThreshold:    true,
+				FailureRateThreshold: 0, // Will default to 0.05
+			},
+			shouldPanic: false,
+		},
+		{
+			name: "failure rate threshold too low",
+			settings: Settings{
+				Name:                 "test",
+				AdaptiveThreshold:    true,
+				FailureRateThreshold: 0.0,
+			},
+			shouldPanic: false, // 0 is OK, triggers default
+		},
+		{
+			name: "failure rate threshold negative",
+			settings: Settings{
+				Name:                 "test",
+				AdaptiveThreshold:    true,
+				FailureRateThreshold: -0.1,
+			},
+			shouldPanic: true,
+			panicMsg:    "autobreaker: FailureRateThreshold must be in range (0, 1)",
+		},
+		{
+			name: "failure rate threshold equals 1",
+			settings: Settings{
+				Name:                 "test",
+				AdaptiveThreshold:    true,
+				FailureRateThreshold: 1.0,
+			},
+			shouldPanic: true,
+			panicMsg:    "autobreaker: FailureRateThreshold must be in range (0, 1)",
+		},
+		{
+			name: "failure rate threshold above 1",
+			settings: Settings{
+				Name:                 "test",
+				AdaptiveThreshold:    true,
+				FailureRateThreshold: 1.5,
+			},
+			shouldPanic: true,
+			panicMsg:    "autobreaker: FailureRateThreshold must be in range (0, 1)",
+		},
+		{
+			name: "negative interval",
+			settings: Settings{
+				Name:     "test",
+				Interval: -1 * time.Second,
+			},
+			shouldPanic: true,
+			panicMsg:    "autobreaker: Interval cannot be negative",
+		},
+		{
+			name: "zero interval (valid)",
+			settings: Settings{
+				Name:     "test",
+				Interval: 0,
+			},
+			shouldPanic: false,
+		},
+		{
+			name: "non-adaptive with invalid threshold (ignored)",
+			settings: Settings{
+				Name:                 "test",
+				AdaptiveThreshold:    false,
+				FailureRateThreshold: 5.0, // Invalid but ignored since adaptive is false
+			},
+			shouldPanic: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				r := recover()
+				if tt.shouldPanic {
+					if r == nil {
+						t.Errorf("Expected panic with message containing %q, but no panic occurred", tt.panicMsg)
+					} else {
+						panicStr := fmt.Sprint(r)
+						if panicStr != tt.panicMsg {
+							t.Errorf("Expected panic message %q, got %q", tt.panicMsg, panicStr)
+						}
+					}
+				} else {
+					if r != nil {
+						t.Errorf("Expected no panic, but got: %v", r)
+					}
+				}
+			}()
+
+			_ = New(tt.settings)
+		})
+	}
+}
+
 func TestStateString(t *testing.T) {
 	tests := []struct {
 		state State
