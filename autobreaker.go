@@ -272,12 +272,7 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 				cb.recordOutcome(false)
 
 				// Handle state transitions for panic (same as failure)
-				switch currentState {
-				case StateClosed:
-					cb.checkAndTripCircuit()
-				case StateHalfOpen:
-					cb.transitionBackToOpen()
-				}
+				cb.handleStateTransition(false, currentState)
 
 				// Re-panic to preserve stack trace
 				panic(r)
@@ -293,21 +288,7 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 		cb.recordOutcome(success)
 
 		// Handle state transitions based on outcome
-		switch currentState {
-		case StateClosed:
-			// Check if we should trip (Closed → Open)
-			if !success {
-				cb.checkAndTripCircuit()
-			}
-
-		case StateHalfOpen:
-			// HalfOpen → Closed on success, HalfOpen → Open on failure
-			if success {
-				cb.transitionToClosed()
-			} else {
-				cb.transitionBackToOpen()
-			}
-		}
+		cb.handleStateTransition(success, currentState)
 	}
 
 	return result, err
@@ -347,6 +328,24 @@ func (cb *CircuitBreaker) recordOutcome(success bool) {
 		cb.totalFailures.Add(1)
 		cb.consecutiveFailures.Add(1)
 		cb.consecutiveSuccesses.Store(0)
+	}
+}
+
+// handleStateTransition handles state machine transitions based on request outcome.
+func (cb *CircuitBreaker) handleStateTransition(success bool, currentState State) {
+	switch currentState {
+	case StateClosed:
+		// Only check for trip on failure (Closed → Open)
+		if !success {
+			cb.checkAndTripCircuit()
+		}
+	case StateHalfOpen:
+		// Transition based on outcome (HalfOpen → Closed or Open)
+		if success {
+			cb.transitionToClosed()
+		} else {
+			cb.transitionBackToOpen()
+		}
 	}
 }
 
