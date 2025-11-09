@@ -354,6 +354,93 @@ func TestAdaptiveReadyToTripTransition(t *testing.T) {
 	}
 }
 
+func TestStateTransitionOpenToHalfOpen(t *testing.T) {
+	cb := New(Settings{
+		Name:    "test",
+		Timeout: 100 * time.Millisecond,
+		ReadyToTrip: func(counts Counts) bool {
+			return counts.ConsecutiveFailures > 1
+		},
+	})
+
+	// Trip the circuit to Open
+	cb.Execute(failFunc)
+	cb.Execute(failFunc)
+
+	if cb.State() != StateOpen {
+		t.Fatalf("Circuit not open after failures, state = %v", cb.State())
+	}
+
+	// Try request before timeout (should be rejected)
+	_, err := cb.Execute(successFunc)
+	if err != ErrOpenState {
+		t.Errorf("Request before timeout: error = %v, want ErrOpenState", err)
+	}
+
+	// Wait for timeout
+	time.Sleep(150 * time.Millisecond)
+
+	// Next request should trigger transition to HalfOpen
+	result, err := cb.Execute(successFunc)
+
+	if cb.State() != StateHalfOpen {
+		t.Errorf("After timeout: state = %v, want HalfOpen", cb.State())
+	}
+
+	if err != nil {
+		t.Errorf("Request after timeout: error = %v, want nil", err)
+	}
+
+	if result != "success" {
+		t.Errorf("Request after timeout: result = %v, want 'success'", result)
+	}
+}
+
+func TestStateTransitionOpenToHalfOpenWithCallback(t *testing.T) {
+	var transitions []struct {
+		from State
+		to   State
+	}
+
+	cb := New(Settings{
+		Name:    "test",
+		Timeout: 50 * time.Millisecond,
+		ReadyToTrip: func(counts Counts) bool {
+			return counts.ConsecutiveFailures > 0
+		},
+		OnStateChange: func(name string, from State, to State) {
+			transitions = append(transitions, struct {
+				from State
+				to   State
+			}{from, to})
+		},
+	})
+
+	// Trip circuit (Closed → Open)
+	cb.Execute(failFunc)
+
+	if len(transitions) != 1 {
+		t.Fatalf("After tripping: transitions = %d, want 1", len(transitions))
+	}
+
+	// Wait for timeout and trigger transition (Open → HalfOpen)
+	time.Sleep(100 * time.Millisecond)
+	cb.Execute(successFunc)
+
+	if len(transitions) != 2 {
+		t.Fatalf("After timeout: transitions = %d, want 2", len(transitions))
+	}
+
+	// Verify transition sequence
+	if transitions[0].from != StateClosed || transitions[0].to != StateOpen {
+		t.Errorf("First transition: %v → %v, want Closed → Open", transitions[0].from, transitions[0].to)
+	}
+
+	if transitions[1].from != StateOpen || transitions[1].to != StateHalfOpen {
+		t.Errorf("Second transition: %v → %v, want Open → HalfOpen", transitions[1].from, transitions[1].to)
+	}
+}
+
 // Placeholder for concurrency tests (Phase 1 implementation)
 func TestConcurrency(t *testing.T) {
 	t.Skip("Phase 1: Implement concurrency tests with race detector")

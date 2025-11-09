@@ -228,8 +228,15 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 	// Handle based on state
 	switch currentState {
 	case StateOpen:
-		// Circuit is open - reject request immediately
-		return nil, ErrOpenState
+		// Check if timeout has elapsed (lazy transition to half-open)
+		if cb.shouldTransitionToHalfOpen() {
+			cb.transitionToHalfOpen()
+			// Fall through to half-open handling below
+			currentState = StateHalfOpen
+		} else {
+			// Circuit is still open - reject request immediately
+			return nil, ErrOpenState
+		}
 
 	case StateHalfOpen:
 		// Half-open state - check concurrent request limit
@@ -327,6 +334,37 @@ func (cb *CircuitBreaker) checkAndTripCircuit() {
 	// Call state change callback if configured
 	if cb.onStateChange != nil {
 		cb.onStateChange(cb.name, StateClosed, StateOpen)
+	}
+}
+
+// shouldTransitionToHalfOpen checks if timeout has elapsed since circuit opened.
+func (cb *CircuitBreaker) shouldTransitionToHalfOpen() bool {
+	openedAt := cb.openedAt.Load()
+	if openedAt == 0 {
+		return false // Never opened
+	}
+
+	elapsed := time.Duration(time.Now().UnixNano() - openedAt)
+	return elapsed >= cb.timeout
+}
+
+// transitionToHalfOpen transitions from Open to HalfOpen state.
+func (cb *CircuitBreaker) transitionToHalfOpen() {
+	// Attempt atomic state transition from Open to HalfOpen
+	if !cb.state.CompareAndSwap(int32(StateOpen), int32(StateHalfOpen)) {
+		return // Lost race, another goroutine already transitioned
+	}
+
+	// Successfully transitioned to HalfOpen
+	// Clear counts
+	cb.clearCounts()
+
+	// Reset half-open request counter
+	cb.halfOpenRequests.Store(0)
+
+	// Call state change callback if configured
+	if cb.onStateChange != nil {
+		cb.onStateChange(cb.name, StateOpen, StateHalfOpen)
 	}
 }
 
