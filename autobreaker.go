@@ -258,27 +258,55 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 	// Increment request counter
 	cb.requests.Add(1)
 
-	// Execute the request
-	result, err := req()
+	// Execute the request with panic recovery
+	var result interface{}
+	var err error
+	var panicked bool
 
-	// Record the outcome
-	success := cb.isSuccessful(err)
-	cb.recordOutcome(success)
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				// Panic occurred - treat as failure
+				panicked = true
+				// Record panic as failure
+				cb.recordOutcome(false)
 
-	// Handle state transitions based on outcome
-	switch currentState {
-	case StateClosed:
-		// Check if we should trip (Closed → Open)
-		if !success {
-			cb.checkAndTripCircuit()
-		}
+				// Handle state transitions for panic (same as failure)
+				switch currentState {
+				case StateClosed:
+					cb.checkAndTripCircuit()
+				case StateHalfOpen:
+					cb.transitionBackToOpen()
+				}
 
-	case StateHalfOpen:
-		// HalfOpen → Closed on success, HalfOpen → Open on failure
-		if success {
-			cb.transitionToClosed()
-		} else {
-			cb.transitionBackToOpen()
+				// Re-panic to preserve stack trace
+				panic(r)
+			}
+		}()
+
+		result, err = req()
+	}()
+
+	// If we got here without panic, record normal outcome
+	if !panicked {
+		success := cb.isSuccessful(err)
+		cb.recordOutcome(success)
+
+		// Handle state transitions based on outcome
+		switch currentState {
+		case StateClosed:
+			// Check if we should trip (Closed → Open)
+			if !success {
+				cb.checkAndTripCircuit()
+			}
+
+		case StateHalfOpen:
+			// HalfOpen → Closed on success, HalfOpen → Open on failure
+			if success {
+				cb.transitionToClosed()
+			} else {
+				cb.transitionBackToOpen()
+			}
 		}
 	}
 
