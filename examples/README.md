@@ -73,11 +73,20 @@ for dir in examples/*/; do
 done
 ```
 
-## Note
+## Running Examples
 
-These examples are part of Phase 0 (Foundation). The `Execute()` method is not yet implemented.
+All examples are fully functional with complete circuit breaker implementation.
 
-Full implementation will be completed in Phase 1.
+```bash
+# Run basic example
+go run examples/basic/main.go
+
+# Run adaptive threshold example
+go run examples/adaptive/main.go
+
+# Run custom error classification example
+go run examples/custom_errors/main.go
+```
 
 ## Next Steps
 

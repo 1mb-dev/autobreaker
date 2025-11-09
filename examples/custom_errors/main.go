@@ -108,5 +108,5 @@ func main() {
 	fmt.Println("\n=== Key Insight ===")
 	fmt.Println("Client errors (4xx) don't trip the circuit.")
 	fmt.Println("Only server errors (5xx) indicate service health issues.")
-	fmt.Println("\nNote: Implementation pending - Execute() not yet implemented in Phase 0")
+	fmt.Println("\nCustom error classification prevents false positives!")
 }
