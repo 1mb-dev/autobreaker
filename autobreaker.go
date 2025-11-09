@@ -258,6 +258,11 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 	success := cb.isSuccessful(err)
 	cb.recordOutcome(success)
 
+	// Check if we should transition state (Closed → Open)
+	if currentState == StateClosed && !success {
+		cb.checkAndTripCircuit()
+	}
+
 	return result, err
 }
 
@@ -295,6 +300,33 @@ func (cb *CircuitBreaker) recordOutcome(success bool) {
 		cb.totalFailures.Add(1)
 		cb.consecutiveFailures.Add(1)
 		cb.consecutiveSuccesses.Store(0)
+	}
+}
+
+// checkAndTripCircuit evaluates ReadyToTrip and transitions to Open if needed.
+func (cb *CircuitBreaker) checkAndTripCircuit() {
+	counts := cb.Counts()
+
+	// Check if we should trip
+	if !cb.readyToTrip(counts) {
+		return
+	}
+
+	// Attempt atomic state transition from Closed to Open
+	if !cb.state.CompareAndSwap(int32(StateClosed), int32(StateOpen)) {
+		return // Lost race, another goroutine already transitioned
+	}
+
+	// Successfully transitioned to Open
+	// Record the timestamp
+	cb.openedAt.Store(time.Now().UnixNano())
+
+	// Clear counts
+	cb.clearCounts()
+
+	// Call state change callback if configured
+	if cb.onStateChange != nil {
+		cb.onStateChange(cb.name, StateClosed, StateOpen)
 	}
 }
 

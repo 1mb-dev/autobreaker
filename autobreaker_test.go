@@ -250,9 +250,108 @@ func TestAdaptiveThresholdDefaults(t *testing.T) {
 	}
 }
 
-// Placeholder for state transition tests (Phase 1 implementation)
-func TestStateTransitions(t *testing.T) {
-	t.Skip("Phase 1: Implement state transition tests")
+func TestStateTransitionClosedToOpen(t *testing.T) {
+	cb := New(Settings{
+		Name: "test",
+		ReadyToTrip: func(counts Counts) bool {
+			return counts.ConsecutiveFailures > 2
+		},
+	})
+
+	// Verify initial state
+	if cb.State() != StateClosed {
+		t.Errorf("Initial state = %v, want Closed", cb.State())
+	}
+
+	// First two failures should not trip
+	cb.Execute(failFunc)
+	cb.Execute(failFunc)
+
+	if cb.State() != StateClosed {
+		t.Errorf("After 2 failures: state = %v, want Closed", cb.State())
+	}
+
+	// Third failure should trip circuit
+	cb.Execute(failFunc)
+
+	if cb.State() != StateOpen {
+		t.Errorf("After 3 failures: state = %v, want Open", cb.State())
+	}
+
+	// Verify counts were cleared after transition
+	counts := cb.Counts()
+	if counts.Requests != 0 {
+		t.Errorf("After transition: Requests = %v, want 0 (cleared)", counts.Requests)
+	}
+}
+
+func TestStateTransitionWithCallback(t *testing.T) {
+	var callbackFrom, callbackTo State
+	var callbackName string
+	var callbackCalled bool
+
+	cb := New(Settings{
+		Name: "test-callback",
+		ReadyToTrip: func(counts Counts) bool {
+			return counts.ConsecutiveFailures > 1
+		},
+		OnStateChange: func(name string, from State, to State) {
+			callbackCalled = true
+			callbackName = name
+			callbackFrom = from
+			callbackTo = to
+		},
+	})
+
+	// Trigger transition
+	cb.Execute(failFunc)
+	cb.Execute(failFunc)
+
+	if !callbackCalled {
+		t.Error("OnStateChange callback was not called")
+	}
+
+	if callbackName != "test-callback" {
+		t.Errorf("Callback name = %v, want 'test-callback'", callbackName)
+	}
+
+	if callbackFrom != StateClosed {
+		t.Errorf("Callback from state = %v, want Closed", callbackFrom)
+	}
+
+	if callbackTo != StateOpen {
+		t.Errorf("Callback to state = %v, want Open", callbackTo)
+	}
+}
+
+func TestAdaptiveReadyToTripTransition(t *testing.T) {
+	cb := New(Settings{
+		Name:                 "test",
+		AdaptiveThreshold:    true,
+		FailureRateThreshold: 0.10, // 10%
+		MinimumObservations:  10,
+	})
+
+	// 5 successes, 5 failures (should not trip - below minimum observations)
+	for i := 0; i < 5; i++ {
+		cb.Execute(successFunc)
+		cb.Execute(failFunc)
+	}
+
+	if cb.State() != StateClosed {
+		t.Errorf("At 10 requests (50%% failure): state = %v, want Closed (not enough observations)", cb.State())
+	}
+
+	// Add more requests to reach minimum observations
+	// Now at 10 success, 10 failures (50% > 10% threshold - should trip)
+	for i := 0; i < 5; i++ {
+		cb.Execute(successFunc)
+		cb.Execute(failFunc)
+	}
+
+	if cb.State() != StateOpen {
+		t.Errorf("At 20 requests (50%% failure): state = %v, want Open (above threshold)", cb.State())
+	}
 }
 
 // Placeholder for concurrency tests (Phase 1 implementation)
