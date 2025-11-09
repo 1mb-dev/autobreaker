@@ -329,21 +329,21 @@ func TestAdaptiveReadyToTripTransition(t *testing.T) {
 		Name:                 "test",
 		AdaptiveThreshold:    true,
 		FailureRateThreshold: 0.10, // 10%
-		MinimumObservations:  10,
+		MinimumObservations:  20,   // Increased to 20 for clearer test
 	})
 
-	// 5 successes, 5 failures (should not trip - below minimum observations)
+	// 5 successes, 5 failures = 10 requests (should not trip - below minimum observations)
 	for i := 0; i < 5; i++ {
 		cb.Execute(successFunc)
 		cb.Execute(failFunc)
 	}
 
 	if cb.State() != StateClosed {
-		t.Errorf("At 10 requests (50%% failure): state = %v, want Closed (not enough observations)", cb.State())
+		t.Errorf("At 10 requests (50%% failure): state = %v, want Closed (below minimum observations)", cb.State())
 	}
 
 	// Add more requests to reach minimum observations
-	// Now at 10 success, 10 failures (50% > 10% threshold - should trip)
+	// Now at 10 success, 10 failures = 20 requests (50% >> 10% threshold - should trip)
 	for i := 0; i < 5; i++ {
 		cb.Execute(successFunc)
 		cb.Execute(failFunc)
