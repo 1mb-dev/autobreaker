@@ -265,9 +265,21 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 	success := cb.isSuccessful(err)
 	cb.recordOutcome(success)
 
-	// Check if we should transition state (Closed → Open)
-	if currentState == StateClosed && !success {
-		cb.checkAndTripCircuit()
+	// Handle state transitions based on outcome
+	switch currentState {
+	case StateClosed:
+		// Check if we should trip (Closed → Open)
+		if !success {
+			cb.checkAndTripCircuit()
+		}
+
+	case StateHalfOpen:
+		// HalfOpen → Closed on success, HalfOpen → Open on failure
+		if success {
+			cb.transitionToClosed()
+		} else {
+			cb.transitionBackToOpen()
+		}
 	}
 
 	return result, err
@@ -365,6 +377,46 @@ func (cb *CircuitBreaker) transitionToHalfOpen() {
 	// Call state change callback if configured
 	if cb.onStateChange != nil {
 		cb.onStateChange(cb.name, StateOpen, StateHalfOpen)
+	}
+}
+
+// transitionToClosed transitions from HalfOpen to Closed state (recovery).
+func (cb *CircuitBreaker) transitionToClosed() {
+	// Attempt atomic state transition from HalfOpen to Closed
+	if !cb.state.CompareAndSwap(int32(StateHalfOpen), int32(StateClosed)) {
+		return // Lost race, another goroutine already transitioned
+	}
+
+	// Successfully transitioned to Closed (recovery complete)
+	// Clear counts
+	cb.clearCounts()
+
+	// Reset last cleared timestamp
+	cb.lastClearedAt.Store(time.Now().UnixNano())
+
+	// Call state change callback if configured
+	if cb.onStateChange != nil {
+		cb.onStateChange(cb.name, StateHalfOpen, StateClosed)
+	}
+}
+
+// transitionBackToOpen transitions from HalfOpen back to Open (failed recovery).
+func (cb *CircuitBreaker) transitionBackToOpen() {
+	// Attempt atomic state transition from HalfOpen to Open
+	if !cb.state.CompareAndSwap(int32(StateHalfOpen), int32(StateOpen)) {
+		return // Lost race, another goroutine already transitioned
+	}
+
+	// Successfully transitioned back to Open
+	// Record new open timestamp
+	cb.openedAt.Store(time.Now().UnixNano())
+
+	// Clear counts
+	cb.clearCounts()
+
+	// Call state change callback if configured
+	if cb.onStateChange != nil {
+		cb.onStateChange(cb.name, StateHalfOpen, StateOpen)
 	}
 }
 

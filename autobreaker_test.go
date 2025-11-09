@@ -2,6 +2,7 @@ package autobreaker
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 )
@@ -438,6 +439,111 @@ func TestStateTransitionOpenToHalfOpenWithCallback(t *testing.T) {
 
 	if transitions[1].from != StateOpen || transitions[1].to != StateHalfOpen {
 		t.Errorf("Second transition: %v → %v, want Open → HalfOpen", transitions[1].from, transitions[1].to)
+	}
+}
+
+func TestStateTransitionHalfOpenToClosed(t *testing.T) {
+	cb := New(Settings{
+		Name:    "test",
+		Timeout: 50 * time.Millisecond,
+		ReadyToTrip: func(counts Counts) bool {
+			return counts.ConsecutiveFailures > 0
+		},
+	})
+
+	// Trip circuit
+	cb.Execute(failFunc)
+
+	if cb.State() != StateOpen {
+		t.Fatalf("Circuit not open, state = %v", cb.State())
+	}
+
+	// Wait for timeout and transition to HalfOpen
+	time.Sleep(100 * time.Millisecond)
+	cb.Execute(successFunc) // This should succeed and close circuit
+
+	if cb.State() != StateClosed {
+		t.Errorf("After successful probe: state = %v, want Closed", cb.State())
+	}
+
+	// Verify normal operations work
+	result, err := cb.Execute(successFunc)
+	if err != nil {
+		t.Errorf("After recovery: error = %v, want nil", err)
+	}
+	if result != "success" {
+		t.Errorf("After recovery: result = %v, want 'success'", result)
+	}
+}
+
+func TestStateTransitionHalfOpenToOpen(t *testing.T) {
+	cb := New(Settings{
+		Name:    "test",
+		Timeout: 50 * time.Millisecond,
+		ReadyToTrip: func(counts Counts) bool {
+			return counts.ConsecutiveFailures > 0
+		},
+	})
+
+	// Trip circuit
+	cb.Execute(failFunc)
+
+	if cb.State() != StateOpen {
+		t.Fatalf("Circuit not open, state = %v", cb.State())
+	}
+
+	// Wait for timeout and transition to HalfOpen
+	time.Sleep(100 * time.Millisecond)
+	cb.Execute(failFunc) // Failed probe - should go back to Open
+
+	if cb.State() != StateOpen {
+		t.Errorf("After failed probe: state = %v, want Open", cb.State())
+	}
+
+	// Verify circuit is rejecting again
+	_, err := cb.Execute(successFunc)
+	if err != ErrOpenState {
+		t.Errorf("After re-opening: error = %v, want ErrOpenState", err)
+	}
+}
+
+func TestFullRecoveryFlow(t *testing.T) {
+	var transitions []string
+
+	cb := New(Settings{
+		Name:    "test",
+		Timeout: 50 * time.Millisecond,
+		ReadyToTrip: func(counts Counts) bool {
+			return counts.ConsecutiveFailures > 1
+		},
+		OnStateChange: func(name string, from State, to State) {
+			transitions = append(transitions, fmt.Sprintf("%v→%v", from, to))
+		},
+	})
+
+	// Normal operations
+	cb.Execute(successFunc)
+
+	// Trip circuit (Closed → Open)
+	cb.Execute(failFunc)
+	cb.Execute(failFunc)
+
+	// Wait for timeout
+	time.Sleep(100 * time.Millisecond)
+
+	// Successful probe (Open → HalfOpen → Closed)
+	cb.Execute(successFunc)
+
+	// Verify full transition sequence
+	expected := []string{"closed→open", "open→half-open", "half-open→closed"}
+	if len(transitions) != len(expected) {
+		t.Fatalf("Transitions = %v, want %v", transitions, expected)
+	}
+
+	for i, exp := range expected {
+		if transitions[i] != exp {
+			t.Errorf("Transition %d = %v, want %v", i, transitions[i], exp)
+		}
 	}
 }
 
