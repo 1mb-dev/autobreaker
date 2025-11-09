@@ -381,11 +381,12 @@ func TestStateTransitionOpenToHalfOpen(t *testing.T) {
 	// Wait for timeout
 	time.Sleep(150 * time.Millisecond)
 
-	// Next request should trigger transition to HalfOpen
+	// Next request triggers transition to HalfOpen, and success closes it
 	result, err := cb.Execute(successFunc)
 
-	if cb.State() != StateHalfOpen {
-		t.Errorf("After timeout: state = %v, want HalfOpen", cb.State())
+	// Successful probe completes recovery (HalfOpen → Closed)
+	if cb.State() != StateClosed {
+		t.Errorf("After successful probe: state = %v, want Closed (full recovery)", cb.State())
 	}
 
 	if err != nil {
@@ -424,12 +425,13 @@ func TestStateTransitionOpenToHalfOpenWithCallback(t *testing.T) {
 		t.Fatalf("After tripping: transitions = %d, want 1", len(transitions))
 	}
 
-	// Wait for timeout and trigger transition (Open → HalfOpen)
+	// Wait for timeout and trigger transition (Open → HalfOpen → Closed)
 	time.Sleep(100 * time.Millisecond)
 	cb.Execute(successFunc)
 
-	if len(transitions) != 2 {
-		t.Fatalf("After timeout: transitions = %d, want 2", len(transitions))
+	// Successful probe triggers two transitions
+	if len(transitions) != 3 {
+		t.Fatalf("After successful probe: transitions = %d, want 3", len(transitions))
 	}
 
 	// Verify transition sequence
@@ -439,6 +441,10 @@ func TestStateTransitionOpenToHalfOpenWithCallback(t *testing.T) {
 
 	if transitions[1].from != StateOpen || transitions[1].to != StateHalfOpen {
 		t.Errorf("Second transition: %v → %v, want Open → HalfOpen", transitions[1].from, transitions[1].to)
+	}
+
+	if transitions[2].from != StateHalfOpen || transitions[2].to != StateClosed {
+		t.Errorf("Third transition: %v → %v, want HalfOpen → Closed", transitions[2].from, transitions[2].to)
 	}
 }
 
