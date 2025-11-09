@@ -222,9 +222,80 @@ func (cb *CircuitBreaker) Counts() Counts {
 // Execute runs the given function if the circuit breaker allows it.
 // Returns the result and error from the function, or a circuit breaker error.
 func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{}, error) {
-	// Implementation will be added in Phase 1
-	// This is just the API definition for Phase 0
-	return nil, errors.New("not implemented yet")
+	// Get current state
+	currentState := cb.State()
+
+	// Handle based on state
+	switch currentState {
+	case StateOpen:
+		// Circuit is open - reject request immediately
+		return nil, ErrOpenState
+
+	case StateHalfOpen:
+		// Half-open state - check concurrent request limit
+		current := cb.halfOpenRequests.Add(1)
+		if current > int32(cb.maxRequests) {
+			cb.halfOpenRequests.Add(-1)
+			return nil, ErrTooManyRequests
+		}
+		defer cb.halfOpenRequests.Add(-1)
+
+	case StateClosed:
+		// Closed state - normal operation
+		// Check if we need to clear counts based on interval
+		if cb.interval > 0 {
+			cb.maybeResetCounts()
+		}
+	}
+
+	// Increment request counter
+	cb.requests.Add(1)
+
+	// Execute the request
+	result, err := req()
+
+	// Record the outcome
+	success := cb.isSuccessful(err)
+	cb.recordOutcome(success)
+
+	return result, err
+}
+
+// maybeResetCounts clears counts if interval has elapsed (Closed state only).
+func (cb *CircuitBreaker) maybeResetCounts() {
+	now := time.Now().UnixNano()
+	last := cb.lastClearedAt.Load()
+
+	// Check if interval has elapsed
+	if time.Duration(now-last) >= cb.interval {
+		// Try to claim clearing responsibility
+		if cb.lastClearedAt.CompareAndSwap(last, now) {
+			// We won the race, clear counts
+			cb.clearCounts()
+		}
+	}
+}
+
+// clearCounts resets all counters to zero.
+func (cb *CircuitBreaker) clearCounts() {
+	cb.requests.Store(0)
+	cb.totalSuccesses.Store(0)
+	cb.totalFailures.Store(0)
+	cb.consecutiveSuccesses.Store(0)
+	cb.consecutiveFailures.Store(0)
+}
+
+// recordOutcome updates counts based on request outcome.
+func (cb *CircuitBreaker) recordOutcome(success bool) {
+	if success {
+		cb.totalSuccesses.Add(1)
+		cb.consecutiveSuccesses.Add(1)
+		cb.consecutiveFailures.Store(0)
+	} else {
+		cb.totalFailures.Add(1)
+		cb.consecutiveFailures.Add(1)
+		cb.consecutiveSuccesses.Store(0)
+	}
 }
 
 // Default ReadyToTrip: trip after 5 consecutive failures.
