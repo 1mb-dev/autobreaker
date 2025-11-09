@@ -1,0 +1,65 @@
+linters:
+  enable:
+    - errcheck      # Check for unchecked errors
+    - gosimple      # Suggest code simplifications
+    - govet         # Vet examines Go source code
+    - ineffassign   # Detect ineffectual assignments
+    - staticcheck   # Advanced static analysis
+    - unused        # Check for unused code
+    - gofmt         # Check formatting
+    - goimports     # Check import formatting
+    - misspell      # Check for spelling mistakes
+    - revive        # Fast, configurable linter
+    - gocritic      # Opinionated linter
+    - gosec         # Security checks
+    - dupl          # Code clone detection
+    - unconvert     # Unnecessary type conversions
+    - prealloc      # Find slice declarations that could be preallocated
+
+linters-settings:
+  errcheck:
+    check-blank: true
+    check-type-assertions: true
+
+  govet:
+    check-shadowing: true
+    enable-all: true
+
+  revive:
+    rules:
+      - name: exported
+        severity: warning
+        disabled: false
+
+  gosec:
+    excludes:
+      - G404 # Use of weak random number generator (ok for tests)
+
+  dupl:
+    threshold: 100
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - performance
+      - style
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - dupl
+        - gosec
+
+run:
+  timeout: 5m
+  tests: true
+  skip-dirs:
+    - vendor
+    - examples
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
