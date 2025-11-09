@@ -1204,3 +1204,327 @@ func TestIntervalBasedCountClearing(t *testing.T) {
 		t.Errorf("After interval: TotalSuccesses = %v, want 1", counts.TotalSuccesses)
 	}
 }
+
+// Test adaptive thresholds work across different traffic levels (core value proposition)
+func TestAdaptiveVsStaticLowTraffic(t *testing.T) {
+	// Low traffic scenario: 100 requests total
+	const totalRequests = 100
+	const failureRate = 0.06 // 6% failures
+
+	// Adaptive breaker: should trip at 5% failure rate
+	adaptive := New(Settings{
+		Name:                 "adaptive-low-traffic",
+		AdaptiveThreshold:    true,
+		FailureRateThreshold: 0.05, // 5%
+		MinimumObservations:  20,
+	})
+
+	// Static breaker: needs 6 consecutive failures
+	static := New(Settings{
+		Name: "static-low-traffic",
+		ReadyToTrip: func(counts Counts) bool {
+			return counts.ConsecutiveFailures > 5
+		},
+	})
+
+	// Simulate requests with 6% failure rate
+	adaptiveTripped := false
+	staticTripped := false
+
+	for i := 0; i < totalRequests; i++ {
+		// Create request that fails 6% of the time
+		var req func() (interface{}, error)
+		if i%17 == 0 { // ~6% failure rate
+			req = failFunc
+		} else {
+			req = successFunc
+		}
+
+		// Execute on adaptive breaker
+		if !adaptiveTripped {
+			_, err := adaptive.Execute(req)
+			if err == ErrOpenState {
+				adaptiveTripped = true
+			}
+		}
+
+		// Execute on static breaker
+		if !staticTripped {
+			_, err := static.Execute(req)
+			if err == ErrOpenState {
+				staticTripped = true
+			}
+		}
+	}
+
+	// Adaptive should have tripped (6% > 5% threshold)
+	if !adaptiveTripped {
+		t.Error("Adaptive breaker should have tripped at 6% failure rate in low traffic")
+	}
+
+	// Static might not have tripped (depends on failure distribution)
+	// This demonstrates the problem with absolute count thresholds
+	t.Logf("Low traffic (100 req): Adaptive tripped=%v, Static tripped=%v", adaptiveTripped, staticTripped)
+}
+
+func TestAdaptiveVsStaticHighTraffic(t *testing.T) {
+	// High traffic scenario: 10,000 requests total
+	const totalRequests = 10000
+	const failureRate = 0.06 // 6% failures
+
+	// Adaptive breaker: should trip at 5% failure rate
+	adaptive := New(Settings{
+		Name:                 "adaptive-high-traffic",
+		AdaptiveThreshold:    true,
+		FailureRateThreshold: 0.05, // 5%
+		MinimumObservations:  20,
+	})
+
+	// Static breaker: needs 6 consecutive failures
+	static := New(Settings{
+		Name: "static-high-traffic",
+		ReadyToTrip: func(counts Counts) bool {
+			return counts.ConsecutiveFailures > 5
+		},
+	})
+
+	// Simulate requests with 6% failure rate
+	adaptiveTripped := false
+	staticTripped := false
+
+	for i := 0; i < totalRequests; i++ {
+		// Create request that fails 6% of the time
+		var req func() (interface{}, error)
+		if i%17 == 0 { // ~6% failure rate
+			req = failFunc
+		} else {
+			req = successFunc
+		}
+
+		// Execute on adaptive breaker
+		if !adaptiveTripped {
+			_, err := adaptive.Execute(req)
+			if err == ErrOpenState {
+				adaptiveTripped = true
+			}
+		}
+
+		// Execute on static breaker
+		if !staticTripped {
+			_, err := static.Execute(req)
+			if err == ErrOpenState {
+				staticTripped = true
+			}
+		}
+	}
+
+	// Adaptive should have tripped (6% > 5% threshold)
+	if !adaptiveTripped {
+		t.Error("Adaptive breaker should have tripped at 6% failure rate in high traffic")
+	}
+
+	// Static might or might not trip depending on failure distribution
+	// (needs 6 consecutive failures, but our failures are spread out)
+	// This demonstrates adaptive is more reliable across traffic patterns
+	t.Logf("High traffic (10000 req): Adaptive tripped=%v, Static tripped=%v", adaptiveTripped, staticTripped)
+}
+
+func TestAdaptiveSameConfigDifferentTraffic(t *testing.T) {
+	// Test that same adaptive config works across different traffic levels
+	configs := []struct {
+		name          string
+		totalRequests int
+		description   string
+	}{
+		{"low-traffic", 50, "dev environment"},
+		{"medium-traffic", 500, "staging environment"},
+		{"high-traffic", 5000, "production environment"},
+	}
+
+	for _, tc := range configs {
+		t.Run(tc.name, func(t *testing.T) {
+			// Same configuration for all traffic levels
+			cb := New(Settings{
+				Name:                 tc.name,
+				AdaptiveThreshold:    true,
+				FailureRateThreshold: 0.10, // 10%
+				MinimumObservations:  20,
+			})
+
+			tripped := false
+			requestsBeforeTrip := 0
+
+			// Simulate requests with 12% failure rate (above 10% threshold)
+			for i := 0; i < tc.totalRequests; i++ {
+				var req func() (interface{}, error)
+				if i%8 == 0 { // ~12.5% failure rate
+					req = failFunc
+				} else {
+					req = successFunc
+				}
+
+				if !tripped {
+					_, err := cb.Execute(req)
+					if err == ErrOpenState {
+						tripped = true
+						requestsBeforeTrip = i
+					}
+				}
+			}
+
+			// Should trip in all traffic levels (12% > 10%)
+			if !tripped {
+				t.Errorf("%s: Circuit should have tripped at 12%% failure rate", tc.description)
+			}
+
+			// Should trip after minimum observations
+			if tripped && requestsBeforeTrip < 20 {
+				t.Errorf("%s: Circuit tripped too early (%d requests, expected >= 20)",
+					tc.description, requestsBeforeTrip)
+			}
+
+			t.Logf("%s: Tripped after %d requests (expected >= 20)", tc.description, requestsBeforeTrip)
+		})
+	}
+}
+
+func TestTrafficSpike(t *testing.T) {
+	// Test behavior during traffic spike: low → high → low
+	cb := New(Settings{
+		Name:                 "traffic-spike",
+		AdaptiveThreshold:    true,
+		FailureRateThreshold: 0.05,
+		MinimumObservations:  20,
+		Interval:             100 * time.Millisecond,
+	})
+
+	// Phase 1: Low traffic (10 req/s equivalent)
+	for i := 0; i < 10; i++ {
+		cb.Execute(successFunc)
+	}
+
+	counts := cb.Counts()
+	if counts.Requests != 10 {
+		t.Errorf("Phase 1: Requests = %v, want 10", counts.Requests)
+	}
+
+	// Phase 2: Traffic spike (1000 req/s equivalent)
+	for i := 0; i < 1000; i++ {
+		// 3% failure rate (below threshold)
+		if i%33 == 0 {
+			cb.Execute(failFunc)
+		} else {
+			cb.Execute(successFunc)
+		}
+	}
+
+	counts = cb.Counts()
+	if counts.Requests != 1010 {
+		t.Errorf("Phase 2: Requests = %v, want 1010", counts.Requests)
+	}
+
+	// Should NOT have tripped (3% < 5% threshold)
+	if cb.State() != StateClosed {
+		t.Errorf("Should remain closed with 3%% failure rate, got state %v", cb.State())
+	}
+
+	// Wait for interval to clear counts
+	time.Sleep(150 * time.Millisecond)
+	cb.Execute(successFunc) // Trigger count clearing
+
+	// Phase 3: Back to low traffic
+	for i := 0; i < 10; i++ {
+		cb.Execute(successFunc)
+	}
+
+	counts = cb.Counts()
+	// Should have cleared after interval
+	if counts.Requests > 15 { // Allow some buffer for clearing timing
+		t.Errorf("Phase 3: Requests should be cleared, got %v", counts.Requests)
+	}
+}
+
+func TestGradualTrafficIncrease(t *testing.T) {
+	// Test behavior during gradual traffic increase
+	cb := New(Settings{
+		Name:                 "gradual-increase",
+		AdaptiveThreshold:    true,
+		FailureRateThreshold: 0.05,
+		MinimumObservations:  20,
+	})
+
+	// Gradually increase traffic while maintaining 3% failure rate
+	trafficLevels := []int{10, 50, 100, 500, 1000}
+
+	totalExecuted := 0
+	for _, level := range trafficLevels {
+		for i := 0; i < level; i++ {
+			// 3% failure rate (below 5% threshold)
+			// Use totalExecuted to avoid clustering failures
+			if totalExecuted%34 == 0 && totalExecuted > 0 { // ~3% failure rate, skip first request
+				cb.Execute(failFunc)
+			} else {
+				cb.Execute(successFunc)
+			}
+			totalExecuted++
+		}
+	}
+
+	// Should NOT have tripped at any level (3% < 5%)
+	if cb.State() != StateClosed {
+		t.Errorf("Should remain closed with 3%% failure rate during gradual increase, got state %v", cb.State())
+	}
+
+	totalRequests := 0
+	for _, level := range trafficLevels {
+		totalRequests += level
+	}
+
+	counts := cb.Counts()
+	if counts.Requests != uint32(totalRequests) {
+		t.Errorf("Total requests = %v, want %v", counts.Requests, totalRequests)
+	}
+
+	t.Logf("Handled gradual increase from 10 to 1000 req without tripping")
+}
+
+func TestLowTrafficBehavior(t *testing.T) {
+	// Test that minimum observations prevents premature tripping in very low traffic
+	cb := New(Settings{
+		Name:                 "very-low-traffic",
+		AdaptiveThreshold:    true,
+		FailureRateThreshold: 0.05, // 5%
+		MinimumObservations:  20,
+	})
+
+	// Send only 10 requests with 100% failure rate
+	for i := 0; i < 10; i++ {
+		cb.Execute(failFunc)
+	}
+
+	// Should NOT trip (below minimum observations)
+	if cb.State() != StateClosed {
+		t.Errorf("Should not trip with <MinimumObservations, got state %v", cb.State())
+	}
+
+	counts := cb.Counts()
+	if counts.Requests != 10 {
+		t.Errorf("Requests = %v, want 10", counts.Requests)
+	}
+	if counts.TotalFailures != 10 {
+		t.Errorf("TotalFailures = %v, want 10", counts.TotalFailures)
+	}
+
+	// Send 10 more successful requests (now at MinimumObservations)
+	for i := 0; i < 10; i++ {
+		cb.Execute(successFunc)
+	}
+
+	// Now at 20 requests: 10 failures / 20 total = 50% failure rate
+	// Should trip (50% >> 5%)
+	cb.Execute(failFunc) // This should trigger the trip
+
+	if cb.State() != StateOpen {
+		t.Errorf("Should trip after reaching MinimumObservations with high failure rate, got state %v", cb.State())
+	}
+}
