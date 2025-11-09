@@ -1,18 +1,4 @@
-// Package autobreaker provides an adaptive circuit breaker for Go.
-//
-// AutoBreaker automatically adjusts failure thresholds based on traffic patterns,
-// eliminating the need for manual tuning across different environments.
-//
-// Basic usage:
-//
-//	breaker := autobreaker.New(autobreaker.Settings{
-//	    Name: "my-service",
-//	})
-//
-//	result, err := breaker.Execute(func() (interface{}, error) {
-//	    return externalService.Call()
-//	})
-package autobreaker
+package breaker
 
 import (
 	"errors"
@@ -144,12 +130,12 @@ var (
 	ErrTooManyRequests = errors.New("too many requests")
 )
 
-// defaultReadyToTrip returns true after 5 consecutive failures.
-func defaultReadyToTrip(counts Counts) bool {
+// DefaultReadyToTrip returns true after 5 consecutive failures.
+func DefaultReadyToTrip(counts Counts) bool {
 	return counts.ConsecutiveFailures > 5
 }
 
-// defaultIsSuccessful returns true only for nil errors.
-func defaultIsSuccessful(err error) bool {
+// DefaultIsSuccessful returns true only for nil errors.
+func DefaultIsSuccessful(err error) bool {
 	return err == nil
 }

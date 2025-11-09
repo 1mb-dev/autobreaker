@@ -1,4 +1,4 @@
-package autobreaker
+package breaker
 
 // defaultAdaptiveReadyToTrip implements percentage-based threshold logic.
 func (cb *CircuitBreaker) defaultAdaptiveReadyToTrip(counts Counts) bool {

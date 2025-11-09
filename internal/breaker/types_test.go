@@ -1,4 +1,4 @@
-package autobreaker
+package breaker
 
 import (
 	"errors"
@@ -214,8 +214,8 @@ func TestDefaultReadyToTrip(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := defaultReadyToTrip(tt.counts); got != tt.want {
-				t.Errorf("defaultReadyToTrip() = %v, want %v", got, tt.want)
+			if got := DefaultReadyToTrip(tt.counts); got != tt.want {
+				t.Errorf("DefaultReadyToTrip() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -241,8 +241,8 @@ func TestDefaultIsSuccessful(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := defaultIsSuccessful(tt.err); got != tt.want {
-				t.Errorf("defaultIsSuccessful() = %v, want %v", got, tt.want)
+			if got := DefaultIsSuccessful(tt.err); got != tt.want {
+				t.Errorf("DefaultIsSuccessful() = %v, want %v", got, tt.want)
 			}
 		})
 	}

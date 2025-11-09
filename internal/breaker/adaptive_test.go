@@ -1,4 +1,4 @@
-package autobreaker
+package breaker
 
 import (
 	"testing"

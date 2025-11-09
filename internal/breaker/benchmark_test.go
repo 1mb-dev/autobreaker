@@ -1,4 +1,4 @@
-package autobreaker
+package breaker
 
 import (
 	"errors"
@@ -120,7 +120,7 @@ func BenchmarkDefaultReadyToTrip(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		_ = defaultReadyToTrip(counts)
+		_ = DefaultReadyToTrip(counts)
 	}
 }
 

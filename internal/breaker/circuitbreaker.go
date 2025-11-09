@@ -1,4 +1,4 @@
-package autobreaker
+package breaker
 
 import (
 	"sync/atomic"
@@ -82,12 +82,12 @@ func New(settings Settings) *CircuitBreaker {
 		if cb.adaptiveThreshold {
 			cb.readyToTrip = cb.defaultAdaptiveReadyToTrip
 		} else {
-			cb.readyToTrip = defaultReadyToTrip
+			cb.readyToTrip = DefaultReadyToTrip
 		}
 	}
 
 	if cb.isSuccessful == nil {
-		cb.isSuccessful = defaultIsSuccessful
+		cb.isSuccessful = DefaultIsSuccessful
 	}
 
 	if cb.failureRateThreshold == 0 && cb.adaptiveThreshold {
