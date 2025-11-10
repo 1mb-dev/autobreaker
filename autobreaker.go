@@ -255,6 +255,19 @@ var (
 // Constructor and Helper Functions
 //
 // These functions create and configure circuit breakers.
+//
+// Implementation Note: Package Variable Pattern
+//
+// We expose internal/breaker functions via package variables (var New = breaker.New)
+// rather than wrapper functions. This provides a cleaner import path for users
+// (autobreaker.New vs breaker.New) while avoiding wrapper function overhead.
+//
+// Trade-offs:
+//   - Pros: Cleaner API, zero wrapper overhead, simpler imports
+//   - Cons: Less conventional, harder to mock in tests
+//
+// This pattern is intentional and appropriate for a library facade.
+// Consider function wrappers in v2.0 if testability issues arise.
 
 // New creates a new CircuitBreaker with the given settings.
 //

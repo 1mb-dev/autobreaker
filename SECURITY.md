@@ -185,6 +185,35 @@ Circuit breakers protect **against** DoS by failing fast, but misconfiguration c
 
 **Mitigation**: Use adaptive thresholds and configure `Interval` for count resets.
 
+### 5. Rate Limiting
+
+**Important:** AutoBreaker does **not** limit the request rate to the circuit breaker itself. It protects your backend by failing fast when open, but accepts unlimited concurrent requests when closed.
+
+The circuit breaker pattern focuses on failure detection and recovery, not request throttling.
+
+**For request rate limiting**, use complementary libraries:
+- `golang.org/x/time/rate` - Token bucket algorithm
+- `github.com/ulule/limiter` - Multiple algorithms (sliding window, fixed window)
+
+**Example - Combining Circuit Breaker + Rate Limiter:**
+```go
+rateLimiter := rate.NewLimiter(rate.Limit(100), 10) // 100 req/s, burst 10
+breaker := autobreaker.New(autobreaker.Settings{Name: "api"})
+
+func protectedRequest() error {
+    // Rate limit first
+    if err := rateLimiter.Wait(ctx); err != nil {
+        return err
+    }
+
+    // Then circuit breaker
+    _, err := breaker.Execute(func() (interface{}, error) {
+        return apiCall()
+    })
+    return err
+}
+```
+
 ## Acknowledgments
 
 We appreciate responsible disclosure and will acknowledge security researchers who report vulnerabilities (with permission).

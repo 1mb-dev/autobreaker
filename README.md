@@ -58,6 +58,22 @@ func main() {
 }
 ```
 
+## ⚠️ Performance Warning: User Callbacks
+
+**Critical:** `ReadyToTrip`, `OnStateChange`, and `IsSuccessful` callbacks run **synchronously** on every request. Slow callbacks will block all traffic.
+
+**Requirements:**
+- Keep callbacks <1μs (microsecond)
+- No I/O, network calls, or `time.Sleep()`
+- For slow work, spawn goroutines:
+  ```go
+  OnStateChange: func(name string, from, to State) {
+      go metrics.Record(name, from, to) // Async, non-blocking
+  }
+  ```
+
+**Why:** Callbacks execute on the hot path. A 10ms callback = 10ms added to every request.
+
 ## How It Works
 
 AutoBreaker adapts failure thresholds as a **percentage of recent requests** instead of absolute counts:
@@ -81,15 +97,13 @@ go get github.com/vnykmshr/autobreaker
 
 ## Status
 
-✅ **Production-Ready with Runtime Configuration** - Phase 4A Complete
+✅ **Production-Ready** - v1.0.0
 
-- ✅ Full circuit breaker implementation with adaptive thresholds
-- ✅ Runtime configuration updates (UpdateSettings API)
-- ✅ Comprehensive observability (Metrics() + Diagnostics() APIs)
-- ✅ Comprehensive test suite (68 tests, 98.3% coverage)
-- ✅ Race-detector clean, thread-safe
-- ✅ 7 production-ready examples (including Prometheus + runtime config)
-- ⏭️ Next: Advanced features (Phase 4B: Sliding windows, middleware)
+- Adaptive thresholds with runtime configuration
+- 102 tests, 97.1% coverage, race-detector clean
+- <100ns overhead, zero allocations, zero dependencies
+- 9 production examples (HTTP, Prometheus, runtime config)
+- Full observability (Metrics, Diagnostics)
 
 ## Examples
 
@@ -123,12 +137,13 @@ AutoBreaker follows a lean approach:
 
 ## Roadmap
 
-- ✅ **Phase 1:** Core circuit breaker implementation
-- ✅ **Phase 2A:** Adaptive thresholds, validation, comprehensive tests
-- ✅ **Phase 3A:** Observability & metrics (Metrics API, Diagnostics API, examples)
-- ✅ **Phase 4A:** Runtime configuration (UpdateSettings API, thread-safe atomic updates)
-- ⏭️ **Phase 4B:** Advanced features (sliding windows, middleware helpers)
-- 🔮 **Phase 5:** Ecosystem integration (HTTP middleware, gRPC interceptors)
+- ✅ **Phase 1:** Core circuit breaker
+- ✅ **Phase 2A:** Adaptive thresholds
+- ✅ **Phase 3A:** Observability & metrics
+- ✅ **Phase 4A:** Runtime configuration
+- 🔍 **Phase 4B/5:** Feature requests - [RFC: Sliding Windows](../../issues), [RFC: Middleware](../../issues)
+
+**Note:** v1.0 may be feature-complete. Future phases depend on validated community demand.
 
 ## License
 
