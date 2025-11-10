@@ -135,6 +135,33 @@ go run examples/prometheus/main.go
 
 ---
 
+### 7. Runtime Configuration (`runtime_config/`) ⭐ **Recommended**
+
+Demonstrates runtime configuration updates without restart:
+- Programmatic updates via UpdateSettings() API
+- File-based configuration with JSON
+- HTTP API for remote updates
+- SIGHUP signal handler for config reload
+- Validation and error handling
+
+**Run:**
+```bash
+go run examples/runtime_config/main.go
+# Interact via HTTP: curl http://localhost:8081/config
+```
+
+**Key Concepts:**
+- Updating settings at runtime
+- File-based configuration patterns
+- HTTP API for ops teams
+- Signal handling for reload
+- Thread-safe configuration updates
+- Production configuration management
+
+**Perfect for:** Operations teams, dynamic tuning, A/B testing
+
+---
+
 ## Quick Start
 
 ```bash
@@ -155,8 +182,9 @@ done
 ## Learning Path
 
 1. **Start here:** `production_ready/` - See everything in action
-2. **Observability:** `observability/` - Learn monitoring and troubleshooting
-3. **Basics:** `basic/` - Understand core concepts
-4. **Adaptive:** `adaptive/` - Learn why adaptive thresholds matter
-5. **Integration:** `prometheus/` - Connect to monitoring systems
-6. **Customization:** `custom_errors/` - Tailor to your error types
+2. **Runtime Config:** `runtime_config/` - Learn how to update settings dynamically
+3. **Observability:** `observability/` - Learn monitoring and troubleshooting
+4. **Basics:** `basic/` - Understand core concepts
+5. **Adaptive:** `adaptive/` - Learn why adaptive thresholds matter
+6. **Integration:** `prometheus/` - Connect to monitoring systems
+7. **Customization:** `custom_errors/` - Tailor to your error types

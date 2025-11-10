@@ -15,6 +15,7 @@ AutoBreaker solves this by using **percentage-based thresholds** that adapt to r
 ## Features
 
 - **Adaptive Thresholds:** Same config works across different traffic volumes
+- **Runtime Configuration:** Update settings without restart
 - **Drop-in Replacement:** Compatible with sony/gobreaker API
 - **Zero Dependencies:** Only standard library
 - **High Performance:** <100ns overhead per request
@@ -75,20 +76,22 @@ go get github.com/vnykmshr/autobreaker
 
 ## Status
 
-✅ **Production-Ready with Observability** - Phase 3A Complete
+✅ **Production-Ready with Runtime Configuration** - Phase 4A Complete
 
 - ✅ Full circuit breaker implementation with adaptive thresholds
+- ✅ Runtime configuration updates (UpdateSettings API)
 - ✅ Comprehensive observability (Metrics() + Diagnostics() APIs)
-- ✅ Comprehensive test suite (50 tests, 98.2% coverage)
-- ✅ Race-detector clean
-- ✅ 6 production-ready examples (including Prometheus integration)
-- ⏭️ Next: Advanced features (Phase 4)
+- ✅ Comprehensive test suite (68 tests, 98.3% coverage)
+- ✅ Race-detector clean, thread-safe
+- ✅ 7 production-ready examples (including Prometheus + runtime config)
+- ⏭️ Next: Advanced features (Phase 4B: Sliding windows, middleware)
 
 ## Examples
 
 See comprehensive examples in the [`examples/`](examples/) directory:
 
 - **[production_ready/](examples/production_ready/)** ⭐ - Realistic production scenarios, recommended starting point
+- **[runtime_config/](examples/runtime_config/)** ⭐ - Runtime configuration updates (file, API, SIGHUP)
 - **[observability/](examples/observability/)** ⭐ - Monitoring, metrics, and diagnostics patterns
 - **[prometheus/](examples/prometheus/)** - Prometheus integration (custom collector)
 - **[basic/](examples/basic/)** - Fundamental circuit breaker patterns
@@ -98,6 +101,7 @@ See comprehensive examples in the [`examples/`](examples/) directory:
 Run any example:
 ```bash
 go run examples/production_ready/main.go
+go run examples/runtime_config/main.go
 go run examples/observability/main.go
 ```
 
@@ -117,7 +121,8 @@ AutoBreaker follows a lean approach:
 - ✅ **Phase 1:** Core circuit breaker implementation
 - ✅ **Phase 2A:** Adaptive thresholds, validation, comprehensive tests
 - ✅ **Phase 3A:** Observability & metrics (Metrics API, Diagnostics API, examples)
-- ⏭️ **Phase 4:** Advanced features (sliding windows, health checks, middleware)
+- ✅ **Phase 4A:** Runtime configuration (UpdateSettings API, thread-safe atomic updates)
+- ⏭️ **Phase 4B:** Advanced features (sliding windows, middleware helpers)
 - 🔮 **Phase 5:** Ecosystem integration (HTTP middleware, gRPC interceptors)
 
 ## License
