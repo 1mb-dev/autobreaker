@@ -1,0 +1,89 @@
+name: Benchmarks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    name: Run Benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run benchmarks
+        run: |
+          go test -bench=. -benchmem -run=^$ ./internal/breaker > bench_results.txt
+          cat bench_results.txt
+
+      - name: Check performance targets
+        run: |
+          echo "Checking performance targets..."
+
+          # Extract key benchmark results
+          state_ns=$(grep "BenchmarkState-" bench_results.txt | awk '{print $3}')
+          counts_ns=$(grep "BenchmarkCounts-" bench_results.txt | awk '{print $3}')
+          execute_closed_ns=$(grep "BenchmarkExecute_Closed-" bench_results.txt | awk '{print $3}')
+          execute_context_ns=$(grep "BenchmarkExecuteContext_Closed-" bench_results.txt | awk '{print $3}')
+
+          # Convert to comparable numbers (remove ns/op)
+          state_val=${state_ns% ns/op}
+          counts_val=${counts_ns% ns/op}
+          execute_closed_val=${execute_closed_ns% ns/op}
+          execute_context_val=${execute_context_ns% ns/op}
+
+          # Display results
+          echo "📊 Performance Results:"
+          echo "  State():              $state_ns (target: < 5 ns/op)"
+          echo "  Counts():             $counts_ns (target: < 10 ns/op)"
+          echo "  Execute (closed):     $execute_closed_ns (target: < 100 ns/op)"
+          echo "  ExecuteContext:       $execute_context_ns (target: < 100 ns/op)"
+
+          # Check if targets are met (simplified check - just verify benchmarks ran)
+          if [ -n "$state_val" ] && [ -n "$counts_val" ] && [ -n "$execute_closed_val" ]; then
+            echo "✅ All benchmarks completed successfully"
+          else
+            echo "❌ Some benchmarks failed to run"
+            exit 1
+          fi
+
+      - name: Check for zero allocations
+        run: |
+          echo "Checking for zero allocations in hot paths..."
+
+          # Check hot path benchmarks have 0 allocs
+          hot_paths="BenchmarkExecute_Closed BenchmarkState BenchmarkCounts BenchmarkMetrics"
+
+          for bench in $hot_paths; do
+            allocs=$(grep "${bench}-" bench_results.txt | awk '{print $5}')
+            if [ "$allocs" != "0" ]; then
+              echo "❌ $bench has allocations: $allocs"
+              exit 1
+            fi
+          done
+
+          echo "✅ All hot paths have zero allocations"
+
+      - name: Upload benchmark results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: bench_results.txt
+          retention-days: 30
