@@ -329,15 +329,22 @@ func TestStress_LongRunning(t *testing.T) {
 	t.Logf("✅ Long-running test completed after %v", duration)
 	t.Logf("   Total operations: %d", ops)
 	t.Logf("   Total errors: %d (%.2f%%)", errs, float64(errs)/float64(ops)*100)
+
+	// Calculate memory delta safely (handle both growth and shrinkage)
+	var memDelta int64
+	if endMem > startMem {
+		memDelta = int64(endMem - startMem)
+	} else {
+		memDelta = -int64(startMem - endMem)
+	}
 	t.Logf("   Memory: %d KB → %d KB (Δ%+d KB)",
-		startMem/1024, endMem/1024, (endMem-startMem)/1024)
+		startMem/1024, endMem/1024, memDelta/1024)
 	t.Logf("   Goroutines: %d → %d (Δ%+d)",
 		startGoroutines, endGoroutines, endGoroutines-startGoroutines)
 
-	// Verify no significant memory growth or goroutine leaks
-	memGrowth := endMem - startMem
-	if memGrowth > 10*1024*1024 { // 10 MB
-		t.Errorf("Significant memory growth detected: %d KB", memGrowth/1024)
+	// Verify no significant memory growth (only check positive growth)
+	if endMem > startMem && (endMem-startMem) > 10*1024*1024 { // 10 MB
+		t.Errorf("Significant memory growth detected: %d KB", (endMem-startMem)/1024)
 	}
 
 	goroutineDelta := endGoroutines - startGoroutines

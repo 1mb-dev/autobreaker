@@ -239,7 +239,7 @@ func BenchmarkExecute_HalfOpen(b *testing.B) {
 		})
 
 		// Trip and immediately transition to half-open
-		cb.Execute(func() (interface{}, error) {
+		_, _ = cb.Execute(func() (interface{}, error) {
 			return nil, errors.New("error")
 		})
 		cb.transitionToHalfOpen()
@@ -406,9 +406,9 @@ func BenchmarkStateTransitions(b *testing.B) {
 		})
 
 		// Closed -> Open
-		cb.Execute(failOp)
-		cb.Execute(failOp)
-		cb.Execute(failOp)
+		_, _ = cb.Execute(failOp)
+		_, _ = cb.Execute(failOp)
+		_, _ = cb.Execute(failOp)
 
 		// Open -> HalfOpen
 		cb.transitionToHalfOpen()
