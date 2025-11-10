@@ -84,7 +84,7 @@ func BenchmarkExecuteOpenState(b *testing.B) {
 	operation := func() (interface{}, error) {
 		return nil, errors.New("failure")
 	}
-	cb.Execute(operation) // Should open the circuit
+	_, _ = cb.Execute(operation) // Should open the circuit
 
 	b.ResetTimer()
 	b.ReportAllocs()
@@ -142,7 +142,7 @@ func BenchmarkConcurrentExecute(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			cb.Execute(operation)
+			_, _ = cb.Execute(operation)
 		}
 	})
 }
@@ -203,7 +203,7 @@ func BenchmarkExecute_Open(b *testing.B) {
 	})
 
 	// Trip the circuit
-	cb.Execute(func() (interface{}, error) {
+	_, _ = cb.Execute(func() (interface{}, error) {
 		return nil, errors.New("error")
 	})
 

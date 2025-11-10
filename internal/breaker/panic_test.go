@@ -96,9 +96,9 @@ func TestPanicInHalfOpenReopensCircuit(t *testing.T) {
 	// Panic during probe should reopen circuit
 	func() {
 		defer func() {
-			recover() // Swallow the panic
+			_ = recover() // Swallow the panic
 		}()
-		cb.Execute(panicFunc)
+		_, _ = cb.Execute(panicFunc)
 	}()
 
 	if cb.State() != StateOpen {
