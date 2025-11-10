@@ -59,12 +59,17 @@ linters:
           - errcheck     # Test code often intentionally ignores errors
           - goconst      # Test literals don't need to be constants
           - unparam      # Test helpers may have unused params for consistency
+          - gocritic     # Test code can shadow imports and use pragmatic patterns
+          - govet        # Test structs don't need field alignment optimization
 
       # Exclude some linters from running on example files
       - path: 'examples/'
         linters:
           - errcheck     # Example code intentionally has simplified error handling
           - bodyclose    # Example code may omit body close for clarity
+          - goconst      # Example literals don't need to be constants
+          - gocritic     # Example code prioritizes readability over strict patterns
+          - govet        # Example structs don't need field alignment optimization
 
 run:
   timeout: 5m
