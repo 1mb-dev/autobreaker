@@ -176,8 +176,8 @@ func TestLongRunningStability(t *testing.T) {
 	totalFailures := 0
 
 	for i := 0; i < totalRequests; i++ {
-		// Distribute failures evenly: every 34th request fails = ~2.9% failure rate
-		if i > 0 && i%34 == 0 { // Skip i=0 to avoid early failures
+		// Distribute failures evenly: moduloFor3Percent = ~2.9% failure rate
+		if i > 0 && i%moduloFor3Percent == 0 { // Skip i=0 to avoid early failures
 			cb.Execute(failFunc)
 			totalFailures++
 		} else {
@@ -208,8 +208,8 @@ func TestRapidStateTransitions(t *testing.T) {
 
 	// Trip the circuit with distributed failures
 	for i := 0; i < 30; i++ {
-		// Distribute failures throughout: every 5th request fails = 20% > 10%
-		if i > 0 && i%5 == 0 {
+		// Distribute failures throughout: moduloFor20Percent = 20% > 10% threshold
+		if i > 0 && i%moduloFor20Percent == 0 {
 			cb.Execute(failFunc)
 		} else {
 			cb.Execute(successFunc)
@@ -240,8 +240,8 @@ func TestRapidStateTransitions(t *testing.T) {
 
 		// Immediately trip again with distributed failures
 		for i := 0; i < 30; i++ {
-			// Every 5th request fails = 20% > 10%
-			if i > 0 && i%5 == 0 {
+			// moduloFor20Percent = 20% > 10% threshold
+			if i > 0 && i%moduloFor20Percent == 0 {
 				cb.Execute(failFunc)
 			} else {
 				cb.Execute(successFunc)
