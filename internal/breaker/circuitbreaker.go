@@ -99,9 +99,9 @@ type CircuitBreaker struct {
 	halfOpenRequests atomic.Int32
 
 	// Timestamps (atomic, int64 nanoseconds)
-	openedAt        atomic.Int64
-	lastClearedAt   atomic.Int64
-	stateChangedAt  atomic.Int64
+	openedAt       atomic.Int64
+	lastClearedAt  atomic.Int64
+	stateChangedAt atomic.Int64
 }
 
 // New creates a new circuit breaker with the given settings.
@@ -571,15 +571,22 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 // When to Use ExecuteContext vs Execute:
 //
 //   - Use ExecuteContext when:
-//     - You have a context (HTTP handlers, gRPC, etc.)
-//     - You need cancellation support
-//     - You want to enforce timeouts
-//     - You're implementing graceful shutdown
+//
+//   - You have a context (HTTP handlers, gRPC, etc.)
+//
+//   - You need cancellation support
+//
+//   - You want to enforce timeouts
+//
+//   - You're implementing graceful shutdown
 //
 //   - Use Execute when:
-//     - You don't have a context
-//     - Cancellation isn't needed
-//     - Simpler API is preferred
+//
+//   - You don't have a context
+//
+//   - Cancellation isn't needed
+//
+//   - Simpler API is preferred
 func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, req func() (interface{}, error)) (interface{}, error) {
 	// Check context before attempting execution
 	if err := ctx.Err(); err != nil {

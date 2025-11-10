@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 )
+
 func TestTrafficSpike(t *testing.T) {
 	// Test behavior during traffic spike: low → high → low
 	cb := New(Settings{

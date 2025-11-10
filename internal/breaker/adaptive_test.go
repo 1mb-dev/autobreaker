@@ -3,6 +3,7 @@ package breaker
 import (
 	"testing"
 )
+
 func TestAdaptiveReadyToTrip(t *testing.T) {
 	cb := New(Settings{
 		AdaptiveThreshold:    true,
@@ -18,40 +19,40 @@ func TestAdaptiveReadyToTrip(t *testing.T) {
 		{
 			name: "not enough observations",
 			counts: Counts{
-				Requests:       5,
-				TotalFailures:  3,
+				Requests:      5,
+				TotalFailures: 3,
 			},
 			want: false, // Below minimum observations
 		},
 		{
 			name: "below threshold",
 			counts: Counts{
-				Requests:       100,
-				TotalFailures:  5,
+				Requests:      100,
+				TotalFailures: 5,
 			},
 			want: false, // 5% failure rate < 10% threshold
 		},
 		{
 			name: "at threshold",
 			counts: Counts{
-				Requests:       100,
-				TotalFailures:  10,
+				Requests:      100,
+				TotalFailures: 10,
 			},
 			want: false, // 10% failure rate == 10% threshold (not >)
 		},
 		{
 			name: "above threshold",
 			counts: Counts{
-				Requests:       100,
-				TotalFailures:  11,
+				Requests:      100,
+				TotalFailures: 11,
 			},
 			want: true, // 11% failure rate > 10% threshold
 		},
 		{
 			name: "high failure rate",
 			counts: Counts{
-				Requests:       50,
-				TotalFailures:  25,
+				Requests:      50,
+				TotalFailures: 25,
 			},
 			want: true, // 50% failure rate > 10% threshold
 		},
@@ -294,4 +295,3 @@ func TestAdaptiveSameConfigDifferentTraffic(t *testing.T) {
 		})
 	}
 }
-

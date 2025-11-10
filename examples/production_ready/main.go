@@ -18,9 +18,9 @@ type Environment struct {
 }
 
 var environments = []Environment{
-	{"Development", 5, 0.02},      // 5 req/s, 2% failure
-	{"Staging", 50, 0.02},          // 50 req/s, 2% failure
-	{"Production", 500, 0.02},      // 500 req/s, 2% failure
+	{"Development", 5, 0.02},  // 5 req/s, 2% failure
+	{"Staging", 50, 0.02},     // 50 req/s, 2% failure
+	{"Production", 500, 0.02}, // 500 req/s, 2% failure
 }
 
 // Simulate API call with realistic failure patterns
@@ -263,8 +263,8 @@ func main() {
 	breaker := autobreaker.New(autobreaker.Settings{
 		Name:                 "api-client",
 		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.05,  // Trip at 5% failure rate
-		MinimumObservations:  20,     // Need 20+ requests before evaluating
+		FailureRateThreshold: 0.05, // Trip at 5% failure rate
+		MinimumObservations:  20,   // Need 20+ requests before evaluating
 		Timeout:              1 * time.Second,
 	})
 

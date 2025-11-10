@@ -64,23 +64,23 @@ import (
 //
 //  1. Incident Response - Relax threshold during incidents:
 //     breaker.UpdateSettings(autobreaker.SettingsUpdate{
-//         FailureRateThreshold: autobreaker.Float64Ptr(0.20), // 5% → 20%
+//     FailureRateThreshold: autobreaker.Float64Ptr(0.20), // 5% → 20%
 //     })
 //
 //  2. Traffic Scaling - Adjust window for traffic changes:
 //     breaker.UpdateSettings(autobreaker.SettingsUpdate{
-//         Interval: autobreaker.DurationPtr(30 * time.Second), // 60s → 30s
+//     Interval: autobreaker.DurationPtr(30 * time.Second), // 60s → 30s
 //     })
 //
 //  3. Progressive Recovery - Gradually increase probe requests:
 //     breaker.UpdateSettings(autobreaker.SettingsUpdate{
-//         MaxRequests: autobreaker.Uint32Ptr(5), // 1 → 5
+//     MaxRequests: autobreaker.Uint32Ptr(5), // 1 → 5
 //     })
 //
 //  4. Configuration Reload - Apply changes from config file/API:
 //     newSettings := loadFromConfig()
 //     if err := breaker.UpdateSettings(newSettings); err != nil {
-//         log.Error("Invalid settings: %v", err)
+//     log.Error("Invalid settings: %v", err)
 //     }
 //
 // Example - Gradual Rollout:

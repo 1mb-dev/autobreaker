@@ -460,8 +460,8 @@ func TestUpdateSettings_PreservesStateOnValidationError(t *testing.T) {
 
 	// Try to update with some valid and some invalid settings
 	err := cb.UpdateSettings(SettingsUpdate{
-		MaxRequests:          Uint32Ptr(10),           // valid
-		FailureRateThreshold: Float64Ptr(1.5),         // INVALID
+		MaxRequests:          Uint32Ptr(10),                 // valid
+		FailureRateThreshold: Float64Ptr(1.5),               // INVALID
 		Timeout:              DurationPtr(60 * time.Second), // valid
 	})
 

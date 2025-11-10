@@ -61,10 +61,10 @@ func TestDiagnostics(t *testing.T) {
 
 func TestDiagnosticsWillTripNext(t *testing.T) {
 	tests := []struct {
-		name            string
-		settings        Settings
-		requests        []func() (interface{}, error)
-		expectWillTrip  bool
+		name           string
+		settings       Settings
+		requests       []func() (interface{}, error)
+		expectWillTrip bool
 	}{
 		{
 			name: "static - one more failure will trip",
