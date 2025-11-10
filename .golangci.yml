@@ -26,11 +26,8 @@ linters:
   settings:
     govet:
       enable-all: true
-      settings:
-        fieldalignment:
-          # Disable fieldalignment - code readability and logical grouping
-          # are more important than minor memory optimizations
-          disable: true
+      disable:
+        - fieldalignment  # Code readability and logical grouping are more important than minor memory optimizations
     gocyclo:
       min-complexity: 15
     dupl:
