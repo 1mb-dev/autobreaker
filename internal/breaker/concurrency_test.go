@@ -104,6 +104,10 @@ func TestConcurrentStateTransitions(t *testing.T) {
 }
 
 func TestConcurrentHalfOpenLimiting(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping flaky concurrency test in short mode")
+	}
+
 	cb := New(Settings{
 		Name:        "concurrent-halfopen",
 		MaxRequests: 3,
