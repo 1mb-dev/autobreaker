@@ -1,31 +1,7 @@
-version: 2
-
-linters-settings:
-  govet:
-    check-shadowing: true
-  gocyclo:
-    min-complexity: 15
-  dupl:
-    threshold: 100
-  goconst:
-    min-len: 2
-    min-occurrences: 2
-  misspell:
-    locale: US
-  lll:
-    line-length: 140
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - hugeParam  # 88 bytes for Settings struct is acceptable for a builder pattern API
+version: "2"
 
 linters:
-  disable-all: true
+  default: none
   enable:
     - bodyclose
     - dogsled
@@ -51,18 +27,42 @@ linters:
     - unused
     - whitespace
 
-issues:
-  exclude-rules:
-    # Exclude some linters from running on tests files
-    - path: _test\.go
-      linters:
-        - gocyclo
-        - dupl
-        - gosec
-        - lll
-        - errcheck     # Test code often intentionally ignores errors
-        - goconst      # Test literals don't need to be constants
-        - unparam      # Test helpers may have unused params for consistency
+  settings:
+    govet:
+      enable-all: true
+    gocyclo:
+      min-complexity: 15
+    dupl:
+      threshold: 100
+    goconst:
+      min-len: 2
+      min-occurrences: 2
+    misspell:
+      locale: US
+    lll:
+      line-length: 140
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+      disabled-checks:
+        - hugeParam  # 88 bytes for Settings struct is acceptable for a builder pattern API
+
+  exclusions:
+    rules:
+      # Exclude some linters from running on test files
+      - path: '_test\.go'
+        linters:
+          - gocyclo
+          - dupl
+          - gosec
+          - lll
+          - errcheck     # Test code often intentionally ignores errors
+          - goconst      # Test literals don't need to be constants
+          - unparam      # Test helpers may have unused params for consistency
 
 run:
   timeout: 5m
