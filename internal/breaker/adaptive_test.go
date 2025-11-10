@@ -127,10 +127,10 @@ func TestAdaptiveVsStatic_TrafficLevels(t *testing.T) {
 	}
 
 	const (
-		failureRateThreshold = 0.05                // 5% adaptive threshold
-		actualFailureRate    = 0.06                // 6% actual failures (should trip)
-		staticConsecFailures = 5                   // Static needs 6 consecutive
-		failureModulo        = moduloFor6Percent   // ~6% failure rate
+		failureRateThreshold = 0.05              // 5% adaptive threshold
+		actualFailureRate    = 0.06              // 6% actual failures (should trip)
+		staticConsecFailures = 5                 // Static needs 6 consecutive
+		failureModulo        = moduloFor6Percent // ~6% failure rate
 	)
 
 	for _, scenario := range scenarios {
