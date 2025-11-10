@@ -75,9 +75,27 @@ go get github.com/vnykmshr/autobreaker
 
 ## Status
 
-🚧 **In Active Development** - Phase 0 (Foundation)
+✅ **Production-Ready Core** - Phase 2A Complete
 
-Current focus: Core circuit breaker with adaptive thresholds (no ML complexity).
+- ✅ Full circuit breaker implementation with adaptive thresholds
+- ✅ Comprehensive test suite (43 tests, 96% coverage)
+- ✅ Race-detector clean
+- ✅ Production-ready examples
+- ⏭️ Next: Advanced observability & metrics (Phase 3)
+
+## Examples
+
+See comprehensive examples in the [`examples/`](examples/) directory:
+
+- **[production_ready/](examples/production_ready/)** ⭐ - Realistic production scenarios, recommended starting point
+- **[basic/](examples/basic/)** - Fundamental circuit breaker patterns
+- **[adaptive/](examples/adaptive/)** - Adaptive vs static threshold comparison
+- **[custom_errors/](examples/custom_errors/)** - Custom error classification
+
+Run any example:
+```bash
+go run examples/production_ready/main.go
+```
 
 ## Philosophy
 
@@ -92,10 +110,11 @@ AutoBreaker follows a lean approach:
 
 ## Roadmap
 
-- **Phase 1:** Core circuit breaker with adaptive thresholds
-- **Phase 2:** Rich observability and metrics
-- **Phase 3:** Production hardening and performance optimization
-- **Phase 4:** Ecosystem integration (HTTP, gRPC, etc.)
+- ✅ **Phase 1:** Core circuit breaker implementation
+- ✅ **Phase 2A:** Adaptive thresholds, validation, comprehensive tests
+- ⏭️ **Phase 3:** Observability & metrics (GetMetrics, Prometheus, structured logging)
+- 🔮 **Phase 4:** Advanced features (sliding windows, health checks)
+- 🔮 **Phase 5:** Ecosystem integration (HTTP middleware, gRPC interceptors)
 
 ## License
 
