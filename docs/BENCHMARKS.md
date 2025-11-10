@@ -43,7 +43,7 @@ Only `New()` allocates (one-time, 128 bytes for the circuit breaker struct).
 
 ## Comparison to Targets
 
-From `internal/CONCURRENCY.md`:
+From `CONCURRENCY.md`:
 
 | Metric | Target | Actual | Result |
 |--------|--------|--------|--------|
