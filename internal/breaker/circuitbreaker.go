@@ -490,9 +490,9 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 //
 // Context Handling:
 //
-//   - Before Execution: Checks ctx.Err() and returns immediately if context is already cancelled
+//   - Before Execution: Checks ctx.Err() and returns immediately if context is already canceled
 //   - During Execution: Request function executes normally (should respect context internally)
-//   - After Execution: Checks ctx.Err() again; if cancelled, returns context error without counting as failure
+//   - After Execution: Checks ctx.Err() again; if canceled, returns context error without counting as failure
 //
 // Behavior is identical to Execute() except for context integration:
 //   - Same state machine (Closed/Open/HalfOpen)
@@ -502,7 +502,7 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 //
 // Context Cancellation:
 //
-// If context is cancelled or deadline exceeded:
+// If context is canceled or deadline exceeded:
 //   - Before execution: Returns ctx.Err() immediately, request count NOT incremented
 //   - During execution: Returns ctx.Err(), request IS counted but NOT as success/failure
 //
@@ -512,7 +512,7 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 // Return Values:
 //
 //   - Success: Returns (result, err) from request function
-//   - Context Cancelled: Returns (nil, ctx.Err()) - context.Canceled or context.DeadlineExceeded
+//   - Context Canceled: Returns (nil, ctx.Err()) - context.Canceled or context.DeadlineExceeded
 //   - Circuit Open: Returns (nil, ErrOpenState) without executing request
 //   - Too Many Requests: Returns (nil, ErrTooManyRequests) in half-open with exceeded MaxRequests
 //   - Application Error: Returns (result, err) unchanged; isSuccessful determines if counted as failure
@@ -590,7 +590,7 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, req func() (interface{}, error)) (interface{}, error) {
 	// Check context before attempting execution
 	if err := ctx.Err(); err != nil {
-		// Context already cancelled/expired, return immediately
+		// Context already canceled/expired, return immediately
 		// Don't increment request count since we never attempted execution
 		return nil, err
 	}
@@ -657,7 +657,7 @@ func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, req func() (interf
 
 	// Check context after execution
 	if ctxErr := ctx.Err(); ctxErr != nil {
-		// Context was cancelled/expired during execution
+		// Context was canceled/expired during execution
 		// Return context error WITHOUT counting as success or failure
 		// Rationale: Cancellation is client-initiated, not a backend health issue
 		return nil, ctxErr

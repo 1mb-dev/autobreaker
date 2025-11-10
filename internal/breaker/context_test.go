@@ -8,12 +8,12 @@ import (
 )
 
 // Test context cancellation before execution
-func TestExecuteContext_CancelledBeforeExecution(t *testing.T) {
+func TestExecuteContext_CanceledBeforeExecution(t *testing.T) {
 	cb := New(Settings{
 		Name: "test",
 	})
 
-	// Create already-cancelled context
+	// Create already-canceled context
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
@@ -76,7 +76,7 @@ func TestExecuteContext_DeadlineExceededBeforeExecution(t *testing.T) {
 }
 
 // Test context cancellation during execution
-func TestExecuteContext_CancelledDuringExecution(t *testing.T) {
+func TestExecuteContext_CanceledDuringExecution(t *testing.T) {
 	cb := New(Settings{
 		Name: "test",
 	})
