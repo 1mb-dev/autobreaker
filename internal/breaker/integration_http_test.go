@@ -124,7 +124,7 @@ func TestIntegration_HTTPClientWithContext(t *testing.T) {
 	defer cancel()
 
 	makeRequest := func() (interface{}, error) {
-		req, err := http.NewRequestWithContext(ctx, "GET", server.URL, nil)
+		req, err := http.NewRequestWithContext(ctx, "GET", server.URL, http.NoBody)
 		if err != nil {
 			return nil, err
 		}

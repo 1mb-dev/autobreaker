@@ -49,6 +49,10 @@ const (
 	StateHalfOpen
 )
 
+const (
+	stateUnknownStr = "unknown"
+)
+
 // String returns the string representation of the state.
 //
 // Returns "closed", "open", "half-open", or "unknown" for invalid states.
@@ -62,7 +66,7 @@ func (s State) String() string {
 	case StateHalfOpen:
 		return "half-open"
 	default:
-		return "unknown"
+		return stateUnknownStr
 	}
 }
 
