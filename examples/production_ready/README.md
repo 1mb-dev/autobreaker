@@ -46,10 +46,10 @@ breaker := autobreaker.New(autobreaker.Settings{
 
 The example demonstrates:
 
-1. ✅ **Stability** under normal conditions (2% failure rate)
-2. ✅ **Protection** during degradation (15% failure rate triggers circuit)
-3. ✅ **Recovery** when service improves
-4. ✅ **Superiority** over static thresholds (catches distributed failures)
+1. ****Stability** under normal conditions (2% failure rate)
+2. ****Protection** during degradation (15% failure rate triggers circuit)
+3. ****Recovery** when service improves
+4. ****Superiority** over static thresholds (catches distributed failures)
 
 ## Production Recommendations
 
@@ -94,14 +94,14 @@ Timeout: 60 * time.Second
 
 ## Comparison: Adaptive vs Static
 
-### Adaptive Advantages ✅
+### Adaptive Advantages
 
 - **Traffic-agnostic**: Works at any request rate
 - **Catches distributed failures**: Doesn't require consecutive failures
 - **No tuning needed**: Same config across environments
 - **Percentage-based**: Intuitive threshold (5% = 5 failures per 100 requests)
 
-### Static Limitations ⚠️
+### Static Limitations
 
 - **Traffic-dependent**: Must tune for each environment
 - **Misses patterns**: Only detects consecutive failures

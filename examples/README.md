@@ -62,9 +62,9 @@ go run examples/custom_errors/main.go
 
 ---
 
-### 4. Production-Ready Scenarios (`production_ready/`) ⭐ **Recommended**
+### 4. Production-Ready Scenarios (`production_ready/`) - Recommended
 
-Comprehensive example showing real-world production usage:
+Example showing real-world production usage:
 - Multiple realistic scenarios (normal operation, degradation, failure spikes)
 - Traffic scaling from dev (5 req/s) to production (500 req/s)
 - Side-by-side comparison: Adaptive vs Static thresholds
@@ -83,13 +83,13 @@ go run examples/production_ready/main.go
 - Recovery behavior
 - Distributed failure detection
 
-**Perfect for:** Understanding how to deploy AutoBreaker in production
+**Good for:** Understanding how to deploy AutoBreaker in production
 
 ---
 
-### 5. Observability & Monitoring (`observability/`) ⭐ **Recommended**
+### 5. Observability & Monitoring (`observability/`) - Recommended
 
-Comprehensive observability example with four scenarios:
+Observability example with four scenarios:
 - Normal operation monitoring
 - Diagnostic troubleshooting
 - Real-time monitoring during failures
@@ -107,7 +107,7 @@ go run examples/observability/main.go
 - Health check patterns
 - Structured logging examples
 
-**Perfect for:** Production monitoring and incident response
+**Good for:** Production monitoring and incident response
 
 ---
 
@@ -131,11 +131,11 @@ go run examples/prometheus/main.go
 - Alert rules
 - Dashboard design
 
-**Perfect for:** Prometheus users, production monitoring
+**Good for:** Prometheus users, production monitoring
 
 ---
 
-### 7. Runtime Configuration (`runtime_config/`) ⭐ **Recommended**
+### 7. Runtime Configuration (`runtime_config/`) - Recommended
 
 Demonstrates runtime configuration updates without restart:
 - Programmatic updates via UpdateSettings() API
@@ -158,14 +158,14 @@ go run examples/runtime_config/main.go
 - Thread-safe configuration updates
 - Production configuration management
 
-**Perfect for:** Operations teams, dynamic tuning, A/B testing
+**Good for:** Operations teams, dynamic tuning, A/B testing
 
 ---
 
 ## Quick Start
 
 ```bash
-# Recommended: Start with production_ready for comprehensive overview
+# Recommended: Start with production_ready for an overview
 go run examples/production_ready/main.go
 
 # Then explore observability

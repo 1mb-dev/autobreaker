@@ -52,15 +52,15 @@ go run main.go
 ```go
 client := NewProtectedHTTPClient("external-api")
 resp, err := client.Get("https://httpbin.org/status/200")
-// ✅ Success: Status 200 OK
+// **Success: Status 200 OK
 ```
 
 ### 2. Circuit Opens on Failures
 
 After repeated 5xx errors:
 ```
-❌ Server error: Request 1 returned 500 Internal Server Error
-❌ Server error: Request 2 returned 500 Internal Server Error
+**Server error: Request 1 returned 500 Internal Server Error
+**Server error: Request 2 returned 500 Internal Server Error
 ...
 ⚡ Circuit open: Request 15 rejected (fail fast)
 ```
@@ -73,14 +73,14 @@ defer cancel()
 
 req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
 resp, err = client.Do(req)
-// ✅ Request cancelled: context deadline exceeded (not counted as failure)
+// **Request cancelled: context deadline exceeded (not counted as failure)
 ```
 
 ### 4. Client Errors Don't Trip Circuit
 
 ```go
 resp, err := client.Get("https://httpbin.org/status/404")
-// ℹ️  Client error: 404 Not Found (doesn't trip circuit)
+// Note: Client error: 404 Not Found (doesn't trip circuit)
 ```
 
 ## Integration Pattern
@@ -138,12 +138,12 @@ breaker := autobreaker.New(autobreaker.Settings{
 
 ## Benefits
 
-✅ **Fail Fast**: Reject requests immediately when service is down
-✅ **Automatic Recovery**: Test recovery automatically after timeout
-✅ **Context Aware**: Proper cancellation and deadline support
-✅ **Adaptive**: Same config works at any traffic level
-✅ **Observable**: State change callbacks for monitoring
-✅ **Drop-in**: Works with existing `http.Client` code
+****Fail Fast**: Reject requests immediately when service is down
+****Automatic Recovery**: Test recovery automatically after timeout
+****Context Aware**: Proper cancellation and deadline support
+****Adaptive**: Same config works at any traffic level
+****Observable**: State change callbacks for monitoring
+****Drop-in**: Works with existing `http.Client` code
 
 ## See Also
 

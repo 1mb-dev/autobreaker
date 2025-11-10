@@ -18,7 +18,7 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 - **Runtime Configuration** - Update settings without restart
 - **Zero Dependencies** - Standard library only
 - **High Performance** - <100ns overhead per request, zero allocations
-- **Rich Observability** - Metrics() and Diagnostics() APIs built-in
+- **Observability** - Metrics() and Diagnostics() APIs built-in
 - **Thread-Safe** - Lock-free atomic operations throughout
 
 ## Installation
@@ -146,7 +146,7 @@ Same config, correct behavior at any traffic level.
 
 The implementation uses a three-state machine (Closed → Open → HalfOpen → Closed) with lock-free atomic operations for minimal overhead.
 
-**Architecture Details:** See [docs/TECHNICAL_BLOG.md](docs/TECHNICAL_BLOG.md) for comprehensive design explanation with diagrams.
+**Architecture Details:** See [docs/TECHNICAL_BLOG.md](docs/TECHNICAL_BLOG.md) for design details with diagrams.
 
 ## Performance
 

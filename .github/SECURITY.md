@@ -147,10 +147,10 @@ Ensure callbacks are thread-safe and don't leak sensitive information:
 ```go
 breaker := autobreaker.New(autobreaker.Settings{
     OnStateChange: func(name string, from, to autobreaker.State) {
-        // ❌ Bad: Logging sensitive data
+        // **Bad: Logging sensitive data
         log.Printf("Circuit %s changed with user data: %v", name, sensitiveData)
 
-        // ✅ Good: Safe logging
+        // **Good: Safe logging
         log.Printf("Circuit %s: %s → %s", name, from, to)
     },
 })

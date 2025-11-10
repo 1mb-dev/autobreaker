@@ -468,27 +468,27 @@ assert(state in {StateClosed, StateOpen, StateHalfOpen})
 
 ## Anti-Patterns (What NOT to Do)
 
-❌ **Mutex for state:** Adds contention, slows hot path
+****Mutex for state:** Adds contention, slows hot path
 
-❌ **RWMutex for counts:** Atomic operations are faster
+****RWMutex for counts:** Atomic operations are faster
 
-❌ **Channels for coordination:** Overhead, complexity, potential deadlocks
+****Channels for coordination:** Overhead, complexity, potential deadlocks
 
-❌ **Background goroutines:** Memory leaks, resource waste
+****Background goroutines:** Memory leaks, resource waste
 
-❌ **Locks during request execution:** Serializes requests (defeats purpose)
+****Locks during request execution:** Serializes requests (defeats purpose)
 
 ---
 
 ## Summary
 
 **Concurrency Model:**
-- ✅ Lock-free reads (state, counts)
-- ✅ Atomic updates (state transitions, count increments)
-- ✅ CAS-based coordination (no locks)
-- ✅ Safe under high concurrency (10k+ goroutines)
-- ✅ Bounded memory (no goroutine leaks)
-- ✅ Minimal contention (atomic operations only)
+- **Lock-free reads (state, counts)
+- **Atomic updates (state transitions, count increments)
+- **CAS-based coordination (no locks)
+- **Safe under high concurrency (10k+ goroutines)
+- **Bounded memory (no goroutine leaks)
+- **Minimal contention (atomic operations only)
 
 **Performance Target:**
 - State check: <10 ns

@@ -431,11 +431,11 @@ minFailureRate := 0.01 // Always trip at >1% errors if enough volume
 ## Summary
 
 This state machine provides:
-- ✅ Clear, deterministic behavior
-- ✅ Thread-safe state transitions
-- ✅ Backward compatible with sony/gobreaker
-- ✅ Foundation for adaptive enhancements
-- ✅ Edge case handling
-- ✅ Performance guarantees
+- **Clear, deterministic behavior
+- **Thread-safe state transitions
+- **Backward compatible with sony/gobreaker
+- **Foundation for adaptive enhancements
+- **Edge case handling
+- **Performance guarantees
 
 All implementation must adhere to these specifications.

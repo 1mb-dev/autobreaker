@@ -250,22 +250,22 @@ func (app *Application) handleMetrics(w http.ResponseWriter, r *http.Request) {
 
 ## Best Practices
 
-✅ **Separate Circuits**: One circuit per dependency (database, API, etc.)
-✅ **Graceful Degradation**: Return cached/fallback data when circuit is open
-✅ **Health Checks**: Expose circuit status for monitoring
-✅ **Context Usage**: Use `ExecuteContext` with request context
-✅ **Error Classification**: Distinguish temporary vs permanent failures
-✅ **Observability**: Log state transitions for debugging
-✅ **Adaptive Thresholds**: Use percentage-based thresholds for variable traffic
+****Separate Circuits**: One circuit per dependency (database, API, etc.)
+****Graceful Degradation**: Return cached/fallback data when circuit is open
+****Health Checks**: Expose circuit status for monitoring
+****Context Usage**: Use `ExecuteContext` with request context
+****Error Classification**: Distinguish temporary vs permanent failures
+****Observability**: Log state transitions for debugging
+****Adaptive Thresholds**: Use percentage-based thresholds for variable traffic
 
 ## Benefits
 
-✅ **Prevent Cascading Failures**: Isolate failing dependencies
-✅ **Fast Recovery**: Automatic probing for dependency recovery
-✅ **Graceful Degradation**: Serve degraded responses instead of errors
-✅ **Observable**: Health endpoint shows circuit status
-✅ **Configurable**: Per-dependency settings for optimal protection
-✅ **Production Ready**: Tested under load with stress tests
+****Prevent Cascading Failures**: Isolate failing dependencies
+****Fast Recovery**: Automatic probing for dependency recovery
+****Graceful Degradation**: Serve degraded responses instead of errors
+****Observable**: Health endpoint shows circuit status
+****Configurable**: Per-dependency settings for optimal protection
+****Production Ready**: Tested under load with stress tests
 
 ## See Also
 
