@@ -207,7 +207,7 @@ func TestExecuteContext_CircuitOpen(t *testing.T) {
 	ctx := context.Background()
 
 	// Trip the circuit
-	cb.ExecuteContext(ctx, func() (interface{}, error) {
+	_, _ = cb.ExecuteContext(ctx, func() (interface{}, error) {
 		return nil, errors.New("error")
 	})
 
@@ -248,7 +248,7 @@ func TestExecuteContext_CircuitHalfOpen(t *testing.T) {
 	ctx := context.Background()
 
 	// Trip the circuit
-	cb.ExecuteContext(ctx, func() (interface{}, error) {
+	_, _ = cb.ExecuteContext(ctx, func() (interface{}, error) {
 		return nil, errors.New("error")
 	})
 
@@ -356,7 +356,7 @@ func TestExecuteContext_PanicHandling(t *testing.T) {
 		}
 	}()
 
-	cb.ExecuteContext(ctx, func() (interface{}, error) {
+	_, _ = cb.ExecuteContext(ctx, func() (interface{}, error) {
 		panic("test panic")
 	})
 }

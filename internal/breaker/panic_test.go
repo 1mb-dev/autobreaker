@@ -27,9 +27,9 @@ func TestPanicCountsAsFailure(t *testing.T) {
 	// Catch the re-panic
 	func() {
 		defer func() {
-			recover() // Swallow the panic
+			_ = recover() // Swallow the panic
 		}()
-		cb.Execute(panicFunc)
+		_, _ = cb.Execute(panicFunc)
 	}()
 
 	// Verify panic was counted as failure
@@ -56,9 +56,9 @@ func TestPanicTripsCircuit(t *testing.T) {
 	// First panic
 	func() {
 		defer func() {
-			recover() // Swallow the panic
+			_ = recover() // Swallow the panic
 		}()
-		cb.Execute(panicFunc)
+		_, _ = cb.Execute(panicFunc)
 	}()
 
 	if cb.State() != StateClosed {
@@ -68,9 +68,9 @@ func TestPanicTripsCircuit(t *testing.T) {
 	// Second panic should trip circuit
 	func() {
 		defer func() {
-			recover() // Swallow the panic
+			_ = recover() // Swallow the panic
 		}()
-		cb.Execute(panicFunc)
+		_, _ = cb.Execute(panicFunc)
 	}()
 
 	if cb.State() != StateOpen {

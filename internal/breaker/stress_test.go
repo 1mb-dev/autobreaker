@@ -212,7 +212,7 @@ func TestStress_MixedReadWrite(t *testing.T) {
 					update := SettingsUpdate{
 						Timeout: DurationPtr(30 * time.Second),
 					}
-					cb.UpdateSettings(update)
+					_ = cb.UpdateSettings(update)
 					updateCount.Add(1)
 				}
 			}
