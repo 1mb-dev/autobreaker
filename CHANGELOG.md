@@ -183,10 +183,10 @@ AutoBreaker follows [Semantic Versioning](https://semver.org/):
 ### v1.x Compatibility Promise
 
 Within v1.x releases:
-- ✅ No breaking API changes
-- ✅ Additive changes only (new methods, fields)
-- ✅ Behavior changes will be opt-in
-- ✅ Deprecations will be marked and documented for at least 2 minor versions
+- **No breaking API changes
+- **Additive changes only (new methods, fields)
+- **Behavior changes will be opt-in
+- **Deprecations will be marked and documented for at least 2 minor versions
 
 ### When v2.0 Would Happen
 

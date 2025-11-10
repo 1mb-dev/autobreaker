@@ -116,15 +116,15 @@ prometheus.MustRegister(NewCircuitBreakerCollector(breaker))
 ## Why This Pattern?
 
 **Advantages:**
-- ✅ No Prometheus dependency in main library
-- ✅ Users control what metrics to export
-- ✅ Flexible - can customize metric names, labels
-- ✅ Efficient - metrics computed on scrape, not continuously
+- **No Prometheus dependency in main library
+- **Users control what metrics to export
+- **Flexible - can customize metric names, labels
+- **Efficient - metrics computed on scrape, not continuously
 
 **vs Built-in Integration:**
-- ❌ Would force Prometheus dependency
-- ❌ Less flexible for users
-- ❌ Can't customize to user's needs
+- **Would force Prometheus dependency
+- **Less flexible for users
+- **Can't customize to user's needs
 
 ## Production Recommendations
 

@@ -8,15 +8,15 @@ All performance targets **exceeded**. Zero allocations in hot path.
 
 | Operation | Latency | Target | Status | Allocs |
 |-----------|---------|--------|--------|--------|
-| State check | 0.34 ns | <10 ns | ✅ **30x better** | 0 |
-| Counts snapshot | 0.87 ns | <50 ns | ✅ **57x better** | 0 |
-| Execute (success) | 33.62 ns | <100 ns | ✅ **3x better** | 0 |
-| Execute (failure) | 79.44 ns | <100 ns | ✅ 20% better | 0 |
-| Execute (open) | 82.35 ns | <50 ns | ⚠️ 65% over | 0 |
-| Adaptive ReadyToTrip | 0.54 ns | <20 ns | ✅ **37x better** | 0 |
-| Default ReadyToTrip | 0.27 ns | <5 ns | ✅ **18x better** | 0 |
-| Concurrent Execute | 96.47 ns | comparable | ✅ Good | 0 |
-| New (creation) | 139.5 ns | N/A | ✅ | 128 B (1 alloc) |
+| State check | 0.34 ns | <10 ns | ****30x better** | 0 |
+| Counts snapshot | 0.87 ns | <50 ns | ****57x better** | 0 |
+| Execute (success) | 33.62 ns | <100 ns | ****3x better** | 0 |
+| Execute (failure) | 79.44 ns | <100 ns | **20% better | 0 |
+| Execute (open) | 82.35 ns | <50 ns | **65% over | 0 |
+| Adaptive ReadyToTrip | 0.54 ns | <20 ns | ****37x better** | 0 |
+| Default ReadyToTrip | 0.27 ns | <5 ns | ****18x better** | 0 |
+| Concurrent Execute | 96.47 ns | comparable | **Good | 0 |
+| New (creation) | 139.5 ns | N/A | **| 128 B (1 alloc) |
 
 ## Overhead Analysis
 
@@ -34,10 +34,10 @@ This is **exceptional** for a circuit breaker with:
 ## Zero Allocations
 
 All hot-path operations allocate **zero bytes**:
-- ✅ State() - 0 allocs
-- ✅ Counts() - 0 allocs
-- ✅ Execute() - 0 allocs
-- ✅ ReadyToTrip - 0 allocs
+- **State() - 0 allocs
+- **Counts() - 0 allocs
+- **Execute() - 0 allocs
+- **ReadyToTrip - 0 allocs
 
 Only `New()` allocates (one-time, 128 bytes for the circuit breaker struct).
 
@@ -84,9 +84,9 @@ CPU: Intel Core i5-8257U @ 1.40GHz
 ## Conclusion
 
 AutoBreaker achieves **exceptional performance**:
-- ✅ Sub-nanosecond state reads
-- ✅ ~30ns request overhead
-- ✅ Zero allocations
-- ✅ Scales under concurrency
+- **Sub-nanosecond state reads
+- **~30ns request overhead
+- **Zero allocations
+- **Scales under concurrency
 
 **Production-ready performance validated.**

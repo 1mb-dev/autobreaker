@@ -287,18 +287,18 @@ All updates use atomic operations - no locks needed.
 ## Best Practices
 
 ### DO:
-✅ Update settings during incidents to adjust circuit sensitivity
-✅ Use file-based config for ops teams to tune without code changes
-✅ Validate configuration before applying
-✅ Log all configuration changes for audit trail
-✅ Monitor metrics after updates to verify effectiveness
+**Update settings during incidents to adjust circuit sensitivity
+**Use file-based config for ops teams to tune without code changes
+**Validate configuration before applying
+**Log all configuration changes for audit trail
+**Monitor metrics after updates to verify effectiveness
 
 ### DON'T:
-❌ Update settings on every request (use infrequently)
-❌ Change all settings at once (update incrementally)
-❌ Ignore validation errors (always check return value)
-❌ Update settings faster than observation window
-❌ Use for application logic (settings are for tuning, not behavior)
+**Update settings on every request (use infrequently)
+**Change all settings at once (update incrementally)
+**Ignore validation errors (always check return value)
+**Update settings faster than observation window
+**Use for application logic (settings are for tuning, not behavior)
 
 ## Learn More
 

@@ -501,13 +501,13 @@ func (cb *CircuitBreaker) isSuccessful(err error) bool {
 ## Summary
 
 **Error Classification Principles:**
-- ✅ Default: `err == nil` → Success
-- ✅ User override via `IsSuccessful` function
-- ✅ Panics always count as failures
-- ✅ Context cancellation counted as failure (by default)
-- ✅ Focus on service health, not client errors
-- ✅ Consistent, stateless classification
-- ✅ Protect against user function panics
+- **Default: `err == nil` → Success
+- **User override via `IsSuccessful` function
+- **Panics always count as failures
+- **Context cancellation counted as failure (by default)
+- **Focus on service health, not client errors
+- **Consistent, stateless classification
+- **Protect against user function panics
 
 **Implementation Checklist:**
 - [ ] Default classifier: `err == nil`

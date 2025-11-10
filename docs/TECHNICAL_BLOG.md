@@ -379,7 +379,7 @@ func monitorCircuitBreaker(breaker *autobreaker.CircuitBreaker) {
         // Check for impending trip
         diag := breaker.Diagnostics()
         if diag.WillTripNext && metrics.State == autobreaker.StateClosed {
-            log.Printf("⚠️  Circuit [%s] will trip on next failure", metrics.Name)
+            log.Printf("** Circuit [%s] will trip on next failure", metrics.Name)
         }
     }
 }
@@ -437,7 +437,7 @@ func watchConfiguration(breaker *autobreaker.CircuitBreaker, configPath string) 
 Traditional implementations use mutexes to protect shared state. AutoBreaker instead uses atomic operations exclusively:
 
 ```go
-// ❌ Traditional approach (lock contention)
+// Traditional approach (lock contention)
 type CircuitBreaker struct {
     mu       sync.RWMutex
     state    State
@@ -455,7 +455,7 @@ func (cb *CircuitBreaker) Execute(fn func() error) error {
     // ... more lock operations
 }
 
-// ✅ Lock-free approach (no contention)
+// Lock-free approach (no contention)
 type CircuitBreaker struct {
     state    atomic.Int32
     requests atomic.Uint32
@@ -642,25 +642,18 @@ Benchmarks from production workloads (Go 1.21, Apple M1):
 
 **Good Use Cases:**
 
-✅ **Variable Traffic Patterns**: Services with fluctuating request volumes (daily/weekly cycles, traffic spikes)
-
-✅ **Multi-Environment Deployments**: Same codebase deployed across dev/staging/prod with different traffic levels
-
-✅ **Microservices Architectures**: Diverse traffic patterns across different service boundaries
-
-✅ **Cloud-Native Applications**: Auto-scaling workloads where traffic varies dynamically
-
-✅ **External Dependencies**: Third-party APIs, payment gateways, external services
+- **Variable Traffic Patterns**: Services with fluctuating request volumes (daily/weekly cycles, traffic spikes)
+- **Multi-Environment Deployments**: Same codebase deployed across dev/staging/prod with different traffic levels
+- **Microservices Architectures**: Diverse traffic patterns across different service boundaries
+- **Cloud-Native Applications**: Auto-scaling workloads where traffic varies dynamically
+- **External Dependencies**: Third-party APIs, payment gateways, external services
 
 **Poor Use Cases:**
 
-❌ **Constant High Traffic**: Services with stable, predictable traffic (static thresholds work fine)
-
-❌ **Critical Path Operations**: Operations where any failure is unacceptable (use retries instead)
-
-❌ **Very Low Traffic**: Services with <10 requests per interval (insufficient statistical significance)
-
-❌ **Non-Idempotent Operations**: Operations that can't be safely retried (use other patterns)
+- **Constant High Traffic**: Services with stable, predictable traffic (static thresholds work fine)
+- **Critical Path Operations**: Operations where any failure is unacceptable (use retries instead)
+- **Very Low Traffic**: Services with <10 requests per interval (insufficient statistical significance)
+- **Non-Idempotent Operations**: Operations that can't be safely retried (use other patterns)
 
 ## When Not to Use Circuit Breakers
 
@@ -677,9 +670,9 @@ Traditional circuit breakers with static thresholds create a false choice: eithe
 
 Adaptive percentage-based thresholds eliminate this tradeoff. By calculating failure rates relative to request volume, the same configuration works correctly across diverse traffic patterns. This reduces operational burden while improving both availability (fewer false positives) and protection (faster detection at low traffic).
 
-The implementation matters as much as the algorithm. Lock-free atomic operations, zero allocations, and comprehensive observability APIs make the difference between a library you can deploy confidently and one that becomes a bottleneck.
+The implementation matters as much as the algorithm. Lock-free atomic operations, zero allocations, and observability APIs make the difference between a library you can deploy confidently and one that becomes a bottleneck.
 
-AutoBreaker demonstrates that circuit breakers can be both simple and sophisticated: simple to use (sensible defaults, minimal configuration) yet sophisticated in behavior (adaptive thresholds, runtime updates, rich diagnostics).
+AutoBreaker demonstrates that circuit breakers can be simple to use (sensible defaults, minimal configuration) while still handling complex behavior (adaptive thresholds, runtime updates, detailed diagnostics).
 
 ---
 
