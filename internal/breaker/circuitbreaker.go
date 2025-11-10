@@ -418,8 +418,7 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 	currentState := cb.State()
 
 	// Check state and handle accordingly
-	switch currentState {
-	case StateOpen:
+	if currentState == StateOpen {
 		// Circuit is open - check if we should transition to half-open
 		if cb.shouldTransitionToHalfOpen() {
 			cb.transitionToHalfOpen()
@@ -564,7 +563,7 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 //	    return processLongRunningRequest(ctx)
 //	})
 //	if err == context.Canceled {
-//	    log.Info("Client disconnected, request cancelled")
+//	    log.Info("Client disconnected, request canceled")
 //	    return
 //	}
 //
@@ -604,8 +603,7 @@ func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, req func() (interf
 	currentState := cb.State()
 
 	// Check state and handle accordingly
-	switch currentState {
-	case StateOpen:
+	if currentState == StateOpen {
 		// Circuit is open - check if we should transition to half-open
 		if cb.shouldTransitionToHalfOpen() {
 			cb.transitionToHalfOpen()

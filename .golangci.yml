@@ -19,6 +19,8 @@ linters-settings:
       - opinionated
       - performance
       - style
+    disabled-checks:
+      - hugeParam  # 88 bytes for Settings struct is acceptable for a builder pattern API
 
 linters:
   disable-all: true
@@ -57,6 +59,9 @@ issues:
         - dupl
         - gosec
         - lll
+        - errcheck     # Test code often intentionally ignores errors
+        - goconst      # Test literals don't need to be constants
+        - unparam      # Test helpers may have unused params for consistency
 
 run:
   timeout: 5m
