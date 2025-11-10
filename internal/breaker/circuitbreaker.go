@@ -34,8 +34,9 @@ type CircuitBreaker struct {
 	halfOpenRequests atomic.Int32
 
 	// Timestamps (atomic, int64 nanoseconds)
-	openedAt      atomic.Int64
-	lastClearedAt atomic.Int64
+	openedAt        atomic.Int64
+	lastClearedAt   atomic.Int64
+	stateChangedAt  atomic.Int64
 }
 
 // New creates a new circuit breaker with the given settings.
@@ -99,8 +100,10 @@ func New(settings Settings) *CircuitBreaker {
 	}
 
 	// Initialize state
+	now := time.Now().UnixNano()
 	cb.state.Store(int32(StateClosed))
-	cb.lastClearedAt.Store(time.Now().UnixNano())
+	cb.lastClearedAt.Store(now)
+	cb.stateChangedAt.Store(now)
 
 	return cb
 }

@@ -36,7 +36,9 @@ func (cb *CircuitBreaker) checkAndTripCircuit() {
 
 	// Successfully transitioned to Open
 	// Record the timestamp
-	cb.openedAt.Store(time.Now().UnixNano())
+	now := time.Now().UnixNano()
+	cb.openedAt.Store(now)
+	cb.stateChangedAt.Store(now)
 
 	// Clear counts
 	cb.clearCounts()
@@ -66,6 +68,8 @@ func (cb *CircuitBreaker) transitionToHalfOpen() {
 	}
 
 	// Successfully transitioned to HalfOpen
+	cb.stateChangedAt.Store(time.Now().UnixNano())
+
 	// Clear counts
 	cb.clearCounts()
 
@@ -86,11 +90,14 @@ func (cb *CircuitBreaker) transitionToClosed() {
 	}
 
 	// Successfully transitioned to Closed (recovery complete)
+	now := time.Now().UnixNano()
+	cb.stateChangedAt.Store(now)
+
 	// Clear counts
 	cb.clearCounts()
 
 	// Reset last cleared timestamp
-	cb.lastClearedAt.Store(time.Now().UnixNano())
+	cb.lastClearedAt.Store(now)
 
 	// Call state change callback if configured
 	if cb.onStateChange != nil {
@@ -107,7 +114,9 @@ func (cb *CircuitBreaker) transitionBackToOpen() {
 
 	// Successfully transitioned back to Open
 	// Record new open timestamp
-	cb.openedAt.Store(time.Now().UnixNano())
+	now := time.Now().UnixNano()
+	cb.openedAt.Store(now)
+	cb.stateChangedAt.Store(now)
 
 	// Clear counts
 	cb.clearCounts()
