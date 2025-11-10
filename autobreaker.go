@@ -18,12 +18,13 @@ import "github.com/vnykmshr/autobreaker/internal/breaker"
 
 // Re-export types
 type (
-	CircuitBreaker = breaker.CircuitBreaker
-	State          = breaker.State
-	Counts         = breaker.Counts
-	Settings       = breaker.Settings
-	Metrics        = breaker.Metrics
-	Diagnostics    = breaker.Diagnostics
+	CircuitBreaker  = breaker.CircuitBreaker
+	State           = breaker.State
+	Counts          = breaker.Counts
+	Settings        = breaker.Settings
+	SettingsUpdate  = breaker.SettingsUpdate
+	Metrics         = breaker.Metrics
+	Diagnostics     = breaker.Diagnostics
 )
 
 // Re-export constants
@@ -41,5 +42,8 @@ var (
 
 // Re-export functions
 var (
-	New = breaker.New
+	New          = breaker.New
+	Uint32Ptr    = breaker.Uint32Ptr
+	DurationPtr  = breaker.DurationPtr
+	Float64Ptr   = breaker.Float64Ptr
 )

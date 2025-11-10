@@ -139,3 +139,49 @@ func DefaultReadyToTrip(counts Counts) bool {
 func DefaultIsSuccessful(err error) bool {
 	return err == nil
 }
+
+// SettingsUpdate holds optional configuration updates for a circuit breaker.
+// Fields set to nil will not be updated. Non-nil fields will update the corresponding setting.
+type SettingsUpdate struct {
+	// MaxRequests updates the maximum number of concurrent requests allowed in half-open state.
+	// Valid range: > 0 (will be validated)
+	MaxRequests *uint32
+
+	// Interval updates the period to clear counts in closed state.
+	// Valid range: >= 0
+	// Note: Changing interval will reset counts immediately to maintain accuracy.
+	Interval *time.Duration
+
+	// Timeout updates the duration to wait before transitioning from open to half-open.
+	// Valid range: > 0 (will be validated)
+	// Note: Changing timeout while circuit is open will restart the timeout from now.
+	Timeout *time.Duration
+
+	// FailureRateThreshold updates the failure rate (0.0-1.0) that triggers circuit open.
+	// Only applies when adaptive threshold is enabled.
+	// Valid range: (0, 1) exclusive
+	FailureRateThreshold *float64
+
+	// MinimumObservations updates the minimum number of requests before adaptive logic activates.
+	// Only applies when adaptive threshold is enabled.
+	// Valid range: > 0 (will be validated)
+	MinimumObservations *uint32
+}
+
+// Uint32Ptr returns a pointer to the given uint32 value.
+// Helper function for constructing SettingsUpdate.
+func Uint32Ptr(v uint32) *uint32 {
+	return &v
+}
+
+// DurationPtr returns a pointer to the given time.Duration value.
+// Helper function for constructing SettingsUpdate.
+func DurationPtr(v time.Duration) *time.Duration {
+	return &v
+}
+
+// Float64Ptr returns a pointer to the given float64 value.
+// Helper function for constructing SettingsUpdate.
+func Float64Ptr(v float64) *float64 {
+	return &v
+}
