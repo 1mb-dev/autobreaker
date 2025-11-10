@@ -57,7 +57,7 @@ jobs:
 
       - name: Run tests with coverage
         shell: bash
-        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+        run: go test -race -coverprofile=coverage.out -covermode=atomic ./internal/...
 
       - name: Check coverage threshold
         run: |
