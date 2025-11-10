@@ -8,7 +8,7 @@ func (cb *CircuitBreaker) maybeResetCounts() {
 	last := cb.lastClearedAt.Load()
 
 	// Check if interval has elapsed
-	if time.Duration(now-last) >= cb.interval {
+	if time.Duration(now-last) >= cb.getInterval() {
 		// Try to claim clearing responsibility
 		if cb.lastClearedAt.CompareAndSwap(last, now) {
 			// We won the race, clear counts

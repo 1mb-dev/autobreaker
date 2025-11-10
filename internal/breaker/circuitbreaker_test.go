@@ -8,13 +8,13 @@ func TestCircuitBreakerDefaults(t *testing.T) {
 	cb := New(Settings{Name: "test"})
 
 	// Test default max requests
-	if cb.maxRequests != 1 {
-		t.Errorf("default maxRequests = %v, want 1", cb.maxRequests)
+	if cb.getMaxRequests() != 1 {
+		t.Errorf("default maxRequests = %v, want 1", cb.getMaxRequests())
 	}
 
 	// Test default timeout
-	if cb.timeout != 60*time.Second {
-		t.Errorf("default timeout = %v, want 60s", cb.timeout)
+	if cb.getTimeout() != 60*time.Second {
+		t.Errorf("default timeout = %v, want 60s", cb.getTimeout())
 	}
 
 	// Test default state

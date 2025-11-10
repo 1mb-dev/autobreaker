@@ -57,7 +57,7 @@ func (cb *CircuitBreaker) shouldTransitionToHalfOpen() bool {
 	}
 
 	elapsed := time.Duration(time.Now().UnixNano() - openedAt)
-	return elapsed >= cb.timeout
+	return elapsed >= cb.getTimeout()
 }
 
 // transitionToHalfOpen transitions from Open to HalfOpen state.
