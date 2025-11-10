@@ -23,6 +23,7 @@ type (
 	Counts         = breaker.Counts
 	Settings       = breaker.Settings
 	Metrics        = breaker.Metrics
+	Diagnostics    = breaker.Diagnostics
 )
 
 // Re-export constants
