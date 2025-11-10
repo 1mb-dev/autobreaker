@@ -87,11 +87,62 @@ go run examples/production_ready/main.go
 
 ---
 
+### 5. Observability & Monitoring (`observability/`) ⭐ **Recommended**
+
+Comprehensive observability example with four scenarios:
+- Normal operation monitoring
+- Diagnostic troubleshooting
+- Real-time monitoring during failures
+- Recovery process monitoring
+
+**Run:**
+```bash
+go run examples/observability/main.go
+```
+
+**Key Concepts:**
+- Using Metrics() API for real-time stats
+- Using Diagnostics() for troubleshooting
+- Predicting circuit behavior
+- Health check patterns
+- Structured logging examples
+
+**Perfect for:** Production monitoring and incident response
+
+---
+
+### 6. Prometheus Integration (`prometheus/`)
+
+Shows how to expose circuit breaker metrics to Prometheus:
+- Custom Prometheus collector
+- 8 metrics exported (state, counts, rates)
+- HTTP metrics endpoint
+- Example PromQL queries and alerts
+
+**Run:**
+```bash
+go run examples/prometheus/main.go
+# Visit http://localhost:8080/metrics
+```
+
+**Key Concepts:**
+- Prometheus integration pattern
+- Metric types (gauges vs counters)
+- Alert rules
+- Dashboard design
+
+**Perfect for:** Prometheus users, production monitoring
+
+---
+
 ## Quick Start
 
 ```bash
 # Recommended: Start with production_ready for comprehensive overview
 go run examples/production_ready/main.go
+
+# Then explore observability
+go run examples/observability/main.go
 
 # Or run all examples
 for dir in examples/*/; do
@@ -104,6 +155,8 @@ done
 ## Learning Path
 
 1. **Start here:** `production_ready/` - See everything in action
-2. **Basics:** `basic/` - Understand core concepts
-3. **Adaptive:** `adaptive/` - Learn why adaptive thresholds matter
-4. **Customization:** `custom_errors/` - Tailor to your error types
+2. **Observability:** `observability/` - Learn monitoring and troubleshooting
+3. **Basics:** `basic/` - Understand core concepts
+4. **Adaptive:** `adaptive/` - Learn why adaptive thresholds matter
+5. **Integration:** `prometheus/` - Connect to monitoring systems
+6. **Customization:** `custom_errors/` - Tailor to your error types

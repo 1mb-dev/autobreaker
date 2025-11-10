@@ -75,19 +75,22 @@ go get github.com/vnykmshr/autobreaker
 
 ## Status
 
-✅ **Production-Ready Core** - Phase 2A Complete
+✅ **Production-Ready with Observability** - Phase 3A Complete
 
 - ✅ Full circuit breaker implementation with adaptive thresholds
-- ✅ Comprehensive test suite (43 tests, 96% coverage)
+- ✅ Comprehensive observability (Metrics() + Diagnostics() APIs)
+- ✅ Comprehensive test suite (50 tests, 98.2% coverage)
 - ✅ Race-detector clean
-- ✅ Production-ready examples
-- ⏭️ Next: Advanced observability & metrics (Phase 3)
+- ✅ 6 production-ready examples (including Prometheus integration)
+- ⏭️ Next: Advanced features (Phase 4)
 
 ## Examples
 
 See comprehensive examples in the [`examples/`](examples/) directory:
 
 - **[production_ready/](examples/production_ready/)** ⭐ - Realistic production scenarios, recommended starting point
+- **[observability/](examples/observability/)** ⭐ - Monitoring, metrics, and diagnostics patterns
+- **[prometheus/](examples/prometheus/)** - Prometheus integration (custom collector)
 - **[basic/](examples/basic/)** - Fundamental circuit breaker patterns
 - **[adaptive/](examples/adaptive/)** - Adaptive vs static threshold comparison
 - **[custom_errors/](examples/custom_errors/)** - Custom error classification
@@ -95,6 +98,7 @@ See comprehensive examples in the [`examples/`](examples/) directory:
 Run any example:
 ```bash
 go run examples/production_ready/main.go
+go run examples/observability/main.go
 ```
 
 ## Philosophy
@@ -112,8 +116,8 @@ AutoBreaker follows a lean approach:
 
 - ✅ **Phase 1:** Core circuit breaker implementation
 - ✅ **Phase 2A:** Adaptive thresholds, validation, comprehensive tests
-- ⏭️ **Phase 3:** Observability & metrics (GetMetrics, Prometheus, structured logging)
-- 🔮 **Phase 4:** Advanced features (sliding windows, health checks)
+- ✅ **Phase 3A:** Observability & metrics (Metrics API, Diagnostics API, examples)
+- ⏭️ **Phase 4:** Advanced features (sliding windows, health checks, middleware)
 - 🔮 **Phase 5:** Ecosystem integration (HTTP middleware, gRPC interceptors)
 
 ## License
