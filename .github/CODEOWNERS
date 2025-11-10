@@ -1,0 +1,11 @@
+# AutoBreaker Code Owners
+# These owners will be automatically requested for review when PRs are opened
+
+# Default owner for everything
+* @vnykmshr
+
+# CI/CD and workflows
+/.github/ @vnykmshr
+
+# Documentation
+/*.md @vnykmshr

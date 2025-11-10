@@ -1,5 +1,10 @@
 # AutoBreaker
 
+[![CI](https://github.com/vnykmshr/autobreaker/workflows/CI/badge.svg)](https://github.com/vnykmshr/autobreaker/actions)
+[![Go Reference](https://pkg.go.dev/badge/github.com/vnykmshr/autobreaker.svg)](https://pkg.go.dev/github.com/vnykmshr/autobreaker)
+[![Go Report Card](https://goreportcard.com/badge/github.com/vnykmshr/autobreaker)](https://goreportcard.com/report/github.com/vnykmshr/autobreaker)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Adaptive circuit breaker for Go that automatically adjusts to your traffic patterns.
 
 ## Why AutoBreaker?
