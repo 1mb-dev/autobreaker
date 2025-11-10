@@ -163,12 +163,12 @@ func TestUpdateSettingsPreservesCallbacks(t *testing.T) {
 // TestAdaptiveThresholdBoundary validates exact boundary conditions.
 func TestAdaptiveThresholdBoundary(t *testing.T) {
 	tests := []struct {
-		name              string
-		threshold         float64
-		failures          uint32
-		requests          uint32
-		minObservations   uint32
-		shouldTrip        bool
+		name            string
+		threshold       float64
+		failures        uint32
+		requests        uint32
+		minObservations uint32
+		shouldTrip      bool
 	}{
 		{
 			name:            "exactly at threshold",
