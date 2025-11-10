@@ -62,10 +62,38 @@ go run examples/custom_errors/main.go
 
 ---
 
-## Running All Examples
+### 4. Production-Ready Scenarios (`production_ready/`) ⭐ **Recommended**
+
+Comprehensive example showing real-world production usage:
+- Multiple realistic scenarios (normal operation, degradation, failure spikes)
+- Traffic scaling from dev (5 req/s) to production (500 req/s)
+- Side-by-side comparison: Adaptive vs Static thresholds
+- Automatic recovery demonstration
+- Production configuration recommendations
+
+**Run:**
+```bash
+go run examples/production_ready/main.go
+```
+
+**Key Concepts:**
+- Production configuration patterns
+- Monitoring and observability
+- Why adaptive beats static thresholds
+- Recovery behavior
+- Distributed failure detection
+
+**Perfect for:** Understanding how to deploy AutoBreaker in production
+
+---
+
+## Quick Start
 
 ```bash
-# Run all examples
+# Recommended: Start with production_ready for comprehensive overview
+go run examples/production_ready/main.go
+
+# Or run all examples
 for dir in examples/*/; do
     echo "Running $(basename $dir)..."
     go run ${dir}main.go
@@ -73,25 +101,9 @@ for dir in examples/*/; do
 done
 ```
 
-## Running Examples
+## Learning Path
 
-All examples are fully functional with complete circuit breaker implementation.
-
-```bash
-# Run basic example
-go run examples/basic/main.go
-
-# Run adaptive threshold example
-go run examples/adaptive/main.go
-
-# Run custom error classification example
-go run examples/custom_errors/main.go
-```
-
-## Next Steps
-
-After Phase 1 implementation:
-- [ ] Verify all examples work correctly
-- [ ] Add state transition examples
-- [ ] Add observability examples
-- [ ] Add integration examples (HTTP, gRPC)
+1. **Start here:** `production_ready/` - See everything in action
+2. **Basics:** `basic/` - Understand core concepts
+3. **Adaptive:** `adaptive/` - Learn why adaptive thresholds matter
+4. **Customization:** `custom_errors/` - Tailor to your error types
