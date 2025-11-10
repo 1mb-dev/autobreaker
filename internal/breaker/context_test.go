@@ -409,7 +409,7 @@ func TestExecuteContext_MultipleContextCancellationsDontTripCircuit(t *testing.T
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
 
-		cb.ExecuteContext(ctx, func() (interface{}, error) {
+		_, _ = cb.ExecuteContext(ctx, func() (interface{}, error) {
 			return "should not execute", nil
 		})
 	}
