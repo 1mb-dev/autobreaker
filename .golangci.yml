@@ -60,6 +60,12 @@ linters:
           - goconst      # Test literals don't need to be constants
           - unparam      # Test helpers may have unused params for consistency
 
+      # Exclude some linters from running on example files
+      - path: 'examples/'
+        linters:
+          - errcheck     # Example code intentionally has simplified error handling
+          - bodyclose    # Example code may omit body close for clarity
+
 run:
   timeout: 5m
   tests: true
