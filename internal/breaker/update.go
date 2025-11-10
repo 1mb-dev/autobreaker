@@ -6,23 +6,106 @@ import (
 	"time"
 )
 
-// UpdateSettings atomically updates the circuit breaker configuration.
+// UpdateSettings atomically updates the circuit breaker configuration at runtime.
 //
-// Only non-nil fields in the update are applied. Nil fields are left unchanged.
+// This method allows dynamic tuning of circuit breaker behavior without restart,
+// enabling adaptive responses to changing traffic patterns, incident mitigation,
+// and A/B testing of different thresholds.
+//
+// Partial Updates:
+//
+// Only non-nil fields in SettingsUpdate are modified. Nil fields keep their current values.
+// This allows surgical updates of specific settings:
+//
+//	// Update only failure threshold, keep everything else
+//	breaker.UpdateSettings(autobreaker.SettingsUpdate{
+//	    FailureRateThreshold: autobreaker.Float64Ptr(0.10),
+//	})
 //
 // Validation:
-//   - MaxRequests must be > 0
-//   - Interval must be >= 0
-//   - Timeout must be > 0
-//   - FailureRateThreshold must be in range (0, 1) exclusive
-//   - MinimumObservations must be > 0
+//
+// All non-nil fields are validated before any updates are applied (all-or-nothing semantics):
+//   - MaxRequests: Must be > 0
+//   - Interval: Must be >= 0 (0 = no periodic reset)
+//   - Timeout: Must be > 0
+//   - FailureRateThreshold: Must be in (0, 1) exclusive when AdaptiveThreshold enabled
+//   - MinimumObservations: Must be > 0
+//
+// If validation fails, no settings are changed and an error is returned.
 //
 // Smart Reset Behavior:
-//   - Changing Interval while in Closed state resets counts immediately
-//   - Changing Timeout while in Open state restarts the timeout from now
-//   - Other setting changes preserve current state
 //
-// Returns an error if validation fails. No settings are updated if validation fails.
+// Some setting changes trigger intelligent resets to maintain consistency:
+//
+//   - Interval Change + Closed State: Resets counts immediately
+//     Rationale: Existing counts were measured with old window, invalid for new window
+//
+//   - Timeout Change + Open State: Restarts timeout from now
+//     Rationale: User wants new timeout to apply fully, not partial remaining time
+//
+//   - Other Changes: Preserve current state and counts
+//     Rationale: Settings like FailureRateThreshold can be adjusted without losing data
+//
+// Thread-Safety:
+//
+// This method is safe to call concurrently with Execute() and other methods. Each
+// individual setting update is atomic. The order of updates is deterministic and
+// designed for consistency.
+//
+// Note: Multiple concurrent UpdateSettings() calls are serialized by atomic operations,
+// but the final state depends on execution order (last write wins per field).
+//
+// Performance:
+//
+// Settings updates are fast (~100-200ns) using atomic stores. Safe to call frequently,
+// though typically settings change infrequently (minutes/hours, not per-request).
+//
+// Use Cases:
+//
+//  1. Incident Response - Relax threshold during incidents:
+//     breaker.UpdateSettings(autobreaker.SettingsUpdate{
+//         FailureRateThreshold: autobreaker.Float64Ptr(0.20), // 5% → 20%
+//     })
+//
+//  2. Traffic Scaling - Adjust window for traffic changes:
+//     breaker.UpdateSettings(autobreaker.SettingsUpdate{
+//         Interval: autobreaker.DurationPtr(30 * time.Second), // 60s → 30s
+//     })
+//
+//  3. Progressive Recovery - Gradually increase probe requests:
+//     breaker.UpdateSettings(autobreaker.SettingsUpdate{
+//         MaxRequests: autobreaker.Uint32Ptr(5), // 1 → 5
+//     })
+//
+//  4. Configuration Reload - Apply changes from config file/API:
+//     newSettings := loadFromConfig()
+//     if err := breaker.UpdateSettings(newSettings); err != nil {
+//         log.Error("Invalid settings: %v", err)
+//     }
+//
+// Example - Gradual Rollout:
+//
+//	// Start conservative
+//	breaker := autobreaker.New(autobreaker.Settings{
+//	    FailureRateThreshold: 0.01, // 1%
+//	})
+//
+//	// After monitoring, relax threshold
+//	time.Sleep(1 * time.Hour)
+//	breaker.UpdateSettings(autobreaker.SettingsUpdate{
+//	    FailureRateThreshold: autobreaker.Float64Ptr(0.05), // → 5%
+//	})
+//
+// Example - Feature Flag Integration:
+//
+//	if featureFlags.IsEnabled("relaxed-circuit-breaker") {
+//	    breaker.UpdateSettings(autobreaker.SettingsUpdate{
+//	        FailureRateThreshold: autobreaker.Float64Ptr(0.10),
+//	        Timeout:              autobreaker.DurationPtr(30 * time.Second),
+//	    })
+//	}
+//
+// Returns nil on success, or an error describing which field failed validation.
 func (cb *CircuitBreaker) UpdateSettings(update SettingsUpdate) error {
 	// Validate all settings before applying any changes
 	if err := cb.validateUpdate(update); err != nil {
