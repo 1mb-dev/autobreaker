@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 )
+
 func TestConcurrentExecute(t *testing.T) {
 	cb := New(Settings{
 		Name: "concurrent-test",
@@ -242,4 +243,3 @@ func TestRaceConditions(t *testing.T) {
 	wg.Wait()
 	// If we get here without race detector errors, we're good
 }
-

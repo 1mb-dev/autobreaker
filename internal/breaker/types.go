@@ -105,41 +105,41 @@ type Counts struct {
 // Configuration Categories:
 //
 //  1. Identity:
-//       - Name: Circuit breaker identifier for logging/metrics
+//     - Name: Circuit breaker identifier for logging/metrics
 //
 //  2. State Timing:
-//       - Timeout: How long to stay open before probing (open → half-open)
-//       - Interval: How often to reset counts in closed state (0 = never)
+//     - Timeout: How long to stay open before probing (open → half-open)
+//     - Interval: How often to reset counts in closed state (0 = never)
 //
 //  3. Request Limiting:
-//       - MaxRequests: Concurrent request limit in half-open state
+//     - MaxRequests: Concurrent request limit in half-open state
 //
 //  4. Failure Detection (choose one):
-//       - Static: Use ReadyToTrip with ConsecutiveFailures threshold
-//       - Adaptive: Use AdaptiveThreshold + FailureRateThreshold + MinimumObservations
+//     - Static: Use ReadyToTrip with ConsecutiveFailures threshold
+//     - Adaptive: Use AdaptiveThreshold + FailureRateThreshold + MinimumObservations
 //
 //  5. Callbacks:
-//       - ReadyToTrip: Custom failure detection logic
-//       - OnStateChange: State transition notifications
-//       - IsSuccessful: Custom success/failure determination
+//     - ReadyToTrip: Custom failure detection logic
+//     - OnStateChange: State transition notifications
+//     - IsSuccessful: Custom success/failure determination
 //
 // Two Main Patterns:
 //
-//  A. Static Threshold (Simple, Predictable):
-//     Settings{
-//         Name:    "api-client",
-//         Timeout: 10 * time.Second,
-//         // Uses default ReadyToTrip: ConsecutiveFailures > 5
-//     }
+//	A. Static Threshold (Simple, Predictable):
+//	   Settings{
+//	       Name:    "api-client",
+//	       Timeout: 10 * time.Second,
+//	       // Uses default ReadyToTrip: ConsecutiveFailures > 5
+//	   }
 //
-//  B. Adaptive Threshold (Traffic-Proportional):
-//     Settings{
-//         Name:                 "api-client",
-//         Timeout:              10 * time.Second,
-//         AdaptiveThreshold:    true,
-//         FailureRateThreshold: 0.05,  // 5% failure rate
-//         MinimumObservations:  20,    // Need 20 requests before adapting
-//     }
+//	B. Adaptive Threshold (Traffic-Proportional):
+//	   Settings{
+//	       Name:                 "api-client",
+//	       Timeout:              10 * time.Second,
+//	       AdaptiveThreshold:    true,
+//	       FailureRateThreshold: 0.05,  // 5% failure rate
+//	       MinimumObservations:  20,    // Need 20 requests before adapting
+//	   }
 //
 // Defaults:
 //

@@ -161,9 +161,9 @@ func TestStress_MixedReadWrite(t *testing.T) {
 	})
 
 	const (
-		duration      = 5 * time.Second
-		numReaders    = 100
-		numWriters    = 10
+		duration       = 5 * time.Second
+		numReaders     = 100
+		numWriters     = 10
 		updateInterval = 10 * time.Millisecond
 	)
 
@@ -470,9 +470,9 @@ func TestStress_VeryLowRequestRate(t *testing.T) {
 	})
 
 	const (
-		duration     = 30 * time.Second
-		requestRate  = 1 * time.Second // 1 request per second
-		failureRate  = 0.6              // 60% failures (should trip at 50%)
+		duration    = 30 * time.Second
+		requestRate = 1 * time.Second // 1 request per second
+		failureRate = 0.6             // 60% failures (should trip at 50%)
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), duration)

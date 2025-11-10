@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 )
+
 func TestExactlyMinimumObservations(t *testing.T) {
 	cb := New(Settings{
 		Name:                 "exact-minimum",

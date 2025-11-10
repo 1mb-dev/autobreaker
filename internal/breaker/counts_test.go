@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 )
+
 func TestIntervalBasedCountClearing(t *testing.T) {
 	cb := New(Settings{
 		Name:     "test",

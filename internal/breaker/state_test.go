@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 )
+
 func TestStateTransitionClosedToOpen(t *testing.T) {
 	cb := New(Settings{
 		Name: "test",
@@ -276,4 +277,3 @@ func TestFullRecoveryFlow(t *testing.T) {
 		}
 	}
 }
-

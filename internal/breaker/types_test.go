@@ -6,17 +6,18 @@ import (
 	"testing"
 	"time"
 )
+
 func TestNew(t *testing.T) {
 	tests := []struct {
-		name     string
-		settings Settings
-		wantName string
+		name      string
+		settings  Settings
+		wantName  string
 		wantState State
 	}{
 		{
-			name:     "default settings",
-			settings: Settings{Name: "test"},
-			wantName: "test",
+			name:      "default settings",
+			settings:  Settings{Name: "test"},
+			wantName:  "test",
 			wantState: StateClosed,
 		},
 		{
@@ -26,7 +27,7 @@ func TestNew(t *testing.T) {
 				MaxRequests: 10,
 				Timeout:     30 * time.Second,
 			},
-			wantName: "custom",
+			wantName:  "custom",
 			wantState: StateClosed,
 		},
 	}
@@ -247,4 +248,3 @@ func TestDefaultIsSuccessful(t *testing.T) {
 		})
 	}
 }
-

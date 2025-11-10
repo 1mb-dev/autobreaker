@@ -20,9 +20,9 @@ func (e *HTTPError) Error() string {
 }
 
 var (
-	ErrNotFound     = &HTTPError{StatusCode: 404, Message: "Not Found"}
-	ErrBadRequest   = &HTTPError{StatusCode: 400, Message: "Bad Request"}
-	ErrServerError  = &HTTPError{StatusCode: 500, Message: "Internal Server Error"}
+	ErrNotFound           = &HTTPError{StatusCode: 404, Message: "Not Found"}
+	ErrBadRequest         = &HTTPError{StatusCode: 400, Message: "Bad Request"}
+	ErrServerError        = &HTTPError{StatusCode: 500, Message: "Internal Server Error"}
 	ErrServiceUnavailable = &HTTPError{StatusCode: 503, Message: "Service Unavailable"}
 )
 

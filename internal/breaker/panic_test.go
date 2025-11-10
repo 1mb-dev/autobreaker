@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 )
+
 func TestPanicRecovery(t *testing.T) {
 	cb := New(Settings{Name: "test"})
 
@@ -104,4 +105,3 @@ func TestPanicInHalfOpenReopensCircuit(t *testing.T) {
 		t.Errorf("After panic in half-open: state = %v, want Open (re-opened)", cb.State())
 	}
 }
-

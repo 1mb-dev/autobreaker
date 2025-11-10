@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 )
+
 func TestCircuitBreakerDefaults(t *testing.T) {
 	cb := New(Settings{Name: "test"})
 
@@ -191,4 +192,3 @@ func TestExecuteHalfOpenMaxRequests(t *testing.T) {
 		t.Errorf("Expected exactly 1 TooManyRequests error, got %d. Errors: %v", tooManyCount, errors)
 	}
 }
-
