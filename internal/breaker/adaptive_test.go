@@ -114,127 +114,82 @@ func TestAdaptiveReadyToTripTransition(t *testing.T) {
 	}
 }
 
-func TestAdaptiveVsStaticLowTraffic(t *testing.T) {
-	// Low traffic scenario: 100 requests total
-	const totalRequests = 100
-	const failureRate = 0.06 // 6% failures
-
-	// Adaptive breaker: should trip at 5% failure rate
-	adaptive := New(Settings{
-		Name:                 "adaptive-low-traffic",
-		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.05, // 5%
-		MinimumObservations:  20,
-	})
-
-	// Static breaker: needs 6 consecutive failures
-	static := New(Settings{
-		Name: "static-low-traffic",
-		ReadyToTrip: func(counts Counts) bool {
-			return counts.ConsecutiveFailures > 5
-		},
-	})
-
-	// Simulate requests with 6% failure rate
-	adaptiveTripped := false
-	staticTripped := false
-
-	for i := 0; i < totalRequests; i++ {
-		// Create request that fails 6% of the time
-		var req func() (interface{}, error)
-		if i%17 == 0 { // ~6% failure rate
-			req = failFunc
-		} else {
-			req = successFunc
-		}
-
-		// Execute on adaptive breaker
-		if !adaptiveTripped {
-			_, err := adaptive.Execute(req)
-			if err == ErrOpenState {
-				adaptiveTripped = true
-			}
-		}
-
-		// Execute on static breaker
-		if !staticTripped {
-			_, err := static.Execute(req)
-			if err == ErrOpenState {
-				staticTripped = true
-			}
-		}
+func TestAdaptiveVsStatic_TrafficLevels(t *testing.T) {
+	// Test that adaptive thresholds work reliably across traffic levels,
+	// while static thresholds are unreliable with distributed failures
+	scenarios := []struct {
+		name          string
+		totalRequests int
+		description   string
+	}{
+		{"low_traffic", 100, "Low traffic (100 req)"},
+		{"high_traffic", 10000, "High traffic (10k req)"},
 	}
 
-	// Adaptive should have tripped (6% > 5% threshold)
-	if !adaptiveTripped {
-		t.Error("Adaptive breaker should have tripped at 6% failure rate in low traffic")
-	}
+	const (
+		failureRateThreshold = 0.05                // 5% adaptive threshold
+		actualFailureRate    = 0.06                // 6% actual failures (should trip)
+		staticConsecFailures = 5                   // Static needs 6 consecutive
+		failureModulo        = moduloFor6Percent   // ~6% failure rate
+	)
 
-	// Static might not have tripped (depends on failure distribution)
-	// This demonstrates the problem with absolute count thresholds
-	t.Logf("Low traffic (100 req): Adaptive tripped=%v, Static tripped=%v", adaptiveTripped, staticTripped)
-}
+	for _, scenario := range scenarios {
+		t.Run(scenario.name, func(t *testing.T) {
+			// Adaptive breaker: uses percentage-based threshold
+			adaptive := New(Settings{
+				Name:                 "adaptive-" + scenario.name,
+				AdaptiveThreshold:    true,
+				FailureRateThreshold: failureRateThreshold,
+				MinimumObservations:  20,
+			})
 
-func TestAdaptiveVsStaticHighTraffic(t *testing.T) {
-	// High traffic scenario: 10,000 requests total
-	const totalRequests = 10000
-	const failureRate = 0.06 // 6% failures
+			// Static breaker: uses absolute consecutive failure count
+			static := New(Settings{
+				Name: "static-" + scenario.name,
+				ReadyToTrip: func(counts Counts) bool {
+					return counts.ConsecutiveFailures > staticConsecFailures
+				},
+			})
 
-	// Adaptive breaker: should trip at 5% failure rate
-	adaptive := New(Settings{
-		Name:                 "adaptive-high-traffic",
-		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.05, // 5%
-		MinimumObservations:  20,
-	})
+			adaptiveTripped := false
+			staticTripped := false
 
-	// Static breaker: needs 6 consecutive failures
-	static := New(Settings{
-		Name: "static-high-traffic",
-		ReadyToTrip: func(counts Counts) bool {
-			return counts.ConsecutiveFailures > 5
-		},
-	})
+			for i := 0; i < scenario.totalRequests; i++ {
+				// Distributed failures: ~6% failure rate
+				var req func() (interface{}, error)
+				if i%failureModulo == 0 {
+					req = failFunc
+				} else {
+					req = successFunc
+				}
 
-	// Simulate requests with 6% failure rate
-	adaptiveTripped := false
-	staticTripped := false
+				// Execute on both breakers
+				if !adaptiveTripped {
+					_, err := adaptive.Execute(req)
+					if err == ErrOpenState {
+						adaptiveTripped = true
+					}
+				}
 
-	for i := 0; i < totalRequests; i++ {
-		// Create request that fails 6% of the time
-		var req func() (interface{}, error)
-		if i%17 == 0 { // ~6% failure rate
-			req = failFunc
-		} else {
-			req = successFunc
-		}
-
-		// Execute on adaptive breaker
-		if !adaptiveTripped {
-			_, err := adaptive.Execute(req)
-			if err == ErrOpenState {
-				adaptiveTripped = true
+				if !staticTripped {
+					_, err := static.Execute(req)
+					if err == ErrOpenState {
+						staticTripped = true
+					}
+				}
 			}
-		}
 
-		// Execute on static breaker
-		if !staticTripped {
-			_, err := static.Execute(req)
-			if err == ErrOpenState {
-				staticTripped = true
+			// Adaptive should trip reliably (6% > 5%)
+			if !adaptiveTripped {
+				t.Errorf("Adaptive breaker should trip at 6%% failure rate in %s", scenario.description)
 			}
-		}
-	}
 
-	// Adaptive should have tripped (6% > 5% threshold)
-	if !adaptiveTripped {
-		t.Error("Adaptive breaker should have tripped at 6% failure rate in high traffic")
+			// Static may or may not trip (depends on failure distribution)
+			// This demonstrates why adaptive is superior for distributed failures
+			t.Logf("%s: Adaptive tripped=%v, Static tripped=%v (failures distributed, not consecutive)",
+				scenario.description, adaptiveTripped, staticTripped)
+		})
 	}
-
-	// Static might or might not trip depending on failure distribution
-	// (needs 6 consecutive failures, but our failures are spread out)
-	// This demonstrates adaptive is more reliable across traffic patterns
-	t.Logf("High traffic (10000 req): Adaptive tripped=%v, Static tripped=%v", adaptiveTripped, staticTripped)
 }
 
 func TestAdaptiveSameConfigDifferentTraffic(t *testing.T) {

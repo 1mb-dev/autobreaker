@@ -81,9 +81,10 @@ func TestStateTransitionWithCallback(t *testing.T) {
 }
 
 func TestStateTransitionOpenToHalfOpen(t *testing.T) {
+	timeout := 100 * time.Millisecond
 	cb := New(Settings{
 		Name:    "test",
-		Timeout: 100 * time.Millisecond,
+		Timeout: timeout,
 		ReadyToTrip: func(counts Counts) bool {
 			return counts.ConsecutiveFailures > 1
 		},
@@ -103,16 +104,14 @@ func TestStateTransitionOpenToHalfOpen(t *testing.T) {
 		t.Errorf("Request before timeout: error = %v, want ErrOpenState", err)
 	}
 
-	// Wait for timeout
-	time.Sleep(150 * time.Millisecond)
+	// Wait for timeout with tolerance (1.5x base timeout)
+	time.Sleep(timeout + 50*time.Millisecond)
 
 	// Next request triggers transition to HalfOpen, and success closes it
 	result, err := cb.Execute(successFunc)
 
 	// Successful probe completes recovery (HalfOpen → Closed)
-	if cb.State() != StateClosed {
-		t.Errorf("After successful probe: state = %v, want Closed (full recovery)", cb.State())
-	}
+	requireState(t, cb, StateClosed, 200*time.Millisecond)
 
 	if err != nil {
 		t.Errorf("Request after timeout: error = %v, want nil", err)
@@ -129,9 +128,10 @@ func TestStateTransitionOpenToHalfOpenWithCallback(t *testing.T) {
 		to   State
 	}
 
+	timeout := 50 * time.Millisecond
 	cb := New(Settings{
 		Name:    "test",
-		Timeout: 50 * time.Millisecond,
+		Timeout: timeout,
 		ReadyToTrip: func(counts Counts) bool {
 			return counts.ConsecutiveFailures > 0
 		},
@@ -150,8 +150,8 @@ func TestStateTransitionOpenToHalfOpenWithCallback(t *testing.T) {
 		t.Fatalf("After tripping: transitions = %d, want 1", len(transitions))
 	}
 
-	// Wait for timeout and trigger transition (Open → HalfOpen → Closed)
-	time.Sleep(100 * time.Millisecond)
+	// Wait for timeout with tolerance (2x base timeout)
+	time.Sleep(timeout * 2)
 	cb.Execute(successFunc)
 
 	// Successful probe triggers two transitions
