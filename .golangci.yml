@@ -46,7 +46,6 @@ linters:
     - prealloc
     - staticcheck
     - stylecheck
-    - typecheck
     - unconvert
     - unparam
     - unused
