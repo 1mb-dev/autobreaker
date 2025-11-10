@@ -1,6 +1,7 @@
 package breaker
 
 import (
+	"context"
 	"sync/atomic"
 	"time"
 )
@@ -469,6 +470,193 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 	}()
 
 	// If we got here without panic, record normal outcome
+	if !panicked {
+		success := cb.isSuccessful(err)
+		cb.recordOutcome(success)
+
+		// Handle state transitions based on outcome
+		cb.handleStateTransition(success, currentState)
+	}
+
+	return result, err
+}
+
+// ExecuteContext runs the given request function if the circuit breaker allows it,
+// respecting the provided context for cancellation and deadlines.
+//
+// This method provides context-aware circuit breaker protection, enabling proper
+// cancellation propagation, deadline enforcement, and graceful shutdown patterns.
+// It's the recommended method for Go applications using context.Context.
+//
+// Context Handling:
+//
+//   - Before Execution: Checks ctx.Err() and returns immediately if context is already cancelled
+//   - During Execution: Request function executes normally (should respect context internally)
+//   - After Execution: Checks ctx.Err() again; if cancelled, returns context error without counting as failure
+//
+// Behavior is identical to Execute() except for context integration:
+//   - Same state machine (Closed/Open/HalfOpen)
+//   - Same failure counting and state transitions
+//   - Same panic handling
+//   - Context cancellation does NOT count as failure (client-initiated, not backend problem)
+//
+// Context Cancellation:
+//
+// If context is cancelled or deadline exceeded:
+//   - Before execution: Returns ctx.Err() immediately, request count NOT incremented
+//   - During execution: Returns ctx.Err(), request IS counted but NOT as success/failure
+//
+// This design ensures context cancellation doesn't trip the circuit, as it indicates
+// client-side cancellation, not backend health issues.
+//
+// Return Values:
+//
+//   - Success: Returns (result, err) from request function
+//   - Context Cancelled: Returns (nil, ctx.Err()) - context.Canceled or context.DeadlineExceeded
+//   - Circuit Open: Returns (nil, ErrOpenState) without executing request
+//   - Too Many Requests: Returns (nil, ErrTooManyRequests) in half-open with exceeded MaxRequests
+//   - Application Error: Returns (result, err) unchanged; isSuccessful determines if counted as failure
+//
+// Performance: Same as Execute() (~<100ns overhead in Closed state).
+//
+// Thread-safe: Can be called concurrently from multiple goroutines with different contexts.
+//
+// Example - Basic Usage with Timeout:
+//
+//	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+//	defer cancel()
+//
+//	result, err := breaker.ExecuteContext(ctx, func() (interface{}, error) {
+//	    return externalService.CallWithContext(ctx)
+//	})
+//	if err == context.DeadlineExceeded {
+//	    // Request timed out (not counted as failure)
+//	    log.Warn("Request timeout")
+//	    return nil, err
+//	}
+//	if err == autobreaker.ErrOpenState {
+//	    // Circuit is open, use fallback
+//	    return cachedResponse, nil
+//	}
+//
+// Example - Graceful Shutdown:
+//
+//	func (s *Server) Shutdown(ctx context.Context) error {
+//	    // Use shutdown context for all in-flight requests
+//	    _, err := breaker.ExecuteContext(ctx, func() (interface{}, error) {
+//	        return s.cleanup()
+//	    })
+//	    return err
+//	}
+//
+// Example - Request Cancellation:
+//
+//	// Client cancels request
+//	ctx, cancel := context.WithCancel(r.Context())
+//	defer cancel()
+//
+//	go func() {
+//	    <-clientDisconnected
+//	    cancel() // Cancel context when client disconnects
+//	}()
+//
+//	result, err := breaker.ExecuteContext(ctx, func() (interface{}, error) {
+//	    return processLongRunningRequest(ctx)
+//	})
+//	if err == context.Canceled {
+//	    log.Info("Client disconnected, request cancelled")
+//	    return
+//	}
+//
+// When to Use ExecuteContext vs Execute:
+//
+//   - Use ExecuteContext when:
+//     - You have a context (HTTP handlers, gRPC, etc.)
+//     - You need cancellation support
+//     - You want to enforce timeouts
+//     - You're implementing graceful shutdown
+//
+//   - Use Execute when:
+//     - You don't have a context
+//     - Cancellation isn't needed
+//     - Simpler API is preferred
+func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, req func() (interface{}, error)) (interface{}, error) {
+	// Check context before attempting execution
+	if err := ctx.Err(); err != nil {
+		// Context already cancelled/expired, return immediately
+		// Don't increment request count since we never attempted execution
+		return nil, err
+	}
+
+	// Check if interval-based count clearing is needed (only in Closed state)
+	if cb.getInterval() > 0 && cb.State() == StateClosed {
+		cb.maybeResetCounts()
+	}
+
+	// Capture current state for state machine logic
+	currentState := cb.State()
+
+	// Check state and handle accordingly
+	switch currentState {
+	case StateOpen:
+		// Circuit is open - check if we should transition to half-open
+		if cb.shouldTransitionToHalfOpen() {
+			cb.transitionToHalfOpen()
+			currentState = StateHalfOpen // Update local state
+			// Fall through to half-open handling
+		} else {
+			// Reject immediately without counting as a request
+			return nil, ErrOpenState
+		}
+	}
+
+	// Request is allowed - increment count
+	cb.requests.Add(1)
+
+	// Handle half-open state with request limiting
+	if currentState == StateHalfOpen {
+		// Check if we've reached max concurrent requests in half-open
+		current := cb.halfOpenRequests.Add(1)
+		if current > int32(cb.getMaxRequests()) {
+			cb.halfOpenRequests.Add(-1) // Undo increment
+			return nil, ErrTooManyRequests
+		}
+		defer cb.halfOpenRequests.Add(-1)
+	}
+
+	// Execute the request with panic recovery
+	var result interface{}
+	var err error
+	panicked := false
+
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				// Panic occurred - treat as failure
+				panicked = true
+				// Record panic as failure
+				cb.recordOutcome(false)
+
+				// Handle state transitions for panic (same as failure)
+				cb.handleStateTransition(false, currentState)
+
+				// Re-panic to preserve stack trace
+				panic(r)
+			}
+		}()
+
+		result, err = req()
+	}()
+
+	// Check context after execution
+	if ctxErr := ctx.Err(); ctxErr != nil {
+		// Context was cancelled/expired during execution
+		// Return context error WITHOUT counting as success or failure
+		// Rationale: Cancellation is client-initiated, not a backend health issue
+		return nil, ctxErr
+	}
+
+	// If we got here without panic and context is still valid, record normal outcome
 	if !panicked {
 		success := cb.isSuccessful(err)
 		cb.recordOutcome(success)
