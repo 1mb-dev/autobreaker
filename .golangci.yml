@@ -26,6 +26,11 @@ linters:
   settings:
     govet:
       enable-all: true
+      settings:
+        fieldalignment:
+          # Disable fieldalignment - code readability and logical grouping
+          # are more important than minor memory optimizations
+          disable: true
     gocyclo:
       min-complexity: 15
     dupl:
@@ -70,6 +75,10 @@ linters:
           - goconst      # Example literals don't need to be constants
           - gocritic     # Example code prioritizes readability over strict patterns
           - govet        # Example structs don't need field alignment optimization
+          - unused       # Example code may have unused helpers for demonstration
+          - unparam      # Example functions may have unused params for consistency
+          - staticcheck  # Example code may have intentional redundancy for clarity
+          - misspell     # Example comments may use non-US spellings
 
 run:
   timeout: 5m
