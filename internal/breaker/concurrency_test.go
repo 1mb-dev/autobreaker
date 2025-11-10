@@ -151,8 +151,8 @@ func TestConcurrentHalfOpenLimiting(t *testing.T) {
 	}
 
 	// Most should be rejected (only MaxRequests allowed)
-	if rejectedCount < goroutines-int(cb.maxRequests)-2 {
-		t.Errorf("Too few rejections: got %d, want at least %d", rejectedCount, goroutines-int(cb.maxRequests)-2)
+	if rejectedCount < goroutines-int(cb.getMaxRequests())-2 {
+		t.Errorf("Too few rejections: got %d, want at least %d", rejectedCount, goroutines-int(cb.getMaxRequests())-2)
 	}
 }
 

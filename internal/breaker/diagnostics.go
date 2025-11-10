@@ -41,7 +41,7 @@ func (cb *CircuitBreaker) Diagnostics() Diagnostics {
 		openedAt := cb.openedAt.Load()
 		if openedAt > 0 {
 			elapsed := time.Since(time.Unix(0, openedAt))
-			remaining := cb.timeout - elapsed
+			remaining := cb.getTimeout() - elapsed
 			if remaining > 0 {
 				timeUntilHalfOpen = remaining
 			}
@@ -54,12 +54,12 @@ func (cb *CircuitBreaker) Diagnostics() Diagnostics {
 		Metrics: metrics,
 
 		// Configuration
-		MaxRequests:          cb.maxRequests,
-		Interval:             cb.interval,
-		Timeout:              cb.timeout,
+		MaxRequests:          cb.getMaxRequests(),
+		Interval:             cb.getInterval(),
+		Timeout:              cb.getTimeout(),
 		AdaptiveEnabled:      cb.adaptiveThreshold,
-		FailureRateThreshold: cb.failureRateThreshold,
-		MinimumObservations:  cb.minimumObservations,
+		FailureRateThreshold: cb.getFailureRateThreshold(),
+		MinimumObservations:  cb.getMinimumObservations(),
 
 		// Predictions
 		WillTripNext:      willTripNext,

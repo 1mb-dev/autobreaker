@@ -42,15 +42,15 @@ func (cb *CircuitBreaker) UpdateSettings(update SettingsUpdate) error {
 
 	// Update MaxRequests (simple field update)
 	if update.MaxRequests != nil {
-		cb.maxRequests = *update.MaxRequests
+		cb.setMaxRequests(*update.MaxRequests)
 	}
 
 	// Update Interval and check if reset needed
 	if update.Interval != nil {
-		oldInterval := cb.interval
+		oldInterval := cb.getInterval()
 		newInterval := *update.Interval
 
-		cb.interval = newInterval
+		cb.setInterval(newInterval)
 
 		// If interval changed and we're in Closed state, reset counts
 		if oldInterval != newInterval && currentState == StateClosed {
@@ -60,10 +60,10 @@ func (cb *CircuitBreaker) UpdateSettings(update SettingsUpdate) error {
 
 	// Update Timeout and check if timer reset needed
 	if update.Timeout != nil {
-		oldTimeout := cb.timeout
+		oldTimeout := cb.getTimeout()
 		newTimeout := *update.Timeout
 
-		cb.timeout = newTimeout
+		cb.setTimeout(newTimeout)
 
 		// If timeout changed and we're in Open state, reset timer
 		if oldTimeout != newTimeout && currentState == StateOpen {
@@ -73,12 +73,12 @@ func (cb *CircuitBreaker) UpdateSettings(update SettingsUpdate) error {
 
 	// Update FailureRateThreshold (simple field update)
 	if update.FailureRateThreshold != nil {
-		cb.failureRateThreshold = *update.FailureRateThreshold
+		cb.setFailureRateThreshold(*update.FailureRateThreshold)
 	}
 
 	// Update MinimumObservations (simple field update)
 	if update.MinimumObservations != nil {
-		cb.minimumObservations = *update.MinimumObservations
+		cb.setMinimumObservations(*update.MinimumObservations)
 	}
 
 	// Apply smart resets after all settings are updated

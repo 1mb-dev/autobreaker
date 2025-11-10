@@ -9,16 +9,18 @@ import (
 type CircuitBreaker struct {
 	name string
 
-	// Settings
-	maxRequests          uint32
-	interval             time.Duration
-	timeout              time.Duration
-	readyToTrip          func(Counts) bool
-	onStateChange        func(string, State, State)
-	isSuccessful         func(error) bool
-	adaptiveThreshold    bool
-	failureRateThreshold float64
-	minimumObservations  uint32
+	// Settings (immutable - set once at creation)
+	readyToTrip       func(Counts) bool
+	onStateChange     func(string, State, State)
+	isSuccessful      func(error) bool
+	adaptiveThreshold bool
+
+	// Settings (atomic - updateable at runtime)
+	maxRequests          atomic.Uint32 // uint32
+	interval             atomic.Int64  // time.Duration (int64)
+	timeout              atomic.Int64  // time.Duration (int64)
+	failureRateThreshold atomic.Uint64 // float64 (stored as bits)
+	minimumObservations  atomic.Uint32 // uint32
 
 	// State (atomic)
 	state atomic.Int32 // State (0=Closed, 1=Open, 2=HalfOpen)
@@ -58,25 +60,27 @@ func New(settings Settings) *CircuitBreaker {
 	}
 
 	cb := &CircuitBreaker{
-		name:                 settings.Name,
-		maxRequests:          settings.MaxRequests,
-		interval:             settings.Interval,
-		timeout:              settings.Timeout,
-		readyToTrip:          settings.ReadyToTrip,
-		onStateChange:        settings.OnStateChange,
-		isSuccessful:         settings.IsSuccessful,
-		adaptiveThreshold:    settings.AdaptiveThreshold,
-		failureRateThreshold: settings.FailureRateThreshold,
-		minimumObservations:  settings.MinimumObservations,
+		name:              settings.Name,
+		readyToTrip:       settings.ReadyToTrip,
+		onStateChange:     settings.OnStateChange,
+		isSuccessful:      settings.IsSuccessful,
+		adaptiveThreshold: settings.AdaptiveThreshold,
 	}
+
+	// Set atomic fields using setters
+	cb.setMaxRequests(settings.MaxRequests)
+	cb.setInterval(settings.Interval)
+	cb.setTimeout(settings.Timeout)
+	cb.setFailureRateThreshold(settings.FailureRateThreshold)
+	cb.setMinimumObservations(settings.MinimumObservations)
 
 	// Apply defaults
-	if cb.maxRequests == 0 {
-		cb.maxRequests = 1
+	if cb.getMaxRequests() == 0 {
+		cb.setMaxRequests(1)
 	}
 
-	if cb.timeout == 0 {
-		cb.timeout = 60 * time.Second
+	if cb.getTimeout() == 0 {
+		cb.setTimeout(60 * time.Second)
 	}
 
 	if cb.readyToTrip == nil {
@@ -91,12 +95,12 @@ func New(settings Settings) *CircuitBreaker {
 		cb.isSuccessful = DefaultIsSuccessful
 	}
 
-	if cb.failureRateThreshold == 0 && cb.adaptiveThreshold {
-		cb.failureRateThreshold = 0.05 // 5% default
+	if cb.getFailureRateThreshold() == 0 && cb.adaptiveThreshold {
+		cb.setFailureRateThreshold(0.05) // 5% default
 	}
 
-	if cb.minimumObservations == 0 && cb.adaptiveThreshold {
-		cb.minimumObservations = 20
+	if cb.getMinimumObservations() == 0 && cb.adaptiveThreshold {
+		cb.setMinimumObservations(20)
 	}
 
 	// Initialize state
@@ -132,7 +136,7 @@ func (cb *CircuitBreaker) Counts() Counts {
 // Execute runs the given request function if the circuit breaker allows it.
 func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{}, error) {
 	// Check if interval-based count clearing is needed (only in Closed state)
-	if cb.interval > 0 && cb.State() == StateClosed {
+	if cb.getInterval() > 0 && cb.State() == StateClosed {
 		cb.maybeResetCounts()
 	}
 
@@ -160,7 +164,7 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 	if currentState == StateHalfOpen {
 		// Check if we've reached max concurrent requests in half-open
 		current := cb.halfOpenRequests.Add(1)
-		if current > int32(cb.maxRequests) {
+		if current > int32(cb.getMaxRequests()) {
 			cb.halfOpenRequests.Add(-1) // Undo increment
 			return nil, ErrTooManyRequests
 		}

@@ -73,13 +73,13 @@ func TestAdaptiveThresholdDefaults(t *testing.T) {
 	})
 
 	// Test default failure rate threshold
-	if cb.failureRateThreshold != 0.05 {
-		t.Errorf("default failureRateThreshold = %v, want 0.05", cb.failureRateThreshold)
+	if cb.getFailureRateThreshold() != 0.05 {
+		t.Errorf("default failureRateThreshold = %v, want 0.05", cb.getFailureRateThreshold())
 	}
 
 	// Test default minimum observations
-	if cb.minimumObservations != 20 {
-		t.Errorf("default minimumObservations = %v, want 20", cb.minimumObservations)
+	if cb.getMinimumObservations() != 20 {
+		t.Errorf("default minimumObservations = %v, want 20", cb.getMinimumObservations())
 	}
 }
 

@@ -3,7 +3,7 @@ package breaker
 // defaultAdaptiveReadyToTrip implements percentage-based threshold logic.
 func (cb *CircuitBreaker) defaultAdaptiveReadyToTrip(counts Counts) bool {
 	// Need minimum observations before evaluating
-	if counts.Requests < cb.minimumObservations {
+	if counts.Requests < cb.getMinimumObservations() {
 		return false
 	}
 
@@ -13,5 +13,5 @@ func (cb *CircuitBreaker) defaultAdaptiveReadyToTrip(counts Counts) bool {
 	}
 
 	failureRate := float64(counts.TotalFailures) / float64(counts.Requests)
-	return failureRate > cb.failureRateThreshold
+	return failureRate > cb.getFailureRateThreshold()
 }
