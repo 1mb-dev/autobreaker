@@ -379,7 +379,7 @@ func BenchmarkConcurrent_100Goroutines(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			cb.Execute(operation)
+			_, _ = cb.Execute(operation)
 		}
 	})
 }
