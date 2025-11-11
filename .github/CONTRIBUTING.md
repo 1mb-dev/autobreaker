@@ -337,8 +337,7 @@ When contributing, keep these principles in mind:
 ## Getting Help
 
 - **Questions**: Open a GitHub Discussion
-- **Real-time**: (If we had a chat, it would go here)
-- **Email**: vinay.mish@gmail.com (for private matters only)
+- **Issues**: Use GitHub Issues for bugs and feature requests
 
 ## Recognition
 
