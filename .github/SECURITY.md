@@ -15,7 +15,7 @@ We take the security of AutoBreaker seriously. If you believe you have found a s
 
 ### Please Do
 
-- **Report privately**: Send reports to [vinay.mish@gmail.com](mailto:vinay.mish@gmail.com)
+- **Report privately**: Open a private security advisory via GitHub Security tab
 - **Include details**: Provide as much information as possible about the vulnerability
 - **Allow time to respond**: Give us reasonable time to investigate and fix the issue before public disclosure
 - **Be patient**: We will respond within 48 hours acknowledging receipt
