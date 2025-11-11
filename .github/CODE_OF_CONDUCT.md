@@ -18,7 +18,7 @@ We are committed to providing a welcoming and professional environment for every
 
 ## Enforcement
 
-Instances of unacceptable behavior may be reported to the project maintainer at vinay.mish@gmail.com. All complaints will be reviewed and investigated promptly and fairly.
+Instances of unacceptable behavior may be reported by opening a GitHub issue. All complaints will be reviewed and investigated promptly and fairly.
 
 ## Attribution
 
