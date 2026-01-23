@@ -487,10 +487,7 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 			return result, err
 		}
 		// Call isSuccessful with panic recovery
-		success := false
-		safeCall(func() {
-			success = cb.isSuccessful(err)
-		})
+		success := safeCallIsSuccessful(cb.name, cb.isSuccessful, err)
 		cb.recordOutcome(success)
 
 		// Handle state transitions based on outcome
@@ -700,10 +697,7 @@ func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, req func() (interf
 			return result, err
 		}
 		// Call isSuccessful with panic recovery
-		success := false
-		safeCall(func() {
-			success = cb.isSuccessful(err)
-		})
+		success := safeCallIsSuccessful(cb.name, cb.isSuccessful, err)
 		cb.recordOutcome(success)
 
 		// Handle state transitions based on outcome

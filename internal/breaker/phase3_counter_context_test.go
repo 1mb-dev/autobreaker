@@ -30,7 +30,7 @@ func TestPhase3_CounterSaturation(t *testing.T) {
 		counter.Store(math.MaxUint32)
 
 		// Try to increment - should return false (already at max)
-		if safeIncrementCounter(&counter) {
+		if safeIncrementCounter(&counter, "test_counter", "test-circuit") {
 			t.Error("safeIncrementCounter should return false when counter is at max")
 		}
 
