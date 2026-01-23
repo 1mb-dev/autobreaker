@@ -44,7 +44,7 @@ func (cb *CircuitBreaker) validateStateMachine() error {
 	// Validate count consistency
 	totalCounted := counts.TotalSuccesses + counts.TotalFailures
 	if counts.Requests != totalCounted {
-		return fmt.Errorf("count mismatch: Requests=%v != TotalSuccesses+TotalFailures=%v", 
+		return fmt.Errorf("count mismatch: Requests=%v != TotalSuccesses+TotalFailures=%v",
 			counts.Requests, totalCounted)
 	}
 
