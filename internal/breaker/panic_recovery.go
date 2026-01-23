@@ -18,7 +18,11 @@ var logMutex sync.Mutex
 // Returns a safe default: treat as "do not trip" (circuit stays closed).
 func (h *callbackPanicHandler) handleReadyToTripPanic(name string, r interface{}) {
 	// Log the panic with stack trace
-	logCallbackPanic("ReadyToTrip", name, r)
+	logMutex.Lock()
+	defer logMutex.Unlock()
+	
+	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: ReadyToTrip callback panicked: %v\n",
+		name, r)
 	
 	// Safe default: do not trip the circuit
 	// This prevents a panicking callback from causing false circuit opens
@@ -27,8 +31,12 @@ func (h *callbackPanicHandler) handleReadyToTripPanic(name string, r interface{}
 // handleOnStateChangePanic handles a panic in the OnStateChange callback.
 // Logs the panic but allows the state transition to proceed.
 func (h *callbackPanicHandler) handleOnStateChangePanic(name string, from, to State, r interface{}) {
-	// Log the panic with stack trace
-	logCallbackPanic("OnStateChange", name, r)
+	// Log the panic with stack trace including state transition context
+	logMutex.Lock()
+	defer logMutex.Unlock()
+	
+	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: OnStateChange callback panicked during transition %v → %v: %v\n",
+		name, from, to, r)
 	
 	// State transition proceeds despite callback panic
 	// This prevents a panicking callback from blocking state transitions
@@ -38,31 +46,22 @@ func (h *callbackPanicHandler) handleOnStateChangePanic(name string, from, to St
 // Returns a safe default: treat as failure (conservative approach).
 func (h *callbackPanicHandler) handleIsSuccessfulPanic(name string, r interface{}) bool {
 	// Log the panic with stack trace
-	logCallbackPanic("IsSuccessful", name, r)
+	logMutex.Lock()
+	defer logMutex.Unlock()
+	
+	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: IsSuccessful callback panicked: %v\n",
+		name, r)
 	
 	// Safe default: treat as failure
 	// This is conservative - better to potentially trip circuit than ignore errors
 	return false
 }
 
-// logCallbackPanic logs a callback panic with stack trace.
-func logCallbackPanic(callbackName, circuitName string, panicValue interface{}) {
-	// In production, we would log with stack trace
-	// For now, use simple logging to avoid race detector issues
-	logMutex.Lock()
-	defer logMutex.Unlock()
-	
-	// Simple log without stack trace to avoid race detector issues
-	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: %s callback panicked: %v\n",
-		circuitName, callbackName, panicValue)
-	
-	// TODO: In v1.2.0, integrate with user-provided logging/metrics
-	// Note: debug.Stack() can have race detector issues in high-concurrency scenarios
-}
+
 
 // safeCallWithRecovery executes a callback with panic recovery and proper handling.
 // It provides deterministic behavior for each callback type.
-func safeCallWithRecovery(callbackType string, circuitName string, fn func(), panicHandler func(interface{})) {
+func safeCallWithRecovery(fn func(), panicHandler func(interface{})) {
 	if fn == nil {
 		return
 	}
@@ -83,7 +82,7 @@ func safeCallReadyToTrip(circuitName string, fn func(Counts) bool, counts Counts
 	var result bool
 	handler := &callbackPanicHandler{}
 	
-	safeCallWithRecovery("ReadyToTrip", circuitName, func() {
+	safeCallWithRecovery(func() {
 		result = fn(counts)
 	}, func(r interface{}) {
 		handler.handleReadyToTripPanic(circuitName, r)
@@ -101,7 +100,7 @@ func safeCallOnStateChange(circuitName string, fn func(string, State, State), fr
 	
 	handler := &callbackPanicHandler{}
 	
-	safeCallWithRecovery("OnStateChange", circuitName, func() {
+	safeCallWithRecovery(func() {
 		fn(circuitName, from, to)
 	}, func(r interface{}) {
 		handler.handleOnStateChangePanic(circuitName, from, to, r)
@@ -114,7 +113,7 @@ func safeCallIsSuccessful(circuitName string, fn func(error) bool, err error) bo
 	var result bool
 	handler := &callbackPanicHandler{}
 	
-	safeCallWithRecovery("IsSuccessful", circuitName, func() {
+	safeCallWithRecovery(func() {
 		result = fn(err)
 	}, func(r interface{}) {
 		result = handler.handleIsSuccessfulPanic(circuitName, r)
