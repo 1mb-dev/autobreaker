@@ -284,7 +284,7 @@ func TestTimeHandlingMonotonicClock(t *testing.T) {
 	// This test verifies that our time handling fixes work correctly
 	// We can't easily simulate system clock jumps in Go tests, but we can verify
 	// that the code uses time.Since() which uses monotonic clock
-	
+
 	cb := New(Settings{
 		Name:    "test",
 		Timeout: 100 * time.Millisecond,
@@ -295,33 +295,33 @@ func TestTimeHandlingMonotonicClock(t *testing.T) {
 
 	// Trip circuit to Open state
 	cb.Execute(failFunc)
-	
+
 	if cb.State() != StateOpen {
 		t.Fatalf("Circuit should be Open after failure, got %v", cb.State())
 	}
 
 	// Record the time when circuit opened
 	startTime := time.Now()
-	
+
 	// Wait for timeout (using real time)
 	time.Sleep(150 * time.Millisecond)
-	
+
 	// Execute a request - should transition to HalfOpen and then Closed on success
 	result, err := cb.Execute(successFunc)
-	
+
 	if err != nil {
 		t.Errorf("Execute after timeout error = %v, want nil", err)
 	}
-	
+
 	if result != "success" {
 		t.Errorf("Execute after timeout result = %v, want 'success'", result)
 	}
-	
+
 	// Verify circuit is now Closed
 	if cb.State() != StateClosed {
 		t.Errorf("Circuit should be Closed after successful probe, got %v", cb.State())
 	}
-	
+
 	// Verify that at least the timeout duration has passed
 	// This ensures time calculations are working correctly
 	elapsed := time.Since(startTime)
@@ -335,10 +335,10 @@ func TestTimeHandlingMonotonicClock(t *testing.T) {
 func TestNegativeDurationPrevention(t *testing.T) {
 	// This is a conceptual test - we can't easily simulate clock jumps
 	// but we document the behavior and verify the code uses monotonic clock
-	
+
 	cb := New(Settings{
-		Name:    "test",
-		Timeout: 50 * time.Millisecond,
+		Name:     "test",
+		Timeout:  50 * time.Millisecond,
 		Interval: 100 * time.Millisecond, // Add interval for counts reset testing
 		ReadyToTrip: func(counts Counts) bool {
 			return counts.ConsecutiveFailures > 0
@@ -349,23 +349,23 @@ func TestNegativeDurationPrevention(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		cb.Execute(successFunc)
 	}
-	
+
 	// Get initial counts
 	initialCounts := cb.Counts()
 	if initialCounts.Requests != 5 {
 		t.Errorf("Initial requests = %v, want 5", initialCounts.Requests)
 	}
-	
+
 	// Wait longer than interval to trigger reset
 	time.Sleep(150 * time.Millisecond)
-	
+
 	// Execute another request - should reset counts due to interval
 	cb.Execute(successFunc)
-	
+
 	// With monotonic clock, we should have consistent time calculations
 	// even if system clock jumps
 	finalCounts := cb.Counts()
-	
+
 	// The counts might be reset (1 request) or not (6 requests) depending on timing
 	// But importantly, no negative durations should occur
 	if finalCounts.Requests != 1 && finalCounts.Requests != 6 {

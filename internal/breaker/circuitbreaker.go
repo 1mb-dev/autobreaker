@@ -305,6 +305,15 @@ func (cb *CircuitBreaker) State() State {
 // However, counts may change immediately after this method returns due to concurrent
 // Execute() calls.
 //
+// **Atomic Snapshot Limitation**: This method reads multiple atomic values sequentially.
+// While each individual read is atomic, the collection as a whole is not an atomic
+// snapshot. Counts may be slightly inconsistent if the circuit breaker is actively
+// processing requests during the read.
+//
+// For most use cases (metrics, monitoring), this inconsistency is acceptable.
+// If you need a perfectly consistent snapshot, you must provide external
+// synchronization.
+//
 // Counts represent the current observation window:
 //   - If Interval > 0: Counts reset every Interval duration (in Closed state)
 //   - If Interval = 0: Counts reset only on state transitions

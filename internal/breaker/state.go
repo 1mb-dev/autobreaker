@@ -1,6 +1,10 @@
+//go:build !production
+
 package breaker
 
-import "time"
+import (
+	"time"
+)
 
 // safeCall executes a callback with panic recovery.
 // If the callback panics, the panic is recovered and ignored.

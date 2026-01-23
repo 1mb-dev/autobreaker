@@ -262,7 +262,7 @@ func TestRapidStateTransitions(t *testing.T) {
 func TestCallbackPanicReadyToTrip(t *testing.T) {
 	panicCalled := false
 	panicRecovered := false
-	
+
 	cb := New(Settings{
 		Name: "test-ready-to-trip-panic",
 		ReadyToTrip: func(counts Counts) bool {
@@ -289,17 +289,17 @@ func TestCallbackPanicReadyToTrip(t *testing.T) {
 	if !panicCalled {
 		t.Error("readyToTrip callback should have been called")
 	}
-	
+
 	// Verify panic was recovered (not propagated to user)
 	if panicRecovered {
 		t.Error("readyToTrip panic should have been recovered internally, not propagated")
 	}
-	
+
 	// Circuit should still be functional
 	if cb.State() != StateClosed {
 		t.Errorf("Circuit should be closed after callback panic, got %v", cb.State())
 	}
-	
+
 	// Should be able to continue using circuit
 	result, err := cb.Execute(successFunc)
 	if err != nil {
@@ -313,7 +313,7 @@ func TestCallbackPanicReadyToTrip(t *testing.T) {
 // TestCallbackPanicOnStateChange verifies that onStateChange callback panics are recovered
 func TestCallbackPanicOnStateChange(t *testing.T) {
 	stateChangeCount := 0
-	
+
 	cb := New(Settings{
 		Name:    "test-state-change-panic",
 		Timeout: 50 * time.Millisecond, // Set short timeout for test
@@ -336,16 +336,16 @@ func TestCallbackPanicOnStateChange(t *testing.T) {
 	if cb.State() != StateOpen {
 		t.Errorf("Circuit should be Open after failure, got %v", cb.State())
 	}
-	
+
 	// onStateChange should have been attempted once (even though it panicked)
 	// Note: stateChangeCount will be 1 because the panic happens AFTER incrementing
 	if stateChangeCount != 1 {
 		t.Errorf("onStateChange should have been attempted once, got %d", stateChangeCount)
 	}
-	
+
 	// Wait for timeout and try recovery
 	time.Sleep(100 * time.Millisecond)
-	
+
 	// Execute success - should trigger state changes (Open → HalfOpen → Closed)
 	// The callback will panic on first call, but subsequent calls should work
 	result, err := cb.Execute(successFunc)
@@ -355,12 +355,12 @@ func TestCallbackPanicOnStateChange(t *testing.T) {
 	if result != "success" {
 		t.Errorf("Should get success result, got: %v", result)
 	}
-	
+
 	// Circuit should now be Closed
 	if cb.State() != StateClosed {
 		t.Errorf("Circuit should be Closed after successful probe, got %v", cb.State())
 	}
-	
+
 	// onStateChange should have been attempted 3 times total
 	// 1st: Closed → Open (panicked)
 	// 2nd: Open → HalfOpen (should work)
@@ -373,7 +373,7 @@ func TestCallbackPanicOnStateChange(t *testing.T) {
 // TestCallbackPanicIsSuccessful verifies that isSuccessful callback panics are recovered
 func TestCallbackPanicIsSuccessful(t *testing.T) {
 	panicCalled := false
-	
+
 	cb := New(Settings{
 		Name: "test-is-successful-panic",
 		IsSuccessful: func(err error) bool {
@@ -397,18 +397,18 @@ func TestCallbackPanicIsSuccessful(t *testing.T) {
 	if !panicCalled {
 		t.Error("isSuccessful callback should have been called")
 	}
-	
+
 	// Circuit should still be functional
 	if cb.State() != StateClosed {
 		t.Errorf("Circuit should be closed after callback panic, got %v", cb.State())
 	}
-	
+
 	// The request should be counted as failure (panic in isSuccessful)
 	counts := cb.Counts()
 	if counts.TotalFailures != 1 {
 		t.Errorf("Request with panicking isSuccessful should count as failure, got %d failures", counts.TotalFailures)
 	}
-	
+
 	// Should be able to continue using circuit
 	result, err := cb.Execute(successFunc)
 	if err != nil {
@@ -422,7 +422,7 @@ func TestCallbackPanicIsSuccessful(t *testing.T) {
 // TestMultipleCallbackPanics verifies circuit remains functional with multiple callback panics
 func TestMultipleCallbackPanics(t *testing.T) {
 	callbackCallCount := 0
-	
+
 	cb := New(Settings{
 		Name:    "test-multiple-panics",
 		Timeout: 50 * time.Millisecond, // Set short timeout for test
@@ -450,7 +450,7 @@ func TestMultipleCallbackPanics(t *testing.T) {
 
 	// Execute multiple requests with various outcomes
 	// All callback panics should be recovered
-	
+
 	// First request - readyToTrip might panic
 	func() {
 		defer func() {
@@ -460,7 +460,7 @@ func TestMultipleCallbackPanics(t *testing.T) {
 		}()
 		cb.Execute(failFunc)
 	}()
-	
+
 	// Second request - might trigger onStateChange panic
 	func() {
 		defer func() {
@@ -470,15 +470,15 @@ func TestMultipleCallbackPanics(t *testing.T) {
 		}()
 		cb.Execute(failFunc)
 	}()
-	
+
 	// Circuit should be Open after 2 failures
 	if cb.State() != StateOpen {
 		t.Errorf("Circuit should be Open after 2 failures, got %v", cb.State())
 	}
-	
+
 	// Wait for timeout
 	time.Sleep(100 * time.Millisecond)
-	
+
 	// Third request - might trigger isSuccessful panic
 	func() {
 		defer func() {
@@ -488,12 +488,12 @@ func TestMultipleCallbackPanics(t *testing.T) {
 		}()
 		cb.Execute(successFunc)
 	}()
-	
+
 	// Circuit should recover to Closed
 	if cb.State() != StateClosed {
 		t.Errorf("Circuit should be Closed after successful probe, got %v", cb.State())
 	}
-	
+
 	// Verify circuit is still functional
 	result, err := cb.Execute(successFunc)
 	if err != nil {
@@ -502,6 +502,6 @@ func TestMultipleCallbackPanics(t *testing.T) {
 	if result != "success" {
 		t.Errorf("Should get success result, got: %v", result)
 	}
-	
+
 	t.Logf("Circuit survived %d callback calls with multiple panics, remained functional", callbackCallCount)
 }

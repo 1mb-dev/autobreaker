@@ -104,6 +104,16 @@ type Diagnostics struct {
 // predictive diagnostics (WillTripNext, TimeUntilHalfOpen) on demand. It provides a complete
 // view of the circuit breaker's health and behavior.
 //
+// **Atomic Snapshot Limitation**: This method reads multiple atomic values sequentially.
+// While each individual read is atomic, the collection as a whole is not an atomic
+// snapshot. Diagnostics may be slightly inconsistent if the circuit breaker is actively
+// processing requests during the read.
+//
+// For most use cases (troubleshooting, incident response), this inconsistency is acceptable.
+// The predictions (WillTripNext, TimeUntilHalfOpen) are based on the snapshot and may
+// not reflect the exact state if the circuit is actively processing requests.
+// If you need a perfectly consistent snapshot, you must provide external synchronization.
+//
 // The returned Diagnostics struct includes:
 //   - Name and State: Circuit identifier and current state
 //   - Metrics: Full metrics snapshot (same as Metrics() method)
