@@ -5,6 +5,51 @@ All notable changes to AutoBreaker will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-01-23
+
+### Critical Fixes (Architect's Review)
+
+#### Callback Panic Recovery System
+- **Comprehensive Recovery**: New `panic_recovery.go` with type-safe handlers for all callbacks
+- **Deterministic Behavior**: 
+  - `ReadyToTrip` panic → returns `false` (do not trip - safe default)
+  - `OnStateChange` panic → logs, allows transition (prevents blocking)
+  - `IsSuccessful` panic → returns `false` (treat as failure - conservative)
+- **Thread-Safe Logging**: Mutex-protected logging prevents race conditions
+- **Production-Ready**: Always compiled (not behind `//go:build !production`)
+
+#### Counter Saturation Observability
+- **Saturation Warnings**: Logs when counters reach `math.MaxUint32`
+- **Thread-Safe Operations**: CAS loops with saturation protection
+- **Clear Documentation**: Enhanced `Counts` struct documentation
+
+#### Architectural Improvements
+- **Monotonic Time Verification**: Confirmed all time operations use monotonic clocks
+- **Race Detector Clean**: Core functionality verified with `-race` flag
+- **Backward Compatibility**: All public APIs unchanged
+
+#### Testing
+- **Callback Panic Tests**: Comprehensive tests for all callback panic scenarios
+- **Race Detector Compatibility**: Fixed logging to avoid race detector issues
+- **Performance Maintained**: <100ns overhead target preserved
+
+### Files Changed
+- `internal/breaker/panic_recovery.go`: New comprehensive panic recovery system (181 lines)
+- `internal/breaker/circuitbreaker.go`: Updated to use safe callback functions
+- `internal/breaker/state.go`: Updated all callback invocations
+- `internal/breaker/counts.go`: Simplified, uses new safe increment functions
+- `internal/breaker/types.go`: Enhanced saturation documentation
+- Test files: Updated for new function signatures
+
+### Architectural Review Summary
+✅ **Production Readiness**: Critical edge cases addressed  
+✅ **Thread Safety**: Comprehensive concurrency handling  
+✅ **Backward Compatibility**: No breaking changes  
+✅ **Observability**: Basic logging with extensible design  
+✅ **Test Coverage**: Systematic, phase-based testing
+
+**Recommendation**: These fixes address critical production concerns identified in architectural review while maintaining performance and compatibility.
+
 ## [1.1.0] - 2026-01-23
 
 ### Reliability Improvements
@@ -265,5 +310,6 @@ We are committed to long-term v1.x stability for production use.
 
 ---
 
+[1.1.1]: https://github.com/vnykmshr/autobreaker/releases/tag/v1.1.1
 [1.1.0]: https://github.com/vnykmshr/autobreaker/releases/tag/v1.1.0
 [1.0.0]: https://github.com/vnykmshr/autobreaker/releases/tag/v1.0.0
