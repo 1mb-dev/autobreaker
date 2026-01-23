@@ -1,5 +1,7 @@
 # Dev-only task tracker
 /todos/
+.claude/
+.goose/
 
 # Binaries for programs and plugins
 *.exe

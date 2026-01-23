@@ -2,6 +2,7 @@ package breaker
 
 import (
 	"context"
+	"fmt"
 	"sync/atomic"
 	"time"
 )
@@ -193,14 +194,14 @@ func New(settings Settings) *CircuitBreaker {
 		// FailureRateThreshold must be in (0, 1) exclusive range if explicitly set
 		if settings.FailureRateThreshold != 0 {
 			if settings.FailureRateThreshold <= 0 || settings.FailureRateThreshold >= 1 {
-				panic("autobreaker: FailureRateThreshold must be in range (0, 1)")
+				panic(fmt.Sprintf("autobreaker: FailureRateThreshold must be in range (0, 1), got %v", settings.FailureRateThreshold))
 			}
 		}
 	}
 
 	// Validate Interval (can be 0 for no reset, but not negative)
 	if settings.Interval < 0 {
-		panic("autobreaker: Interval cannot be negative")
+		panic(fmt.Sprintf("autobreaker: Interval cannot be negative, got %v", settings.Interval))
 	}
 
 	cb := &CircuitBreaker{
@@ -303,6 +304,15 @@ func (cb *CircuitBreaker) State() State {
 // All counts are captured atomically and represent a consistent point-in-time view.
 // However, counts may change immediately after this method returns due to concurrent
 // Execute() calls.
+//
+// **Atomic Snapshot Limitation**: This method reads multiple atomic values sequentially.
+// While each individual read is atomic, the collection as a whole is not an atomic
+// snapshot. Counts may be slightly inconsistent if the circuit breaker is actively
+// processing requests during the read.
+//
+// For most use cases (metrics, monitoring), this inconsistency is acceptable.
+// If you need a perfectly consistent snapshot, you must provide external
+// synchronization.
 //
 // Counts represent the current observation window:
 //   - If Interval > 0: Counts reset every Interval duration (in Closed state)
@@ -430,8 +440,10 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 		}
 	}
 
-	// Request is allowed - increment count
-	cb.requests.Add(1)
+	// Request is allowed - attempt to increment count with saturation protection.
+	// If counter is saturated (safeIncrementRequests returns false), request still
+	// proceeds but won't be counted in statistics.
+	requestCounted := cb.safeIncrementRequests()
 
 	// Handle half-open state with request limiting
 	if currentState == StateHalfOpen {
@@ -470,7 +482,15 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 
 	// If we got here without panic, record normal outcome
 	if !panicked {
-		success := cb.isSuccessful(err)
+		// If request wasn't counted due to saturation, skip recording
+		if !requestCounted {
+			return result, err
+		}
+		// Call isSuccessful with panic recovery
+		success := false
+		safeCall(func() {
+			success = cb.isSuccessful(err)
+		})
 		cb.recordOutcome(success)
 
 		// Handle state transitions based on outcome
@@ -615,8 +635,20 @@ func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, req func() (interf
 		}
 	}
 
-	// Request is allowed - increment count
-	cb.requests.Add(1)
+	// Request is allowed - attempt to increment count with saturation protection.
+	// If counter is saturated (safeIncrementRequests returns false), request still
+	// proceeds but won't be counted in statistics.
+	requestCounted := cb.safeIncrementRequests()
+
+	// Check context again after counting but before expensive operation
+	if err := ctx.Err(); err != nil {
+		// Context canceled between state check and now
+		// Need to undo request count if we incremented it
+		if requestCounted {
+			cb.safeDecrementRequests()
+		}
+		return nil, err
+	}
 
 	// Handle half-open state with request limiting
 	if currentState == StateHalfOpen {
@@ -663,7 +695,15 @@ func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, req func() (interf
 
 	// If we got here without panic and context is still valid, record normal outcome
 	if !panicked {
-		success := cb.isSuccessful(err)
+		// If request wasn't counted due to saturation, skip recording
+		if !requestCounted {
+			return result, err
+		}
+		// Call isSuccessful with panic recovery
+		success := false
+		safeCall(func() {
+			success = cb.isSuccessful(err)
+		})
 		cb.recordOutcome(success)
 
 		// Handle state transitions based on outcome
