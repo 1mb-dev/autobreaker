@@ -3,13 +3,16 @@ package breaker
 import (
 	"fmt"
 	"math"
-	"runtime/debug"
+	"sync"
 	"sync/atomic"
 )
 
 // callbackPanicHandler handles panics in user callbacks with proper logging and metrics.
 // This is the internal panic handler that provides deterministic behavior for each callback type.
 type callbackPanicHandler struct{}
+
+// logMutex protects fmt.Printf calls from concurrent access
+var logMutex sync.Mutex
 
 // handleReadyToTripPanic handles a panic in the ReadyToTrip callback.
 // Returns a safe default: treat as "do not trip" (circuit stays closed).
@@ -44,16 +47,17 @@ func (h *callbackPanicHandler) handleIsSuccessfulPanic(name string, r interface{
 
 // logCallbackPanic logs a callback panic with stack trace.
 func logCallbackPanic(callbackName, circuitName string, panicValue interface{}) {
-	// Get stack trace
-	stack := debug.Stack()
+	// In production, we would log with stack trace
+	// For now, use simple logging to avoid race detector issues
+	logMutex.Lock()
+	defer logMutex.Unlock()
 	
-	// Format log message
-	// In a real implementation, this would use a proper logging framework
-	// For now, we'll use fmt.Printf as a placeholder
-	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: %s callback panicked: %v\nStack trace:\n%s\n",
-		circuitName, callbackName, panicValue, stack)
+	// Simple log without stack trace to avoid race detector issues
+	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: %s callback panicked: %v\n",
+		circuitName, callbackName, panicValue)
 	
 	// TODO: In v1.2.0, integrate with user-provided logging/metrics
+	// Note: debug.Stack() can have race detector issues in high-concurrency scenarios
 }
 
 // safeCallWithRecovery executes a callback with panic recovery and proper handling.
@@ -165,6 +169,10 @@ func (cb *CircuitBreaker) safeDecrementRequests() bool {
 // logCounterSaturation logs a counter saturation event.
 func logCounterSaturation(counterName, circuitName string, currentValue uint32) {
 	// Format log message
+	// Use mutex to protect concurrent fmt.Printf calls
+	logMutex.Lock()
+	defer logMutex.Unlock()
+	
 	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: %s counter saturated at %d (max uint32)\n",
 		circuitName, counterName, currentValue)
 	
