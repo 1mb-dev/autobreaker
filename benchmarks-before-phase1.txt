@@ -1,0 +1,30 @@
+[32mRunning benchmarks...[0m
+goos: darwin
+goarch: amd64
+pkg: github.com/vnykmshr/autobreaker/internal/breaker
+cpu: Intel(R) Core(TM) i5-8257U CPU @ 1.40GHz
+BenchmarkStateCheck-8                  	1000000000	         0.3397 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCountsSnapshot-8              	1000000000	         0.8900 ns/op	       0 B/op	       0 allocs/op
+BenchmarkExecuteSuccess-8              	33259099	        34.69 ns/op	       0 B/op	       0 allocs/op
+BenchmarkExecuteFailure-8              	15012576	        81.13 ns/op	       0 B/op	       0 allocs/op
+BenchmarkExecuteOpenState-8            	15071096	        79.88 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAdaptiveReadyToTrip-8         	1000000000	         1.023 ns/op	       0 B/op	       0 allocs/op
+BenchmarkDefaultReadyToTrip-8          	1000000000	         0.2724 ns/op	       0 B/op	       0 allocs/op
+BenchmarkConcurrentExecute-8           	11354072	        97.82 ns/op	       0 B/op	       0 allocs/op
+BenchmarkNew-8                         	 7284687	       163.1 ns/op	     128 B/op	       1 allocs/op
+BenchmarkCompareBaseline-8             	1000000000	         0.8166 ns/op	       0 B/op	       0 allocs/op
+BenchmarkExecute_Closed-8              	35005146	        34.59 ns/op	       0 B/op	       0 allocs/op
+BenchmarkExecute_Open-8                	15197397	        80.47 ns/op	       0 B/op	       0 allocs/op
+BenchmarkExecute_HalfOpen-8            	 1909837	       631.4 ns/op	     144 B/op	       2 allocs/op
+BenchmarkExecuteContext_Closed-8       	32672959	        35.67 ns/op	       0 B/op	       0 allocs/op
+BenchmarkState-8                       	1000000000	         0.3384 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCounts-8                      	1000000000	         0.8816 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMetrics-8                     	64190853	        18.65 ns/op	       0 B/op	       0 allocs/op
+BenchmarkDiagnostics-8                 	30159758	        40.02 ns/op	       0 B/op	       0 allocs/op
+BenchmarkUpdateSettings-8              	100000000	        11.66 ns/op	       0 B/op	       0 allocs/op
+BenchmarkUpdateSettings_Concurrent-8   	49284800	        24.81 ns/op	       0 B/op	       0 allocs/op
+BenchmarkHighThroughput-8              	1000000000	         0.03471 ns/op	       0 B/op	       0 allocs/op
+BenchmarkConcurrent_100Goroutines-8    	12301506	        87.36 ns/op	       0 B/op	       0 allocs/op
+BenchmarkStateTransitions-8            	 1566380	       757.3 ns/op	     176 B/op	       4 allocs/op
+PASS
+ok  	github.com/vnykmshr/autobreaker/internal/breaker	26.412s

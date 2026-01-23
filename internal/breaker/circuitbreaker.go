@@ -2,6 +2,7 @@ package breaker
 
 import (
 	"context"
+	"fmt"
 	"sync/atomic"
 	"time"
 )
@@ -193,14 +194,14 @@ func New(settings Settings) *CircuitBreaker {
 		// FailureRateThreshold must be in (0, 1) exclusive range if explicitly set
 		if settings.FailureRateThreshold != 0 {
 			if settings.FailureRateThreshold <= 0 || settings.FailureRateThreshold >= 1 {
-				panic("autobreaker: FailureRateThreshold must be in range (0, 1)")
+				panic(fmt.Sprintf("autobreaker: FailureRateThreshold must be in range (0, 1), got %v", settings.FailureRateThreshold))
 			}
 		}
 	}
 
 	// Validate Interval (can be 0 for no reset, but not negative)
 	if settings.Interval < 0 {
-		panic("autobreaker: Interval cannot be negative")
+		panic(fmt.Sprintf("autobreaker: Interval cannot be negative, got %v", settings.Interval))
 	}
 
 	cb := &CircuitBreaker{
