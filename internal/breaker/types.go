@@ -84,6 +84,11 @@ func (s State) String() string {
 // 2. Monitoring for saturation events
 // 3. Creating a new circuit breaker instance
 //
+// Saturation Events:
+// When a counter reaches saturation, a warning is logged to stdout:
+//   [AUTOBREAKER WARNING] Circuit "circuit-name": requests counter saturated at 4294967295 (max uint32)
+// This helps operators identify when counters are no longer accurate due to saturation.
+//
 // Thread-safe: Counts is a snapshot taken atomically.
 type Counts struct {
 	// Requests is the total number of requests in the current observation window.

@@ -1,50 +1,8 @@
 package breaker
 
 import (
-	"math"
-	"sync/atomic"
 	"time"
 )
-
-// safeIncrementCounter safely increments a uint32 counter with saturation protection.
-// Returns true if the counter was incremented, false if it was already at max.
-func safeIncrementCounter(counter *atomic.Uint32) bool {
-	// Use CompareAndSwap loop for atomic check-and-increment
-	for {
-		current := counter.Load()
-		if current == math.MaxUint32 {
-			// Already at max, cannot increment
-			return false
-		}
-		if counter.CompareAndSwap(current, current+1) {
-			return true
-		}
-		// CAS failed, retry
-	}
-}
-
-// safeIncrementRequests safely increments the requests counter with saturation protection.
-// Returns true if the counter was incremented, false if it was already at max (saturated).
-func (cb *CircuitBreaker) safeIncrementRequests() bool {
-	return safeIncrementCounter(&cb.requests)
-}
-
-// safeDecrementRequests safely decrements the requests counter with underflow protection.
-// Returns true if the counter was decremented, false if it was already at 0.
-func (cb *CircuitBreaker) safeDecrementRequests() bool {
-	// Use CompareAndSwap loop for atomic check-and-decrement
-	for {
-		current := cb.requests.Load()
-		if current == 0 {
-			// Already at 0, cannot decrement
-			return false
-		}
-		if cb.requests.CompareAndSwap(current, current-1) {
-			return true
-		}
-		// CAS failed, retry
-	}
-}
 
 // maybeResetCounts clears counts if interval has elapsed (Closed state only).
 func (cb *CircuitBreaker) maybeResetCounts() {
@@ -86,13 +44,13 @@ func (cb *CircuitBreaker) clearCounts() {
 func (cb *CircuitBreaker) recordOutcome(success bool) {
 	if success {
 		// Safe increment with saturation protection for totalSuccesses
-		safeIncrementCounter(&cb.totalSuccesses)
+		safeIncrementCounter(&cb.totalSuccesses, "totalSuccesses", cb.name)
 		// ConsecutiveSuccesses can safely overflow as it resets on failure
 		cb.consecutiveSuccesses.Add(1)
 		cb.consecutiveFailures.Store(0)
 	} else {
 		// Safe increment with saturation protection for totalFailures
-		safeIncrementCounter(&cb.totalFailures)
+		safeIncrementCounter(&cb.totalFailures, "totalFailures", cb.name)
 		// ConsecutiveFailures can safely overflow as it resets on success
 		cb.consecutiveFailures.Add(1)
 		cb.consecutiveSuccesses.Store(0)

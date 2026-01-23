@@ -329,7 +329,7 @@ func TestCallbackPanicOnStateChange(t *testing.T) {
 	})
 
 	// Execute a failure - should trigger state change (Closed → Open)
-	// The panic should be recovered internally by safeCall
+	// The panic should be recovered internally by safeCallIsSuccessful
 	cb.Execute(failFunc)
 
 	// Verify circuit transitioned to Open state despite callback panic
