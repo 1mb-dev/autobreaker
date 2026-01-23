@@ -2,6 +2,25 @@ package breaker
 
 import "time"
 
+// safeCall executes a callback with panic recovery.
+// If the callback panics, the panic is recovered and ignored.
+// This prevents user callbacks from breaking the circuit breaker.
+func safeCall(fn func()) {
+	if fn == nil {
+		return
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			// Panic in user callback - ignore and continue
+			// This prevents user code from breaking the circuit breaker
+			_ = r // Explicitly ignore the panic value
+		}
+	}()
+
+	fn()
+}
+
 // handleStateTransition handles state machine transitions based on request outcome.
 func (cb *CircuitBreaker) handleStateTransition(success bool, currentState State) {
 	switch currentState {
@@ -24,8 +43,13 @@ func (cb *CircuitBreaker) handleStateTransition(success bool, currentState State
 func (cb *CircuitBreaker) checkAndTripCircuit() {
 	counts := cb.Counts()
 
-	// Check if we should trip
-	if !cb.readyToTrip(counts) {
+	// Check if we should trip with panic recovery
+	shouldTrip := false
+	safeCall(func() {
+		shouldTrip = cb.readyToTrip(counts)
+	})
+
+	if !shouldTrip {
 		return
 	}
 
@@ -43,9 +67,11 @@ func (cb *CircuitBreaker) checkAndTripCircuit() {
 	// Clear counts
 	cb.clearCounts()
 
-	// Call state change callback if configured
+	// Call state change callback if configured with panic recovery
 	if cb.onStateChange != nil {
-		cb.onStateChange(cb.name, StateClosed, StateOpen)
+		safeCall(func() {
+			cb.onStateChange(cb.name, StateClosed, StateOpen)
+		})
 	}
 }
 
@@ -78,9 +104,11 @@ func (cb *CircuitBreaker) transitionToHalfOpen() {
 	// Reset half-open request counter
 	cb.halfOpenRequests.Store(0)
 
-	// Call state change callback if configured
+	// Call state change callback if configured with panic recovery
 	if cb.onStateChange != nil {
-		cb.onStateChange(cb.name, StateOpen, StateHalfOpen)
+		safeCall(func() {
+			cb.onStateChange(cb.name, StateOpen, StateHalfOpen)
+		})
 	}
 }
 
@@ -101,9 +129,11 @@ func (cb *CircuitBreaker) transitionToClosed() {
 	// Reset last cleared timestamp
 	cb.lastClearedAt.Store(now)
 
-	// Call state change callback if configured
+	// Call state change callback if configured with panic recovery
 	if cb.onStateChange != nil {
-		cb.onStateChange(cb.name, StateHalfOpen, StateClosed)
+		safeCall(func() {
+			cb.onStateChange(cb.name, StateHalfOpen, StateClosed)
+		})
 	}
 }
 
@@ -123,8 +153,10 @@ func (cb *CircuitBreaker) transitionBackToOpen() {
 	// Clear counts
 	cb.clearCounts()
 
-	// Call state change callback if configured
+	// Call state change callback if configured with panic recovery
 	if cb.onStateChange != nil {
-		cb.onStateChange(cb.name, StateHalfOpen, StateOpen)
+		safeCall(func() {
+			cb.onStateChange(cb.name, StateHalfOpen, StateOpen)
+		})
 	}
 }
