@@ -20,10 +20,10 @@ func (h *callbackPanicHandler) handleReadyToTripPanic(name string, r interface{}
 	// Log the panic with stack trace
 	logMutex.Lock()
 	defer logMutex.Unlock()
-	
+
 	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: ReadyToTrip callback panicked: %v\n",
 		name, r)
-	
+
 	// Safe default: do not trip the circuit
 	// This prevents a panicking callback from causing false circuit opens
 }
@@ -34,10 +34,10 @@ func (h *callbackPanicHandler) handleOnStateChangePanic(name string, from, to St
 	// Log the panic with stack trace including state transition context
 	logMutex.Lock()
 	defer logMutex.Unlock()
-	
+
 	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: OnStateChange callback panicked during transition %v → %v: %v\n",
 		name, from, to, r)
-	
+
 	// State transition proceeds despite callback panic
 	// This prevents a panicking callback from blocking state transitions
 }
@@ -48,16 +48,14 @@ func (h *callbackPanicHandler) handleIsSuccessfulPanic(name string, r interface{
 	// Log the panic with stack trace
 	logMutex.Lock()
 	defer logMutex.Unlock()
-	
+
 	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: IsSuccessful callback panicked: %v\n",
 		name, r)
-	
+
 	// Safe default: treat as failure
 	// This is conservative - better to potentially trip circuit than ignore errors
 	return false
 }
-
-
 
 // safeCallWithRecovery executes a callback with panic recovery and proper handling.
 // It provides deterministic behavior for each callback type.
@@ -81,14 +79,14 @@ func safeCallWithRecovery(fn func(), panicHandler func(interface{})) {
 func safeCallReadyToTrip(circuitName string, fn func(Counts) bool, counts Counts) bool {
 	var result bool
 	handler := &callbackPanicHandler{}
-	
+
 	safeCallWithRecovery(func() {
 		result = fn(counts)
 	}, func(r interface{}) {
 		handler.handleReadyToTripPanic(circuitName, r)
 		result = false // Safe default: do not trip
 	})
-	
+
 	return result
 }
 
@@ -97,9 +95,9 @@ func safeCallOnStateChange(circuitName string, fn func(string, State, State), fr
 	if fn == nil {
 		return
 	}
-	
+
 	handler := &callbackPanicHandler{}
-	
+
 	safeCallWithRecovery(func() {
 		fn(circuitName, from, to)
 	}, func(r interface{}) {
@@ -112,13 +110,13 @@ func safeCallOnStateChange(circuitName string, fn func(string, State, State), fr
 func safeCallIsSuccessful(circuitName string, fn func(error) bool, err error) bool {
 	var result bool
 	handler := &callbackPanicHandler{}
-	
+
 	safeCallWithRecovery(func() {
 		result = fn(err)
 	}, func(r interface{}) {
 		result = handler.handleIsSuccessfulPanic(circuitName, r)
 	})
-	
+
 	return result
 }
 
@@ -171,10 +169,10 @@ func logCounterSaturation(counterName, circuitName string, currentValue uint32) 
 	// Use mutex to protect concurrent fmt.Printf calls
 	logMutex.Lock()
 	defer logMutex.Unlock()
-	
+
 	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: %s counter saturated at %d (max uint32)\n",
 		circuitName, counterName, currentValue)
-	
+
 	// TODO: In v1.2.0, integrate with user-provided logging/metrics
 	// TODO: Add metrics for saturation events
 }
