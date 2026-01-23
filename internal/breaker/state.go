@@ -56,7 +56,9 @@ func (cb *CircuitBreaker) shouldTransitionToHalfOpen() bool {
 		return false // Never opened
 	}
 
-	elapsed := time.Duration(time.Now().UnixNano() - openedAt)
+	// Use monotonic clock for duration calculation to prevent issues from time jumps
+	openedTime := time.Unix(0, openedAt)
+	elapsed := time.Since(openedTime)
 	return elapsed >= cb.getTimeout()
 }
 
