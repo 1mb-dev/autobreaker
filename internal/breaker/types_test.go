@@ -90,7 +90,7 @@ func TestConfigurationValidation(t *testing.T) {
 				FailureRateThreshold: -0.1,
 			},
 			shouldPanic: true,
-			panicMsg:    "autobreaker: FailureRateThreshold must be in range (0, 1)",
+			panicMsg:    "autobreaker: FailureRateThreshold must be in range (0, 1), got -0.1",
 		},
 		{
 			name: "failure rate threshold equals 1",
@@ -100,7 +100,7 @@ func TestConfigurationValidation(t *testing.T) {
 				FailureRateThreshold: 1.0,
 			},
 			shouldPanic: true,
-			panicMsg:    "autobreaker: FailureRateThreshold must be in range (0, 1)",
+			panicMsg:    "autobreaker: FailureRateThreshold must be in range (0, 1), got 1",
 		},
 		{
 			name: "failure rate threshold above 1",
@@ -110,7 +110,7 @@ func TestConfigurationValidation(t *testing.T) {
 				FailureRateThreshold: 1.5,
 			},
 			shouldPanic: true,
-			panicMsg:    "autobreaker: FailureRateThreshold must be in range (0, 1)",
+			panicMsg:    "autobreaker: FailureRateThreshold must be in range (0, 1), got 1.5",
 		},
 		{
 			name: "negative interval",
@@ -119,7 +119,7 @@ func TestConfigurationValidation(t *testing.T) {
 				Interval: -1 * time.Second,
 			},
 			shouldPanic: true,
-			panicMsg:    "autobreaker: Interval cannot be negative",
+			panicMsg:    "autobreaker: Interval cannot be negative, got -1s",
 		},
 		{
 			name: "zero interval (valid)",

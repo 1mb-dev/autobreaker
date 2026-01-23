@@ -59,6 +59,15 @@ type Metrics struct {
 //   - Computed rates (FailureRate, SuccessRate as percentages 0.0-1.0)
 //   - Timestamps (last state change, last counts reset)
 //
+// **Atomic Snapshot Limitation**: This method reads multiple atomic values sequentially.
+// While each individual read is atomic, the collection as a whole is not an atomic
+// snapshot. Metrics may be slightly inconsistent if the circuit breaker is actively
+// processing requests during the read.
+//
+// For most use cases (monitoring, dashboards), this inconsistency is acceptable.
+// If you need a perfectly consistent snapshot, you must provide external
+// synchronization.
+//
 // Performance: This method performs atomic loads and simple arithmetic.
 // Overhead is negligible (~10-20ns). Safe to call frequently for monitoring.
 //

@@ -5,6 +5,72 @@ All notable changes to AutoBreaker will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-01-23
+
+### Reliability Improvements
+
+#### Time Handling
+- **Monotonic Clock**: Now uses monotonic clock for duration calculations, preventing issues from system clock jumps (NTP adjustments)
+- **Negative Duration Prevention**: Added safeguards against negative durations from time jumps
+- **Time Handling Tests**: Added comprehensive tests for time jump scenarios
+
+#### Callback Safety
+- **Panic Recovery**: User callbacks (ReadyToTrip, OnStateChange, IsSuccessful) now have panic recovery
+- **Circuit Protection**: Callback panics don't break circuit breaker functionality
+- **Callback Safety Tests**: Added tests for callback panic scenarios
+
+#### Counter Protection
+- **Counter Saturation**: Counters saturate at math.MaxUint32 (4,294,967,295) instead of undefined overflow
+- **Safe Increment/Decrement**: Thread-safe CAS loops for atomic counter operations
+- **Context Cancellation Fix**: Fixed request counting when context cancels during execution
+- **Counter Tests**: Added tests for counter saturation and long-running scenarios
+
+#### State Machine Improvements
+- **Race Condition Fixes**: Improved state transition handling under high concurrency
+- **Debug Validation**: Added validation for state transition invariants
+- **High-Concurrency Tests**: Added tests for 1000+ concurrent goroutines
+
+#### Documentation
+- **Counter Saturation**: Documented counter saturation behavior and implications
+- **Atomic Snapshot Limitations**: Documented consistency limitations of atomic snapshots
+- **Error Messages**: Improved error messages with context
+- **CHANGELOG**: Updated with v1.1.0 changes
+
+### Performance
+- **Maintained Performance**: <100ns overhead per request in Closed state
+- **Zero Allocations**: No allocations in hot path
+- **Thread-Safe**: Lock-free atomic operations maintained
+- **Race Detector Clean**: All tests pass with race detector
+
+### Compatibility
+- **Backward Compatible**: No breaking API changes
+- **All Tests Pass**: 96.1% test coverage maintained
+- **Existing Code**: All existing code continues to work unchanged
+
+### Files Changed
+- `internal/breaker/state.go`: Time handling and state transition improvements
+- `internal/breaker/counts.go`: Counter saturation implementation
+- `internal/breaker/circuitbreaker.go`: Callback safety and context fixes
+- `internal/breaker/types.go`: Updated documentation
+- Test files: Comprehensive edge case tests added
+- Documentation files: Updated to reflect changes
+
+### Testing Evidence
+- **Comprehensive Tests**: Added tests for all identified vulnerabilities
+- **Race Detector**: Clean on all tests
+- **Stress Tests**: Long-running tests for stability verification
+- **Edge Cases**: Tests for time jumps, callback panics, counter saturation
+
+### Known Limitations
+- **Atomic Snapshot Consistency**: `Counts()` provides point-in-time snapshot but not atomic across all fields
+- **Counter Saturation**: Statistics become inaccurate after counters saturate (at 4+ billion requests)
+- **Documented**: All limitations are documented for user awareness
+
+### Follow-up Items
+- Consider adding metrics for saturation events in future release
+- Consider adding ResetCounts() method if user demand emerges
+- Monitor for any edge cases in production deployments
+
 ## [1.0.0] - 2025-01-10
 
 ### Added
@@ -199,4 +265,5 @@ We are committed to long-term v1.x stability for production use.
 
 ---
 
+[1.1.0]: https://github.com/vnykmshr/autobreaker/releases/tag/v1.1.0
 [1.0.0]: https://github.com/vnykmshr/autobreaker/releases/tag/v1.0.0

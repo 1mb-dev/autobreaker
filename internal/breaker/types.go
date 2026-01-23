@@ -75,6 +75,15 @@ func (s State) String() string {
 // Counts are returned by the Counts() method and also embedded in Metrics.
 // These counts represent the current observation window (defined by Interval setting).
 //
+// Counter Saturation:
+// All counters use uint32 and saturate at math.MaxUint32 (4,294,967,295). Once a counter
+// reaches this maximum value, it stops incrementing to prevent undefined overflow behavior.
+// This is sufficient for most applications. If your service processes more than 4 billion
+// requests and needs accurate statistics beyond that point, consider:
+// 1. Using the Interval setting to periodically reset counts
+// 2. Monitoring for saturation events
+// 3. Creating a new circuit breaker instance
+//
 // Thread-safe: Counts is a snapshot taken atomically.
 type Counts struct {
 	// Requests is the total number of requests in the current observation window.
