@@ -33,11 +33,11 @@ func TestPhase2_StateTransitionRaceCondition(t *testing.T) {
 
 	const goroutines = 100
 	var (
-		transitionAttempts atomic.Int32
+		transitionAttempts    atomic.Int32
 		successfulTransitions atomic.Int32
-		failedTransitions atomic.Int32
-		stillOpenCount atomic.Int32
-		wg sync.WaitGroup
+		failedTransitions     atomic.Int32
+		stillOpenCount        atomic.Int32
+		wg                    sync.WaitGroup
 	)
 
 	wg.Add(goroutines)
@@ -48,13 +48,14 @@ func TestPhase2_StateTransitionRaceCondition(t *testing.T) {
 
 			// Try to execute - this will attempt transition to HalfOpen
 			_, err := cb.Execute(successFunc)
-			if err == nil {
+			switch err {
+			case nil:
 				// Success - circuit was in HalfOpen or Closed
 				successfulTransitions.Add(1)
-			} else if err == ErrOpenState {
+			case ErrOpenState:
 				// Still open - transition failed
 				stillOpenCount.Add(1)
-			} else {
+			default:
 				// Other error (e.g., ErrTooManyRequests)
 				failedTransitions.Add(1)
 			}
@@ -83,6 +84,7 @@ func TestPhase2_StateTransitionRaceCondition(t *testing.T) {
 			stillOpenCount.Load(), successfulTransitions.Load())
 	}
 }
+
 // TestPhase2_ConcurrentStateReadsDuringTransition tests concurrent state reads
 // while state transitions are happening.
 func TestPhase2_ConcurrentStateReadsDuringTransition(t *testing.T) {
@@ -140,7 +142,7 @@ func TestPhase2_ConcurrentStateReadsDuringTransition(t *testing.T) {
 					cb.Execute(successFunc)
 				}
 				executeCalls.Add(1)
-				
+
 				time.Sleep(time.Millisecond)
 			}
 		}(i)
@@ -183,7 +185,7 @@ func TestPhase2_MultipleConcurrentTransitions(t *testing.T) {
 		// Start in Open state
 		cb.Execute(failFunc)
 		cb.Execute(failFunc)
-		
+
 		if cb.State() != StateOpen {
 			t.Fatalf("Iteration %d: Expected StateOpen, got %v", iter, cb.State())
 		}
@@ -196,23 +198,23 @@ func TestPhase2_MultipleConcurrentTransitions(t *testing.T) {
 		for i := 0; i < goroutines; i++ {
 			go func(gid int) {
 				defer wg.Done()
-				
+
 				// Record state before attempt
 				stateBefore := cb.State()
-				
+
 				// Try to execute (will attempt transition if state is Open)
 				_, err := cb.Execute(successFunc)
-				
+
 				// Record state after attempt
 				stateAfter := cb.State()
-				
+
 				// Check for inconsistent state transitions
 				if stateBefore == StateOpen && err == nil && stateAfter == StateOpen {
 					// This would indicate a bug: executed successfully but state didn't change
 					inconsistentStateCount.Add(1)
 					t.Errorf("Goroutine %d: Executed successfully but state remained Open", gid)
 				}
-				
+
 				if stateBefore == StateOpen && err == ErrOpenState && stateAfter == StateHalfOpen {
 					// This would indicate a bug: got ErrOpenState but circuit transitioned
 					inconsistentStateCount.Add(1)
@@ -220,9 +222,9 @@ func TestPhase2_MultipleConcurrentTransitions(t *testing.T) {
 				}
 			}(i)
 		}
-		
+
 		wg.Wait()
-		
+
 		// Reset for next iteration
 		cb.transitionToClosed()
 	}
@@ -260,12 +262,12 @@ func TestPhase2_HighConcurrencyMixedOperations(t *testing.T) {
 	defer cancel()
 
 	var (
-		executeCount    atomic.Int64
-		stateReadCount  atomic.Int64
-		countsReadCount atomic.Int64
+		executeCount     atomic.Int64
+		stateReadCount   atomic.Int64
+		countsReadCount  atomic.Int64
 		metricsReadCount atomic.Int64
-		updateCount     atomic.Int64
-		wg              sync.WaitGroup
+		updateCount      atomic.Int64
+		wg               sync.WaitGroup
 	)
 
 	// Start mixed workload goroutines
@@ -304,7 +306,7 @@ func TestPhase2_HighConcurrencyMixedOperations(t *testing.T) {
 					_ = cb.UpdateSettings(update)
 					updateCount.Add(1)
 				}
-				
+
 				// Small sleep to prevent overwhelming
 				time.Sleep(time.Microsecond * time.Duration(id%100))
 			}
@@ -341,7 +343,7 @@ func TestPhase2_HighConcurrencyMixedOperations(t *testing.T) {
 func TestPhase2_RaceConditionOpenToHalfOpen(t *testing.T) {
 	// This test creates a scenario where many goroutines simultaneously
 	// try to transition from Open to HalfOpen state.
-	
+
 	cb := New(Settings{
 		Name:    "phase2-open-halfopen-race",
 		Timeout: 1 * time.Millisecond, // Very short timeout
@@ -352,7 +354,7 @@ func TestPhase2_RaceConditionOpenToHalfOpen(t *testing.T) {
 
 	// Trip circuit
 	cb.Execute(failFunc)
-	
+
 	if cb.State() != StateOpen {
 		t.Fatalf("Expected StateOpen, got %v", cb.State())
 	}
@@ -372,15 +374,16 @@ func TestPhase2_RaceConditionOpenToHalfOpen(t *testing.T) {
 	for i := 0; i < goroutines; i++ {
 		go func(id int) {
 			defer wg.Done()
-			
+
 			// All goroutines try to execute simultaneously
 			_, err := cb.Execute(successFunc)
-			
-			if err == nil {
+
+			switch err {
+			case nil:
 				successfulExecutions.Add(1)
-			} else if err == ErrOpenState {
+			case ErrOpenState:
 				receivedErrOpenState.Add(1)
-			} else if err == ErrTooManyRequests {
+			case ErrTooManyRequests:
 				// This is OK - circuit transitioned to HalfOpen but we hit MaxRequests limit
 				transitionedToHalfOpen.Add(1)
 			}
@@ -390,7 +393,7 @@ func TestPhase2_RaceConditionOpenToHalfOpen(t *testing.T) {
 	wg.Wait()
 
 	finalState := cb.State()
-	
+
 	t.Logf("Open→HalfOpen race condition test:")
 	t.Logf("  Goroutines: %d", goroutines)
 	t.Logf("  Successful executions: %d", successfulExecutions.Load())
@@ -403,14 +406,14 @@ func TestPhase2_RaceConditionOpenToHalfOpen(t *testing.T) {
 	if finalState != StateHalfOpen && finalState != StateClosed {
 		t.Errorf("Circuit should be HalfOpen or Closed after timeout, got %v", finalState)
 	}
-	
+
 	// 2. We should NOT have both successful executions and ErrOpenState
 	// (that would mean some goroutines thought circuit was open while others executed)
 	if successfulExecutions.Load() > 0 && receivedErrOpenState.Load() > 0 {
 		t.Errorf("Race condition: %d goroutines executed successfully while %d thought circuit was open",
 			successfulExecutions.Load(), receivedErrOpenState.Load())
 	}
-	
+
 	// 3. If circuit is HalfOpen, successful executions should be <= MaxRequests
 	if finalState == StateHalfOpen && successfulExecutions.Load() > 1 {
 		// MaxRequests defaults to 1

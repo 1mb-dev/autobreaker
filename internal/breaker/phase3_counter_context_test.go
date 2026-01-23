@@ -350,8 +350,11 @@ func TestPhase3_ConcurrentCounterOperations(t *testing.T) {
 	}
 	
 	// With 50% failure pattern, we should have roughly equal successes and failures
+	// UNLESS the circuit opened due to consecutive failures
 	total := float64(counts.Requests)
-	if total > 0 {
+	if total > 0 && currentState != StateOpen {
+		// Only check failure rate if circuit is not open
+		// (if circuit is open, failure rate might be skewed)
 		failureRate := float64(counts.TotalFailures) / total
 		// Should be around 50% failure rate
 		if math.Abs(failureRate-0.5) > 0.1 { // Allow 10% tolerance
