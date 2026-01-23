@@ -440,8 +440,10 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 		}
 	}
 
-	// Request is allowed - increment count
-	cb.requests.Add(1)
+	// Request is allowed - attempt to increment count with saturation protection.
+	// If counter is saturated (safeIncrementRequests returns false), request still
+	// proceeds but won't be counted in statistics.
+	requestCounted := cb.safeIncrementRequests()
 
 	// Handle half-open state with request limiting
 	if currentState == StateHalfOpen {
@@ -480,6 +482,10 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 
 	// If we got here without panic, record normal outcome
 	if !panicked {
+		// If request wasn't counted due to saturation, skip recording
+		if !requestCounted {
+			return result, err
+		}
 		// Call isSuccessful with panic recovery
 		success := false
 		safeCall(func() {
@@ -629,8 +635,20 @@ func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, req func() (interf
 		}
 	}
 
-	// Request is allowed - increment count
-	cb.requests.Add(1)
+	// Request is allowed - attempt to increment count with saturation protection.
+	// If counter is saturated (safeIncrementRequests returns false), request still
+	// proceeds but won't be counted in statistics.
+	requestCounted := cb.safeIncrementRequests()
+
+	// Check context again after counting but before expensive operation
+	if err := ctx.Err(); err != nil {
+		// Context canceled between state check and now
+		// Need to undo request count if we incremented it
+		if requestCounted {
+			cb.safeDecrementRequests()
+		}
+		return nil, err
+	}
 
 	// Handle half-open state with request limiting
 	if currentState == StateHalfOpen {
@@ -677,6 +695,10 @@ func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, req func() (interf
 
 	// If we got here without panic and context is still valid, record normal outcome
 	if !panicked {
+		// If request wasn't counted due to saturation, skip recording
+		if !requestCounted {
+			return result, err
+		}
 		// Call isSuccessful with panic recovery
 		success := false
 		safeCall(func() {
