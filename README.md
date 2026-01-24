@@ -6,6 +6,7 @@ Adaptive circuit breaker for Go with percentage-based thresholds that automatica
 [![Go Reference](https://pkg.go.dev/badge/github.com/vnykmshr/autobreaker.svg)](https://pkg.go.dev/github.com/vnykmshr/autobreaker)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vnykmshr/autobreaker)](https://goreportcard.com/report/github.com/vnykmshr/autobreaker)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-vnykmshr.github.io/autobreaker-blue)](https://vnykmshr.github.io/autobreaker/)
 
 ## Overview
 
@@ -59,9 +60,24 @@ func main() {
 }
 ```
 
-## Configuration
+## Documentation
 
-### Basic Settings
+**📚 Complete documentation available at: [vnykmshr.github.io/autobreaker/](https://vnykmshr.github.io/autobreaker/)**
+
+The documentation includes:
+- **Getting Started** - Installation, basic usage, configuration
+- **Guides** - Architecture, state machine, concurrency, error classification, performance, decision guide
+- **Migration** - From sony/gobreaker
+- **API Reference** - Complete API documentation
+- **Examples** - Production-ready code examples
+
+### Quick Links
+- [Getting Started Guide](https://vnykmshr.github.io/autobreaker/getting-started/)
+- [Configuration Guide](https://vnykmshr.github.io/autobreaker/getting-started/#configuration)
+- [API Reference](https://pkg.go.dev/github.com/vnykmshr/autobreaker)
+- [Examples](https://github.com/vnykmshr/autobreaker/tree/main/examples)
+
+## Basic Configuration
 
 ```go
 breaker := autobreaker.New(autobreaker.Settings{
@@ -72,64 +88,7 @@ breaker := autobreaker.New(autobreaker.Settings{
 
 Default behavior uses adaptive thresholds (5% failure rate, minimum 20 observations).
 
-### Advanced Configuration
-
-```go
-breaker := autobreaker.New(autobreaker.Settings{
-    Name:                 "service-name",
-    Timeout:              30 * time.Second,
-    MaxRequests:          3,     // Concurrent requests in half-open state
-    Interval:             60 * time.Second, // Stats reset interval
-
-    // Adaptive threshold settings
-    AdaptiveThreshold:    true,
-    FailureRateThreshold: 0.05,  // Trip at 5% error rate
-    MinimumObservations:  20,    // Minimum requests before evaluating
-
-    // Callbacks (must be fast: <1μs)
-    OnStateChange: func(name string, from, to autobreaker.State) {
-        go log.Printf("%s: %v → %v", name, from, to) // Async
-    },
-
-    IsSuccessful: func(err error) bool {
-        // Don't count 4xx client errors as failures
-        if httpErr, ok := err.(*HTTPError); ok {
-            return httpErr.Code >= 400 && httpErr.Code < 500
-        }
-        return err == nil
-    },
-})
-```
-
-### Runtime Updates
-
-```go
-err := breaker.UpdateSettings(autobreaker.SettingsUpdate{
-    FailureRateThreshold: autobreaker.Float64Ptr(0.10),
-    Timeout:              autobreaker.DurationPtr(15 * time.Second),
-})
-```
-
-## Observability
-
-### Metrics
-
-```go
-metrics := breaker.Metrics()
-fmt.Printf("State: %v, Requests: %d, Failure Rate: %.2f%%\n",
-    metrics.State, metrics.Requests, metrics.FailureRate*100)
-```
-
-### Diagnostics
-
-```go
-diag := breaker.Diagnostics()
-if diag.WillTripNext {
-    log.Warn("Circuit about to trip on next failure")
-}
-```
-
-See [examples/observability](examples/observability/) for Prometheus integration and monitoring patterns.
+For advanced configuration, runtime updates, and complete settings reference, see the [Configuration Guide](https://vnykmshr.github.io/autobreaker/getting-started/#configuration).
 
 ## How It Works
 
@@ -146,8 +105,6 @@ Same config, correct behavior at any traffic level.
 
 The implementation uses a three-state machine (Closed → Open → HalfOpen → Closed) with lock-free atomic operations for minimal overhead.
 
-**Architecture Details:** See [docs/TECHNICAL_BLOG.md](docs/TECHNICAL_BLOG.md) for design details with diagrams.
-
 ## Performance
 
 Benchmarks (Go 1.21, Apple M1):
@@ -158,7 +115,7 @@ Benchmarks (Go 1.21, Apple M1):
 | Execute (Open)     | 0.34 ns | 0 allocs    |
 | UpdateSettings()   | 89.2 ns | 0 allocs    |
 
-See [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for detailed performance analysis.
+See [Performance Guide](https://vnykmshr.github.io/autobreaker/guides/performance/) for detailed analysis.
 
 ## Examples
 
@@ -176,14 +133,6 @@ Run examples:
 go run examples/production_ready/main.go
 ```
 
-## Documentation
-
-- [Technical Blog](docs/TECHNICAL_BLOG.md) - Architecture deep-dive with diagrams
-- [State Machine](docs/STATE_MACHINE.md) - State transition specification
-- [Concurrency](docs/CONCURRENCY.md) - Lock-free implementation details
-- [Error Classification](docs/ERROR_CLASSIFICATION.md) - Custom error handling
-- [API Reference](https://pkg.go.dev/github.com/vnykmshr/autobreaker) - Full API documentation
-
 ## Important Notes
 
 **Callback Performance:** `ReadyToTrip`, `OnStateChange`, and `IsSuccessful` callbacks execute synchronously on every request. Keep them <1μs. Use goroutines for slow operations:
@@ -198,13 +147,13 @@ OnStateChange: func(name string, from, to State) {
 
 ## Status
 
-**Production-Ready** - v1.0.0
+**Production-Ready** - v1.1.1
 
 - 102 tests, 97.1% coverage, race detector clean
 - Zero dependencies, zero allocations in hot path
 - Compatible with Go 1.21+
 
-See [docs/ROADMAP_RFCS.md](docs/ROADMAP_RFCS.md) for future plans.
+See [Roadmap](https://vnykmshr.github.io/autobreaker/guides/roadmap/) for future plans.
 
 ## License
 

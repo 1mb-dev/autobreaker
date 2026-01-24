@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ADD8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#007D9C;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Circuit breaker symbol -->
+  <g transform="translate(10, 10)">
+    <!-- Switch base -->
+    <rect x="0" y="15" width="40" height="10" rx="2" fill="#e0e0e0"/>
+    
+    <!-- Switch handle (closed position) -->
+    <rect x="30" y="5" width="10" height="30" rx="2" fill="#00ADD8"/>
+    
+    <!-- Circuit lines -->
+    <path d="M 40 20 L 60 20" stroke="#00ADD8" stroke-width="3" fill="none"/>
+    <path d="M 60 20 L 60 40" stroke="#00ADD8" stroke-width="3" fill="none"/>
+    <path d="M 60 40 L 80 40" stroke="#00ADD8" stroke-width="3" fill="none"/>
+    
+    <!-- Break point (open circuit indicator) -->
+    <circle cx="70" cy="40" r="5" fill="#ff6b6b" stroke="#cc0000" stroke-width="1"/>
+    <line x1="67" y1="37" x2="73" y2="43" stroke="#ffffff" stroke-width="2"/>
+    <line x1="73" y1="37" x2="67" y2="43" stroke="#ffffff" stroke-width="2"/>
+  </g>
+  
+  <!-- AutoBreaker text -->
+  <text x="100" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="url(#gradient)">
+    AutoBreaker
+  </text>
+  
+  <!-- Tagline -->
+  <text x="100" y="55" font-family="Arial, sans-serif" font-size="12" fill="#666666">
+    Adaptive Circuit Breaker for Go
+  </text>
+</svg>

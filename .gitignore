@@ -21,6 +21,11 @@ coverage.html
 # Go workspace file
 go.work
 
+# Hugo build artifacts
+public/
+.hugo_build.lock
+resources/_gen/
+
 # IDE
 .idea/
 .vscode/

@@ -18,6 +18,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Thread-Safe Logging**: Mutex-protected logging prevents race conditions
 - **Production-Ready**: Always compiled (not behind `//go:build !production`)
 
+### Documentation Transformation
+
+#### New Documentation Site
+- **Professional Hugo Site**: Complete documentation at https://vnykmshr.github.io/autobreaker/
+- **Modern Architecture**: Static site with dark/light mode support, search, and Mermaid diagrams
+- **Comprehensive Guides**: 
+  - Getting Started with practical examples
+  - State Machine architecture with visual diagrams
+  - Concurrency patterns and best practices
+  - Error classification and handling strategies
+  - Performance benchmarks and optimization
+  - Roadmap and RFCs for future development
+- **Enhanced Navigation**: Logical content organization with API reference links to pkg.go.dev
+- **Mobile Responsive**: Optimized for all device sizes
+- **Lean Editorial**: Removed AI-generated bloat, focused on concrete value and actionable content
+
+#### Key Improvements
+- **Mermaid Integration**: Architecture diagrams for complex concepts
+- **Search Functionality**: Full-text search across all documentation
+- **Branding**: Professional logo and Go blue (#00ADD8) accent theme
+- **Quality Assurance**: Link checking, code compilation verification, performance testing
+- **CI/CD**: Automated deployment via GitHub Actions with PR validation
+
+#### Migration Notes
+- **Library Version**: Remains v1.1.1 (no code changes)
+- **All Existing Functionality**: Preserved and enhanced with better documentation
+- **API Reference**: Available at pkg.go.dev/github.com/vnykmshr/autobreaker
+- **Backward Compatibility**: All existing links and references maintained
+- **Contributor Documentation**: Complete guide for updating documentation
+
+**Note**: This is a documentation-only release. The library functionality remains unchanged at v1.1.1.
+
 #### Counter Saturation Observability
 - **Saturation Warnings**: Logs when counters reach `math.MaxUint32`
 - **Thread-Safe Operations**: CAS loops with saturation protection
