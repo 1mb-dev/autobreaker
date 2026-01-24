@@ -1,0 +1,186 @@
+baseURL = 'https://vnykmshr.github.io/autobreaker/'
+languageCode = 'en-us'
+title = 'AutoBreaker - Production-Ready Circuit Breaker for Go'
+theme = 'hugo-book'
+
+# SEO Configuration
+enableRobotsTXT = true
+enableGitInfo = true
+canonifyURLs = true
+
+# Enable Emoji support
+enableEmoji = true
+
+# Configure build
+buildFuture = false
+buildDrafts = false
+buildExpired = false
+
+# Configure output
+[outputs]
+home = ['HTML', 'RSS', 'JSON']
+
+# Markdown processing
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true  # Allow raw HTML in Markdown
+  [markup.highlight]
+    codeFences = true
+    guessSyntax = true
+    lineNos = true
+    style = 'monokai'
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 6
+
+# Hugo-book theme configuration
+[params]
+  # SEO Meta tags
+  description = 'AutoBreaker is a production-ready circuit breaker for Go with adaptive thresholds, runtime configuration, and comprehensive observability. Drop-in replacement for sony/gobreaker.'
+  keywords = ['golang', 'circuit-breaker', 'resiliency', 'microservices', 'go', 'autobreaker', 'fault-tolerance']
+  author = 'AutoBreaker Contributors'
+  generator = 'Hugo'
+  
+  # Open Graph
+  images = ['/logo.svg']
+  
+  # Twitter Cards
+  twitterCard = 'summary'
+  twitterSite = '@vnykmshr'
+  twitterCreator = '@vnykmshr'
+  
+  # Book theme options
+  BookTheme = 'auto'  # auto, dark, light
+  BookToC = true
+  BookSearch = true
+  BookComments = false
+  BookRepo = 'https://github.com/vnykmshr/autobreaker'
+  BookEditPath = 'edit/main/docs/content'
+  
+  # Custom logo
+  BookLogo = '/logo.svg'
+  
+  # Menu configuration
+  BookMenuBundle = '/menu'
+  
+  # Mermaid diagram support
+  BookMermaid = true
+  
+  # Additional features
+  BookPortableLinks = true
+  BookSectionPagesMenu = true
+  
+  # Custom styling
+  BookCustomCSS = ['custom.css']
+
+# Menu configuration
+[menu]
+  [[menu.main]]
+    name = 'Home'
+    url = '/'
+    weight = 1
+  
+  [[menu.main]]
+    name = 'Getting Started'
+    url = '/getting-started/'
+    weight = 2
+  
+  [[menu.main]]
+    name = 'Guides'
+    weight = 3
+    hasChildren = true
+  
+    [[menu.main]]
+      parent = 'Guides'
+      name = 'Building AutoBreaker'
+      url = '/guides/building-autobreaker/'
+      weight = 1
+    
+    [[menu.main]]
+      parent = 'Guides'
+      name = 'State Machine'
+      url = '/guides/state-machine/'
+      weight = 2
+    
+    [[menu.main]]
+      parent = 'Guides'
+      name = 'Concurrency'
+      url = '/guides/concurrency/'
+      weight = 3
+    
+    [[menu.main]]
+      parent = 'Guides'
+      name = 'Error Classification'
+      url = '/guides/error-classification/'
+      weight = 4
+    
+    [[menu.main]]
+      parent = 'Guides'
+      name = 'Performance'
+      url = '/guides/performance/'
+      weight = 5
+    
+    [[menu.main]]
+      parent = 'Guides'
+      name = 'Decision Guide'
+      url = '/guides/decision-guide/'
+      weight = 6
+    
+    [[menu.main]]
+      parent = 'Guides'
+      name = 'Migration'
+      url = '/migration/'
+      weight = 7
+  
+  [[menu.main]]
+    name = 'API Reference'
+    url = 'https://pkg.go.dev/github.com/vnykmshr/autobreaker'
+    weight = 4
+  
+  [[menu.main]]
+    name = 'Examples'
+    url = 'https://github.com/vnykmshr/autobreaker/tree/main/examples'
+    weight = 5
+  
+  [[menu.main]]
+    name = 'GitHub'
+    url = 'https://github.com/vnykmshr/autobreaker'
+    weight = 6
+  
+  [[menu.main]]
+    name = 'Contributing'
+    url = '/contributing/'
+    weight = 7
+  
+  [[menu.main]]
+    name = 'Security'
+    url = '/security/'
+    weight = 8
+  
+  [[menu.main]]
+    name = 'Changelog'
+    url = '/changelog/'
+    weight = 9
+
+# Services
+[services]
+  [services.googleAnalytics]
+    id = ''  # Add Google Analytics ID if desired
+
+# Privacy configuration
+[privacy]
+  [privacy.vimeo]
+    disabled = false
+    simple = true
+  
+  [privacy.twitter]
+    disabled = false
+  
+  [privacy.instagram]
+    disabled = false
+    simple = true
+  
+  [privacy.youtube]
+    disabled = false
+    privacyEnhanced = true

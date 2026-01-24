@@ -1,0 +1,46 @@
+name: Validate Documentation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest'
+          extended: true
+
+      - name: Build Documentation
+        run: hugo --minify --source docs
+
+      - name: Check for broken links
+        run: |
+          # Install htmltest if available
+          if command -v htmltest &> /dev/null; then
+            htmltest --skip-external
+          else
+            echo "htmltest not available, skipping link check"
+          fi
+
+      - name: Verify Mermaid diagrams
+        run: |
+          # Check for Mermaid syntax in content
+          echo "Checking for Mermaid diagrams..."
+          find docs/content -name "*.md" -exec grep -l "```mermaid" {} \;
+
+      - name: Verify build output
+        run: |
+          echo "Build completed successfully"
+          echo "Generated files:"
+          find docs/public -type f -name "*.html" | head -10

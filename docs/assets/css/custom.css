@@ -1,0 +1,87 @@
+/* AutoBreaker Custom Styles */
+
+/* Go blue accent color */
+:root {
+  --primary: #00ADD8;
+  --primary-dark: #0099c3;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] {
+  --primary: #00ADD8;
+  --primary-dark: #33c5e8;
+}
+
+/* Custom logo styling */
+.book-brand img {
+  height: 2rem;
+}
+
+/* Code block styling */
+.book-page pre code {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Improve readability for Go code */
+.language-go .hljs-keyword {
+  color: #00ADD8;
+}
+
+.language-go .hljs-type {
+  color: #6f42c1;
+}
+
+.language-go .hljs-built_in {
+  color: #e36209;
+}
+
+/* Mermaid diagram styling */
+.mermaid {
+  background-color: transparent !important;
+  margin: 1.5rem 0;
+}
+
+/* Navigation improvements */
+.book-menu {
+  font-size: 0.95rem;
+}
+
+.book-menu a.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* External link indicator */
+.book-menu a[href^="http"]:not([href*="vnykmshr.github.io"]):after {
+  content: " ↗";
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .book-page {
+    padding: 1rem;
+  }
+  
+  .book-header {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .book-menu,
+  .book-toc,
+  .book-header,
+  .book-footer {
+    display: none;
+  }
+  
+  .book-page {
+    margin: 0;
+    padding: 0;
+  }
+}

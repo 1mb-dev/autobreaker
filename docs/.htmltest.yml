@@ -1,0 +1,47 @@
+# htmltest configuration for AutoBreaker documentation
+DirectoryPath: "public"
+CheckDoctype: true
+CheckAnchors: true
+CheckImages: true
+CheckLinks: true
+CheckScripts: true
+CheckMeta: true
+
+IgnoreURLs:
+  - ^https://pkg.go.dev/github.com/vnykmshr/autobreaker
+  - ^https://github.com/vnykmshr/autobreaker
+  - ^https://github.com/sony/gobreaker
+  - ^https://img.shields.io
+  - ^https://opensource.org/licenses/MIT
+  - ^mailto:
+
+IgnoreDirs:
+  - node_modules
+  - .git
+  - .github
+
+IgnoreFiles:
+  - CNAME
+  - .nojekyll
+
+IgnorePatterns:
+  - "*.min.js"
+  - "*.min.css"
+
+EnforceHTTPS: false
+IgnoreInternalEmptyHash: true
+Timeout: 10s
+IgnoreAltMissing: false
+OnlySameDomain: false
+SkipExternalLinks: false
+SkipInternalLinks: false
+SkipFileLinks: false
+
+HTTPHeaders:
+  User-Agent: "htmltest/0.17.0"
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+
+CacheExpires: "24h"
+OutputPath: "htmltest.log"
+OutputVerbose: true
+OutputColor: true
