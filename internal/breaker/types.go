@@ -261,6 +261,10 @@ type Settings struct {
 	//   - HalfOpen → Closed: Probe requests succeeded, circuit has recovered
 	//   - HalfOpen → Open: Probe requests failed, backend still unhealthy
 	//
+	// Important: This callback is invoked AFTER counts are cleared. If you need
+	// pre-transition counts (e.g., to log "tripped after N failures"), capture
+	// them in your ReadyToTrip callback instead, which runs before the transition.
+	//
 	// Thread-Safety: This callback must be thread-safe. It may be called concurrently
 	// from multiple goroutines during state transitions.
 	//

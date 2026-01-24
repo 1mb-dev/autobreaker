@@ -44,10 +44,14 @@ func (cb *CircuitBreaker) checkAndTripCircuit() {
 	cb.openedAt.Store(now)
 	cb.stateChangedAt.Store(now)
 
+	// Defensive reset: ensure halfOpenRequests is 0 when entering Open from Closed
+	cb.halfOpenRequests.Store(0)
+
 	// Clear counts
 	cb.clearCounts()
 
 	// Call state change callback if configured with panic recovery
+	// Note: Callback sees zero counts (clearCounts called before callback)
 	safeCallOnStateChange(cb.name, cb.onStateChange, StateClosed, StateOpen)
 }
 
@@ -95,6 +99,10 @@ func (cb *CircuitBreaker) transitionToClosed() {
 	now := time.Now().UnixNano()
 	cb.stateChangedAt.Store(now)
 
+	// Clear openedAt timestamp (circuit is no longer open)
+	// This ensures clean state and prevents stale timestamp issues
+	cb.openedAt.Store(0)
+
 	// Clear counts
 	cb.clearCounts()
 
@@ -102,6 +110,7 @@ func (cb *CircuitBreaker) transitionToClosed() {
 	cb.lastClearedAt.Store(now)
 
 	// Call state change callback if configured with panic recovery
+	// Note: Callback sees zero counts (clearCounts called before callback)
 	safeCallOnStateChange(cb.name, cb.onStateChange, StateHalfOpen, StateClosed)
 }
 
@@ -118,9 +127,13 @@ func (cb *CircuitBreaker) transitionBackToOpen() {
 	cb.openedAt.Store(now)
 	cb.stateChangedAt.Store(now)
 
+	// Defensive reset: ensure halfOpenRequests is 0 when re-entering Open
+	cb.halfOpenRequests.Store(0)
+
 	// Clear counts
 	cb.clearCounts()
 
 	// Call state change callback if configured with panic recovery
+	// Note: Callback sees zero counts (clearCounts called before callback)
 	safeCallOnStateChange(cb.name, cb.onStateChange, StateHalfOpen, StateOpen)
 }

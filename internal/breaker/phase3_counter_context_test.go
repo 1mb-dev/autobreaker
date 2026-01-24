@@ -25,18 +25,29 @@ func TestPhase3_CounterSaturation(t *testing.T) {
 	// Test safeIncrementCounter helper directly
 	t.Run("safeIncrementCounter_saturation", func(t *testing.T) {
 		var counter atomic.Uint32
+		var saturatedFlag atomic.Bool
 
 		// Set counter to max
 		counter.Store(math.MaxUint32)
 
 		// Try to increment - should return false (already at max)
-		if safeIncrementCounter(&counter, "test_counter", "test-circuit") {
+		if safeIncrementCounter(&counter, &saturatedFlag, "test_counter", "test-circuit") {
 			t.Error("safeIncrementCounter should return false when counter is at max")
 		}
 
 		// Counter should still be at max
 		if counter.Load() != math.MaxUint32 {
 			t.Errorf("Counter should remain at max, got %v", counter.Load())
+		}
+
+		// Saturation flag should be set
+		if !saturatedFlag.Load() {
+			t.Error("Saturation flag should be set after saturation")
+		}
+
+		// Second call should NOT log (flag already set)
+		if safeIncrementCounter(&counter, &saturatedFlag, "test_counter", "test-circuit") {
+			t.Error("safeIncrementCounter should still return false")
 		}
 	})
 
@@ -164,9 +175,11 @@ func TestPhase3_ContextCancellationCounting(t *testing.T) {
 		}
 
 		finalCounts := cb.Counts()
-		// Request should be counted (it was attempted) but not as success/failure
-		if finalCounts.Requests != initialCounts.Requests+1 {
-			t.Errorf("Request should be counted when canceled during execution: before=%v, after=%v (expected +1)",
+		// Context-canceled requests should NOT be counted to maintain invariant:
+		// Requests == TotalSuccesses + TotalFailures
+		// The request count is decremented when context is canceled.
+		if finalCounts.Requests != initialCounts.Requests {
+			t.Errorf("Request count should be unchanged after context cancellation: before=%v, after=%v",
 				initialCounts.Requests, finalCounts.Requests)
 		}
 		// Success/failure counts should not change

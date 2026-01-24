@@ -111,10 +111,12 @@ func TestExecuteContext_CanceledDuringExecution(t *testing.T) {
 		t.Error("Request should have started execution")
 	}
 
-	// Should count as a request but NOT as success or failure
+	// Context-canceled requests should NOT be counted to maintain invariant:
+	// Requests == TotalSuccesses + TotalFailures
+	// This is correct because the request was not fully processed.
 	counts := cb.Counts()
-	if counts.Requests != 1 {
-		t.Errorf("Expected 1 request, got %d", counts.Requests)
+	if counts.Requests != 0 {
+		t.Errorf("Expected 0 requests (canceled), got %d", counts.Requests)
 	}
 	if counts.TotalSuccesses != 0 {
 		t.Errorf("Expected 0 successes, got %d", counts.TotalSuccesses)
@@ -382,10 +384,11 @@ func TestExecuteContext_TimeoutDuringExecution(t *testing.T) {
 		t.Errorf("Expected nil result, got %v", result)
 	}
 
-	// Should count as request but not as success/failure
+	// Context-timed-out requests should NOT be counted to maintain invariant:
+	// Requests == TotalSuccesses + TotalFailures
 	counts := cb.Counts()
-	if counts.Requests != 1 {
-		t.Errorf("Expected 1 request, got %d", counts.Requests)
+	if counts.Requests != 0 {
+		t.Errorf("Expected 0 requests (timed out), got %d", counts.Requests)
 	}
 	if counts.TotalSuccesses != 0 {
 		t.Errorf("Expected 0 successes, got %d", counts.TotalSuccesses)

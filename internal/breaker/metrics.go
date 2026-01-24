@@ -46,6 +46,12 @@ type Metrics struct {
 	// CountsLastClearedAt is the timestamp when counts were last reset.
 	// This happens on state transitions or interval-based clearing.
 	CountsLastClearedAt time.Time
+
+	// Saturated indicates if any counter has reached its maximum value (math.MaxUint32).
+	// When true, statistics (failure rate, counts) may be inaccurate.
+	// Counters saturate to prevent undefined overflow behavior.
+	// Saturation resets when counts are cleared (state transitions or interval reset).
+	Saturated bool
 }
 
 // Metrics returns a snapshot of current circuit breaker metrics.
@@ -101,6 +107,11 @@ func (cb *CircuitBreaker) Metrics() Metrics {
 		countsLastClearedAt = time.Unix(0, ts)
 	}
 
+	// Check if any counter is saturated
+	saturated := cb.requestsSaturated.Load() ||
+		cb.totalSuccessesSaturated.Load() ||
+		cb.totalFailuresSaturated.Load()
+
 	return Metrics{
 		State:               state,
 		Counts:              counts,
@@ -108,5 +119,6 @@ func (cb *CircuitBreaker) Metrics() Metrics {
 		SuccessRate:         successRate,
 		StateChangedAt:      stateChangedAt,
 		CountsLastClearedAt: countsLastClearedAt,
+		Saturated:           saturated,
 	}
 }

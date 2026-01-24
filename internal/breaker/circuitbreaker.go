@@ -103,6 +103,13 @@ type CircuitBreaker struct {
 	openedAt       atomic.Int64
 	lastClearedAt  atomic.Int64
 	stateChangedAt atomic.Int64
+
+	// Saturation flags (atomic) - used for log-once behavior
+	// When a counter saturates at math.MaxUint32, the flag is set to true
+	// and only one warning is logged. Flags reset when counts are cleared.
+	requestsSaturated       atomic.Bool
+	totalSuccessesSaturated atomic.Bool
+	totalFailuresSaturated  atomic.Bool
 }
 
 // New creates a new circuit breaker with the given settings.
@@ -685,8 +692,11 @@ func (cb *CircuitBreaker) ExecuteContext(ctx context.Context, req func() (interf
 	// Check context after execution
 	if ctxErr := ctx.Err(); ctxErr != nil {
 		// Context was canceled/expired during execution
-		// Return context error WITHOUT counting as success or failure
-		// Rationale: Cancellation is client-initiated, not a backend health issue
+		// Undo request count to maintain invariant: Requests == TotalSuccesses + TotalFailures
+		// We don't record outcome for canceled requests (not a backend health indicator)
+		if requestCounted {
+			cb.safeDecrementRequests()
+		}
 		return nil, ctxErr
 	}
 

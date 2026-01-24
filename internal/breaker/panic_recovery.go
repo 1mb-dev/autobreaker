@@ -122,15 +122,17 @@ func safeCallIsSuccessful(circuitName string, fn func(error) bool, err error) bo
 
 // safeIncrementCounter safely increments a uint32 counter with saturation protection.
 // Returns true if the counter was incremented, false if it was already at max.
-// Logs a warning when saturation occurs.
-func safeIncrementCounter(counter *atomic.Uint32, counterName, circuitName string) bool {
+// Logs a warning only once per saturation event (uses saturatedFlag to track).
+func safeIncrementCounter(counter *atomic.Uint32, saturatedFlag *atomic.Bool, counterName, circuitName string) bool {
 	// Use CompareAndSwap loop for atomic check-and-increment
 	for {
 		current := counter.Load()
 		if current == math.MaxUint32 {
 			// Already at max, cannot increment
-			// Log saturation warning
-			logCounterSaturation(counterName, circuitName, current)
+			// Log saturation warning only once (when flag transitions false -> true)
+			if saturatedFlag != nil && saturatedFlag.CompareAndSwap(false, true) {
+				logCounterSaturation(counterName, circuitName, current)
+			}
 			return false
 		}
 		if counter.CompareAndSwap(current, current+1) {
@@ -143,7 +145,7 @@ func safeIncrementCounter(counter *atomic.Uint32, counterName, circuitName strin
 // safeIncrementRequests safely increments the requests counter with saturation protection.
 // Returns true if the counter was incremented, false if it was already at max (saturated).
 func (cb *CircuitBreaker) safeIncrementRequests() bool {
-	return safeIncrementCounter(&cb.requests, "requests", cb.name)
+	return safeIncrementCounter(&cb.requests, &cb.requestsSaturated, "requests", cb.name)
 }
 
 // safeDecrementRequests safely decrements the requests counter with underflow protection.

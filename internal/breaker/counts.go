@@ -21,13 +21,18 @@ func (cb *CircuitBreaker) maybeResetCounts() {
 	}
 }
 
-// clearCounts resets all counters to zero.
+// clearCounts resets all counters to zero and clears saturation flags.
 func (cb *CircuitBreaker) clearCounts() {
 	cb.requests.Store(0)
 	cb.totalSuccesses.Store(0)
 	cb.totalFailures.Store(0)
 	cb.consecutiveSuccesses.Store(0)
 	cb.consecutiveFailures.Store(0)
+
+	// Reset saturation flags so warnings can be logged again after counts are cleared
+	cb.requestsSaturated.Store(false)
+	cb.totalSuccessesSaturated.Store(false)
+	cb.totalFailuresSaturated.Store(false)
 }
 
 // recordOutcome updates counts based on request outcome.
@@ -44,13 +49,13 @@ func (cb *CircuitBreaker) clearCounts() {
 func (cb *CircuitBreaker) recordOutcome(success bool) {
 	if success {
 		// Safe increment with saturation protection for totalSuccesses
-		safeIncrementCounter(&cb.totalSuccesses, "totalSuccesses", cb.name)
+		safeIncrementCounter(&cb.totalSuccesses, &cb.totalSuccessesSaturated, "totalSuccesses", cb.name)
 		// ConsecutiveSuccesses can safely overflow as it resets on failure
 		cb.consecutiveSuccesses.Add(1)
 		cb.consecutiveFailures.Store(0)
 	} else {
 		// Safe increment with saturation protection for totalFailures
-		safeIncrementCounter(&cb.totalFailures, "totalFailures", cb.name)
+		safeIncrementCounter(&cb.totalFailures, &cb.totalFailuresSaturated, "totalFailures", cb.name)
 		// ConsecutiveFailures can safely overflow as it resets on success
 		cb.consecutiveFailures.Add(1)
 		cb.consecutiveSuccesses.Store(0)

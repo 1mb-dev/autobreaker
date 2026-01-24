@@ -239,15 +239,19 @@ func TestStress_MixedReadWrite(t *testing.T) {
 	}
 }
 
-// TestStress_LongRunning validates stability over extended duration (1 hour in CI, 5 minutes in normal tests).
+// TestStress_LongRunning validates stability over extended duration.
+// Default: 30 seconds (safe with race detector)
+// Verbose mode (-v): 5 minutes (thorough testing)
 func TestStress_LongRunning(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping stress test in short mode")
 	}
 
-	duration := 5 * time.Minute
+	// Default to 30 seconds - safe even with race detector overhead
+	duration := 30 * time.Second
 	if testing.Verbose() {
-		duration = 1 * time.Hour
+		// Extended duration for thorough testing (run with -v flag)
+		duration = 5 * time.Minute
 	}
 
 	cb := New(Settings{
