@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/1mb-dev/autobreaker"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/1mb-dev/autobreaker"
 )
 
 // CircuitBreakerCollector collects circuit breaker metrics for Prometheus.
