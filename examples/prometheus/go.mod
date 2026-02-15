@@ -5,8 +5,8 @@ go 1.21
 replace github.com/vnykmshr/autobreaker => ../..
 
 require (
+	github.com/1mb-dev/autobreaker v1.1.2
 	github.com/prometheus/client_golang v1.19.0
-	github.com/vnykmshr/autobreaker v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -16,5 +16,5 @@ require (
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 )
