@@ -1,3 +1,3 @@
 module github.com/1mb-dev/autobreaker
 
-go 1.21
+go 1.24
