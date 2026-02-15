@@ -54,7 +54,7 @@
 }
 
 /* External link indicator */
-.book-menu a[href^="http"]:not([href*="vnykmshr.github.io"]):after {
+.book-menu a[href^="http"]:not([href*="1mb-dev.github.io"]):after {
   content: " ↗";
   font-size: 0.8em;
   opacity: 0.7;

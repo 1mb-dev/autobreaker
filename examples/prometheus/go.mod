@@ -1,8 +1,8 @@
-module github.com/vnykmshr/autobreaker/examples/prometheus
+module github.com/1mb-dev/autobreaker/examples/prometheus
 
 go 1.21
 
-replace github.com/vnykmshr/autobreaker => ../..
+replace github.com/1mb-dev/autobreaker => ../..
 
 require (
 	github.com/1mb-dev/autobreaker v1.1.2
