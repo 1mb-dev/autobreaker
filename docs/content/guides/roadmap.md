@@ -35,7 +35,7 @@ Users must write their own middleware wrappers for HTTP/gRPC integration.
 Add optional `middleware` sub-package:
 
 ```go
-import "github.com/vnykmshr/autobreaker/middleware"
+import "github.com/1mb-dev/autobreaker/middleware"
 
 // HTTP Server
 handler := middleware.HTTPHandler(breaker, yourHandler)
@@ -54,7 +54,7 @@ client := &http.Client{
 ## How to Contribute
 
 ### 1. Create GitHub Issues
-Go to [GitHub Issues](https://github.com/vnykmshr/autobreaker/issues) and use the RFC templates.
+Go to [GitHub Issues](https://github.com/1mb-dev/autobreaker/issues) and use the RFC templates.
 
 ### 2. Provide Use Cases
 - Describe your specific scenario
@@ -99,4 +99,4 @@ AutoBreaker follows [Semantic Versioning](https://semver.org/):
 
 ## Links
 
-- **GitHub Issues**: [https://github.com/vnykmshr/autobreaker/issues](https://github.com/vnykmshr/autobreaker/issues)
+- **GitHub Issues**: [https://github.com/1mb-dev/autobreaker/issues](https://github.com/1mb-dev/autobreaker/issues)

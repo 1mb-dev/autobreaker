@@ -263,7 +263,7 @@ Before deploying AutoBreaker:
 If you're unsure about configuration decisions:
 
 1. **Start with Examples**: Run `examples/production_ready/` to see various scenarios
-2. **Use Community**: Check [GitHub Issues](https://github.com/vnykmshr/autobreaker/issues) for similar use cases
+2. **Use Community**: Check [GitHub Issues](https://github.com/1mb-dev/autobreaker/issues) for similar use cases
 3. **Monitor Closely**: Deploy with aggressive monitoring for first week
 4. **Iterate**: Adjust based on real metrics, not assumptions
 

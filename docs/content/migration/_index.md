@@ -20,7 +20,7 @@ breaker := gobreaker.NewCircuitBreaker(gobreaker.Settings{
 })
 
 // After (AutoBreaker)
-import "github.com/vnykmshr/autobreaker"
+import "github.com/1mb-dev/autobreaker"
 
 breaker := autobreaker.New(autobreaker.Settings{
     Name: "service-name",
@@ -108,7 +108,7 @@ settings := gobreaker.Settings{
 breaker := gobreaker.NewCircuitBreaker(settings)
 
 // After: AutoBreaker
-import "github.com/vnykmshr/autobreaker"
+import "github.com/1mb-dev/autobreaker"
 
 settings := autobreaker.Settings{
     Name:          "api-client",
@@ -137,5 +137,5 @@ breaker := autobreaker.New(settings)
 
 ## Need Help?
 
-- **GitHub Issues**: [https://github.com/vnykmshr/autobreaker/issues](https://github.com/vnykmshr/autobreaker/issues)
-- **Examples**: See [examples/](https://github.com/vnykmshr/autobreaker/tree/main/examples)
+- **GitHub Issues**: [https://github.com/1mb-dev/autobreaker/issues](https://github.com/1mb-dev/autobreaker/issues)
+- **Examples**: See [examples/](https://github.com/1mb-dev/autobreaker/tree/main/examples)

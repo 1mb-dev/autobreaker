@@ -1,4 +1,4 @@
-baseURL = 'https://vnykmshr.github.io/autobreaker/'
+baseURL = 'https://1mb-dev.github.io/autobreaker/'
 languageCode = 'en-us'
 title = 'AutoBreaker - Production-Ready Circuit Breaker for Go'
 theme = 'hugo-book'
@@ -47,15 +47,15 @@ home = ['HTML', 'RSS', 'JSON']
   
   # Twitter Cards
   twitterCard = 'summary'
-  twitterSite = '@vnykmshr'
-  twitterCreator = '@vnykmshr'
+  twitterSite = '@1mb-dev'
+  twitterCreator = '@1mb-dev'
   
   # Book theme options
   BookTheme = 'auto'  # auto, dark, light
   BookToC = true
   BookSearch = true
   BookComments = false
-  BookRepo = 'https://github.com/vnykmshr/autobreaker'
+  BookRepo = 'https://github.com/1mb-dev/autobreaker'
   BookEditPath = 'edit/main/docs/content'
   
   # Custom logo
@@ -135,17 +135,17 @@ home = ['HTML', 'RSS', 'JSON']
   
   [[menu.main]]
     name = 'API Reference'
-    url = 'https://pkg.go.dev/github.com/vnykmshr/autobreaker'
+    url = 'https://pkg.go.dev/github.com/1mb-dev/autobreaker'
     weight = 4
   
   [[menu.main]]
     name = 'Examples'
-    url = 'https://github.com/vnykmshr/autobreaker/tree/main/examples'
+    url = 'https://github.com/1mb-dev/autobreaker/tree/main/examples'
     weight = 5
   
   [[menu.main]]
     name = 'GitHub'
-    url = 'https://github.com/vnykmshr/autobreaker'
+    url = 'https://github.com/1mb-dev/autobreaker'
     weight = 6
   
   [[menu.main]]

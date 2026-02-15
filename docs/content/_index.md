@@ -7,9 +7,9 @@ weight: 1
 
 Adaptive circuit breaker for Go with percentage-based thresholds that automatically adjust to traffic patterns.
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/vnykmshr/autobreaker.svg)](https://pkg.go.dev/github.com/vnykmshr/autobreaker)
-[![CI](https://github.com/vnykmshr/autobreaker/workflows/CI/badge.svg)](https://github.com/vnykmshr/autobreaker/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/vnykmshr/autobreaker)](https://goreportcard.com/report/github.com/vnykmshr/autobreaker)
+[![Go Reference](https://pkg.go.dev/badge/github.com/1mb-dev/autobreaker.svg)](https://pkg.go.dev/github.com/1mb-dev/autobreaker)
+[![CI](https://github.com/1mb-dev/autobreaker/workflows/CI/badge.svg)](https://github.com/1mb-dev/autobreaker/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/1mb-dev/autobreaker)](https://goreportcard.com/report/github.com/1mb-dev/autobreaker)
 
 ## Why AutoBreaker?
 
@@ -20,7 +20,7 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 ## Quick Start
 
 ```bash
-go get github.com/vnykmshr/autobreaker
+go get github.com/1mb-dev/autobreaker
 ```
 
 ```go
@@ -29,7 +29,7 @@ package main
 import (
     "fmt"
     "time"
-    "github.com/vnykmshr/autobreaker"
+    "github.com/1mb-dev/autobreaker"
 )
 
 func main() {
@@ -76,8 +76,8 @@ func main() {
 - [Migration](/migration/) - From sony/gobreaker
 
 ### Reference
-- [API Reference](https://pkg.go.dev/github.com/vnykmshr/autobreaker) - Complete API documentation
-- [Examples](https://github.com/vnykmshr/autobreaker/tree/main/examples) - Production-ready examples
+- [API Reference](https://pkg.go.dev/github.com/1mb-dev/autobreaker) - Complete API documentation
+- [Examples](https://github.com/1mb-dev/autobreaker/tree/main/examples) - Production-ready examples
 - [Contributing](/contributing/) - How to contribute
 - [Security](/security/) - Security policy
 - [Changelog](/changelog/) - Release history
@@ -96,7 +96,7 @@ See [Performance Guide](/guides/performance/) for detailed analysis.
 
 ## Examples
 
-Production-ready examples in the [`examples/`](https://github.com/vnykmshr/autobreaker/tree/main/examples) directory:
+Production-ready examples in the [`examples/`](https://github.com/1mb-dev/autobreaker/tree/main/examples) directory:
 
 - **production_ready** - HTTP client integration, recommended starting point
 - **runtime_config** - Dynamic configuration updates (file, API, signals)
@@ -107,7 +107,7 @@ Production-ready examples in the [`examples/`](https://github.com/vnykmshr/autob
 
 ## License
 
-MIT License - see [LICENSE](https://github.com/vnykmshr/autobreaker/blob/main/LICENSE) file.
+MIT License - see [LICENSE](https://github.com/1mb-dev/autobreaker/blob/main/LICENSE) file.
 
 ## Contributing
 

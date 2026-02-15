@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vnykmshr/autobreaker"
+	"github.com/1mb-dev/autobreaker"
 )
 
 // Simulate different environments with varying traffic levels

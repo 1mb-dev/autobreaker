@@ -280,4 +280,4 @@ The design prioritizes:
 3. **Observability**: Built-in metrics and diagnostics
 4. **Operability**: Runtime configuration, sensible defaults
 
-For implementation details, see the [source code](https://github.com/vnykmshr/autobreaker) and [API reference](https://pkg.go.dev/github.com/vnykmshr/autobreaker).
+For implementation details, see the [source code](https://github.com/1mb-dev/autobreaker) and [API reference](https://pkg.go.dev/github.com/1mb-dev/autobreaker).

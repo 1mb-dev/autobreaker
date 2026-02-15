@@ -2,7 +2,7 @@
 
 This directory contains the source for the AutoBreaker documentation site, built with [Hugo](https://gohugo.io/) and the [hugo-book](https://github.com/alex-shpak/hugo-book) theme.
 
-The site is deployed to GitHub Pages at: https://vnykmshr.github.io/autobreaker/
+The site is deployed to GitHub Pages at: https://1mb-dev.github.io/autobreaker/
 
 ## Quick Start
 
@@ -120,8 +120,8 @@ graph TD;
 ### Links
 
 - [Internal link](/guides/state-machine/)
-- [External link](https://pkg.go.dev/github.com/vnykmshr/autobreaker)
-- [API Reference](https://pkg.go.dev/github.com/vnykmshr/autobreaker){target="_blank"}
+- [External link](https://pkg.go.dev/github.com/1mb-dev/autobreaker)
+- [API Reference](https://pkg.go.dev/github.com/1mb-dev/autobreaker){target="_blank"}
 
 ### Images
 
@@ -210,7 +210,7 @@ import (
     "fmt"
     "time"
     
-    "github.com/vnykmshr/autobreaker"
+    "github.com/1mb-dev/autobreaker"
 )
 
 func main() {
@@ -248,7 +248,7 @@ Navigation is configured in `hugo.toml`:
 
 [[menu.main]]
   name = 'API Reference'
-  url = 'https://pkg.go.dev/github.com/vnykmshr/autobreaker'
+  url = 'https://pkg.go.dev/github.com/1mb-dev/autobreaker'
   weight = 4
 ```
 

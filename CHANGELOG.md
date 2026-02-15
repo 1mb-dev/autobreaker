@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation Transformation
 
 #### New Documentation Site
-- **Professional Hugo Site**: Complete documentation at https://vnykmshr.github.io/autobreaker/
+- **Professional Hugo Site**: Complete documentation at https://1mb-dev.github.io/autobreaker/
 - **Modern Architecture**: Static site with dark/light mode support, search, and Mermaid diagrams
 - **Comprehensive Guides**: 
   - Getting Started with practical examples
@@ -44,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Migration Notes
 - **Library Version**: Remains v1.1.1 (no code changes)
 - **All Existing Functionality**: Preserved and enhanced with better documentation
-- **API Reference**: Available at pkg.go.dev/github.com/vnykmshr/autobreaker
+- **API Reference**: Available at pkg.go.dev/github.com/1mb-dev/autobreaker
 - **Backward Compatibility**: All existing links and references maintained
 - **Contributor Documentation**: Complete guide for updating documentation
 
@@ -342,6 +342,6 @@ We are committed to long-term v1.x stability for production use.
 
 ---
 
-[1.1.1]: https://github.com/vnykmshr/autobreaker/releases/tag/v1.1.1
-[1.1.0]: https://github.com/vnykmshr/autobreaker/releases/tag/v1.1.0
-[1.0.0]: https://github.com/vnykmshr/autobreaker/releases/tag/v1.0.0
+[1.1.1]: https://github.com/1mb-dev/autobreaker/releases/tag/v1.1.1
+[1.1.0]: https://github.com/1mb-dev/autobreaker/releases/tag/v1.1.0
+[1.0.0]: https://github.com/1mb-dev/autobreaker/releases/tag/v1.0.0

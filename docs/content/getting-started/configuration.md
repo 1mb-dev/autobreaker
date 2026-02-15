@@ -94,4 +94,4 @@ OnStateChange: func(name string, from, to State) {
 2. **Set reasonable timeouts** - Match your service's typical recovery time
 3. **Monitor failure rates** - Adjust thresholds based on observed behavior
 4. **Use async callbacks** - Keep the hot path fast
-5. **Test with examples** - See [examples](https://github.com/vnykmshr/autobreaker/tree/main/examples) for production patterns
+5. **Test with examples** - See [examples](https://github.com/1mb-dev/autobreaker/tree/main/examples) for production patterns

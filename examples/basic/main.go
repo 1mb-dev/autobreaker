@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/vnykmshr/autobreaker"
+	"github.com/1mb-dev/autobreaker"
 )
 
 func main() {

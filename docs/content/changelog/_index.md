@@ -59,5 +59,5 @@ See [Migration Guide](/migration/) for details.
 
 ## Links
 
-- **GitHub Releases**: [https://github.com/vnykmshr/autobreaker/releases](https://github.com/vnykmshr/autobreaker/releases)
-- **Full CHANGELOG**: [CHANGELOG.md](https://github.com/vnykmshr/autobreaker/blob/main/CHANGELOG.md)
+- **GitHub Releases**: [https://github.com/1mb-dev/autobreaker/releases](https://github.com/1mb-dev/autobreaker/releases)
+- **Full CHANGELOG**: [CHANGELOG.md](https://github.com/1mb-dev/autobreaker/blob/main/CHANGELOG.md)

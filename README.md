@@ -2,11 +2,11 @@
 
 Adaptive circuit breaker for Go with percentage-based thresholds that automatically adjust to traffic patterns.
 
-[![CI](https://github.com/vnykmshr/autobreaker/workflows/CI/badge.svg)](https://github.com/vnykmshr/autobreaker/actions)
-[![Go Reference](https://pkg.go.dev/badge/github.com/vnykmshr/autobreaker.svg)](https://pkg.go.dev/github.com/vnykmshr/autobreaker)
-[![Go Report Card](https://goreportcard.com/badge/github.com/vnykmshr/autobreaker)](https://goreportcard.com/report/github.com/vnykmshr/autobreaker)
+[![CI](https://github.com/1mb-dev/autobreaker/workflows/CI/badge.svg)](https://github.com/1mb-dev/autobreaker/actions)
+[![Go Reference](https://pkg.go.dev/badge/github.com/1mb-dev/autobreaker.svg)](https://pkg.go.dev/github.com/1mb-dev/autobreaker)
+[![Go Report Card](https://goreportcard.com/badge/github.com/1mb-dev/autobreaker)](https://goreportcard.com/report/github.com/1mb-dev/autobreaker)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-vnykmshr.github.io/autobreaker-blue)](https://vnykmshr.github.io/autobreaker/)
+[![Documentation](https://img.shields.io/badge/docs-1mb-dev.github.io/autobreaker-blue)](https://1mb-dev.github.io/autobreaker/)
 
 ## Overview
 
@@ -25,7 +25,7 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 ## Installation
 
 ```bash
-go get github.com/vnykmshr/autobreaker
+go get github.com/1mb-dev/autobreaker
 ```
 
 Requires Go 1.21 or later.
@@ -38,7 +38,7 @@ package main
 import (
     "fmt"
     "time"
-    "github.com/vnykmshr/autobreaker"
+    "github.com/1mb-dev/autobreaker"
 )
 
 func main() {
@@ -62,7 +62,7 @@ func main() {
 
 ## Documentation
 
-**📚 Complete documentation available at: [vnykmshr.github.io/autobreaker/](https://vnykmshr.github.io/autobreaker/)**
+**📚 Complete documentation available at: [1mb-dev.github.io/autobreaker/](https://1mb-dev.github.io/autobreaker/)**
 
 The documentation includes:
 - **Getting Started** - Installation, basic usage, configuration
@@ -72,10 +72,10 @@ The documentation includes:
 - **Examples** - Production-ready code examples
 
 ### Quick Links
-- [Getting Started Guide](https://vnykmshr.github.io/autobreaker/getting-started/)
-- [Configuration Guide](https://vnykmshr.github.io/autobreaker/getting-started/#configuration)
-- [API Reference](https://pkg.go.dev/github.com/vnykmshr/autobreaker)
-- [Examples](https://github.com/vnykmshr/autobreaker/tree/main/examples)
+- [Getting Started Guide](https://1mb-dev.github.io/autobreaker/getting-started/)
+- [Configuration Guide](https://1mb-dev.github.io/autobreaker/getting-started/#configuration)
+- [API Reference](https://pkg.go.dev/github.com/1mb-dev/autobreaker)
+- [Examples](https://github.com/1mb-dev/autobreaker/tree/main/examples)
 
 ## Basic Configuration
 
@@ -88,7 +88,7 @@ breaker := autobreaker.New(autobreaker.Settings{
 
 Default behavior uses adaptive thresholds (5% failure rate, minimum 20 observations).
 
-For advanced configuration, runtime updates, and complete settings reference, see the [Configuration Guide](https://vnykmshr.github.io/autobreaker/getting-started/#configuration).
+For advanced configuration, runtime updates, and complete settings reference, see the [Configuration Guide](https://1mb-dev.github.io/autobreaker/getting-started/#configuration).
 
 ## How It Works
 
@@ -115,7 +115,7 @@ Benchmarks (Go 1.21, Apple M1):
 | Execute (Open)     | 0.34 ns | 0 allocs    |
 | UpdateSettings()   | 89.2 ns | 0 allocs    |
 
-See [Performance Guide](https://vnykmshr.github.io/autobreaker/guides/performance/) for detailed analysis.
+See [Performance Guide](https://1mb-dev.github.io/autobreaker/guides/performance/) for detailed analysis.
 
 ## Examples
 
@@ -153,7 +153,7 @@ OnStateChange: func(name string, from, to State) {
 - Zero dependencies, zero allocations in hot path
 - Compatible with Go 1.21+
 
-See [Roadmap](https://vnykmshr.github.io/autobreaker/guides/roadmap/) for future plans.
+See [Roadmap](https://1mb-dev.github.io/autobreaker/guides/roadmap/) for future plans.
 
 ## License
 

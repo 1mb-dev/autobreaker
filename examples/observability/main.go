@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/vnykmshr/autobreaker"
+	"github.com/1mb-dev/autobreaker"
 )
 
 // Demonstrate comprehensive observability using Metrics() and Diagnostics()

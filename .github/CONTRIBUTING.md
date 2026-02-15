@@ -229,7 +229,7 @@ How this was tested
 
 ```bash
 # Clone repository
-git clone https://github.com/vnykmshr/autobreaker.git
+git clone https://github.com/1mb-dev/autobreaker.git
 cd autobreaker
 
 # Download dependencies

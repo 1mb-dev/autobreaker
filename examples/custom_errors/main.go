@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/vnykmshr/autobreaker"
+	"github.com/1mb-dev/autobreaker"
 )
 
 // HTTPError represents an HTTP error with status code.

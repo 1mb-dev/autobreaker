@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/vnykmshr/autobreaker"
+	"github.com/1mb-dev/autobreaker"
 )
 
 // CircuitBreakerRoundTripper wraps an http.RoundTripper with circuit breaker protection.

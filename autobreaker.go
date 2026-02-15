@@ -165,7 +165,7 @@
 // Enable adaptive thresholds by setting AdaptiveThreshold: true.
 package autobreaker
 
-import "github.com/vnykmshr/autobreaker/internal/breaker"
+import "github.com/1mb-dev/autobreaker/internal/breaker"
 
 // Core Types
 //

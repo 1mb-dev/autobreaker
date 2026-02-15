@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/vnykmshr/autobreaker"
+	"github.com/1mb-dev/autobreaker"
 )
 
 // Config represents the circuit breaker configuration that can be loaded from files

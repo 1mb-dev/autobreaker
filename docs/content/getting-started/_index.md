@@ -19,7 +19,7 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 ## Installation
 
 ```bash
-go get github.com/vnykmshr/autobreaker
+go get github.com/1mb-dev/autobreaker
 ```
 
 Requires Go 1.21 or later.
@@ -32,7 +32,7 @@ package main
 import (
     "fmt"
     "time"
-    "github.com/vnykmshr/autobreaker"
+    "github.com/1mb-dev/autobreaker"
 )
 
 func main() {
@@ -80,7 +80,7 @@ Same config, correct behavior at any traffic level.
 
 - [Configuration](#configuration) - Detailed settings and options
 - [Examples](#examples) - Production-ready code examples
-- [API Reference](https://pkg.go.dev/github.com/vnykmshr/autobreaker) - Complete API documentation
+- [API Reference](https://pkg.go.dev/github.com/1mb-dev/autobreaker) - Complete API documentation
 - [Migration Guide](/migration/) - Moving from sony/gobreaker
 
 ## Configuration
@@ -89,4 +89,4 @@ For detailed configuration options and advanced settings, see the [Configuration
 
 ## Examples
 
-Production-ready code examples are available in the [examples directory](https://github.com/vnykmshr/autobreaker/tree/main/examples) on GitHub.
+Production-ready code examples are available in the [examples directory](https://github.com/1mb-dev/autobreaker/tree/main/examples) on GitHub.

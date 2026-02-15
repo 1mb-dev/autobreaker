@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/vnykmshr/autobreaker"
+	"github.com/1mb-dev/autobreaker"
 )
 
 // CircuitBreakerMiddleware wraps an HTTP handler with circuit breaker protection.
