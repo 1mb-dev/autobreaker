@@ -22,13 +22,28 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 - **Observability** - Metrics() and Diagnostics() APIs built-in
 - **Thread-Safe** - Lock-free atomic operations throughout
 
+## When to Use This
+
+Use AutoBreaker when your services handle variable traffic and you don't want to tune circuit breaker thresholds per environment.
+
+**Choose AutoBreaker over [sony/gobreaker](https://github.com/sony/gobreaker) when:**
+- Your traffic varies 10x+ between environments or time of day -- adaptive thresholds handle this automatically
+- You need to change thresholds at runtime without restarting (`UpdateSettings` API)
+- You want built-in observability without wiring up custom callbacks (`Metrics`/`Diagnostics` APIs)
+
+**Choose sony/gobreaker instead when:**
+- Static failure counts work for your traffic pattern (consistent, predictable load)
+- You need the widest possible community adoption and ecosystem integrations
+
+AutoBreaker is API-compatible with sony/gobreaker. Set `AdaptiveThreshold: true` to get percentage-based detection on top of the familiar interface.
+
 ## Installation
 
 ```bash
 go get github.com/1mb-dev/autobreaker
 ```
 
-Requires Go 1.21 or later.
+Requires Go 1.24 or later.
 
 ## Quick Start
 
@@ -147,11 +162,11 @@ OnStateChange: func(name string, from, to State) {
 
 ## Status
 
-**Production-Ready** - v1.1.1
+**Production-Ready** - v1.1.2
 
 - 102 tests, 97.1% coverage, race detector clean
 - Zero dependencies, zero allocations in hot path
-- Compatible with Go 1.21+
+- Compatible with Go 1.24+
 
 See [Roadmap](https://1mb-dev.github.io/autobreaker/guides/roadmap/) for future plans.
 
