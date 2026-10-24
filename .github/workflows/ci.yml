@@ -21,4 +21,4 @@ jobs:
       # Examples are main packages with no tests; counting them would make the gate track
       # how many examples exist rather than how well the library is tested.
       coverage-packages: "./internal/..."
-      coverage-threshold: 95
+      coverage-threshold: 99
