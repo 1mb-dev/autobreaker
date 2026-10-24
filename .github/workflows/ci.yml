@@ -5,99 +5,20 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # A Dependabot auto-merge is pushed by GITHUB_TOKEN, which starts no push run, so main is
+  # unverified until the next daily run. Dispatch verifies it on demand.
+  schedule:
+    - cron: "23 4 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  test:
-    name: Test
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        go: ['1.25', '1.26']
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: ${{ matrix.go }}
-          cache: true
-
-      - name: Run tests
-        shell: bash
-        run: go test -v -short -race -coverprofile=coverage.out -covermode=atomic ./...
-
-      - name: Upload coverage
-        if: matrix.os == 'ubuntu-latest' && matrix.go == '1.26'
-        uses: codecov/codecov-action@v6
-        with:
-          files: ./coverage.out
-          flags: unittests
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-  coverage:
-    name: Coverage Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: '1.26'
-          cache: true
-
-      - name: Run tests with coverage
-        shell: bash
-        run: go test -short -race -coverprofile=coverage.out -covermode=atomic ./internal/...
-
-      - name: Check coverage threshold
-        run: |
-          coverage=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
-          echo "Coverage: ${coverage}%"
-          threshold=95.0
-          if (( $(echo "$coverage < $threshold" | bc -l) )); then
-            echo "❌ Coverage ${coverage}% below threshold ${threshold}%"
-            exit 1
-          fi
-          echo "✅ Coverage ${coverage}% meets threshold"
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: '1.26'
-          cache: true
-
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v9
-        with:
-          version: v2.9.0
-          args: --timeout=5m
-
-      - name: go fmt
-        run: |
-          unformatted=$(gofmt -l .)
-          if [ -n "$unformatted" ]; then
-            echo "❌ Files need formatting:"
-            echo "$unformatted"
-            exit 1
-          fi
-
-      - name: go vet
-        run: go vet ./...
+  ci:
+    uses: 1mb-dev/.github/.github/workflows/ci-go.yml@main
+    with:
+      # Examples are main packages with no tests; counting them would make the gate track
+      # how many examples exist rather than how well the library is tested.
+      coverage-packages: "./internal/..."
+      coverage-threshold: 95
