@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   ci:
-    uses: 1mb-dev/.github/.github/workflows/ci-go.yml@main
+    uses: 1mb-dev/.github/.github/workflows/ci-go.yml@feat/coverage-packages
     with:
       # Examples are main packages with no tests; counting them would make the gate track
       # how many examples exist rather than how well the library is tested.
