@@ -18,7 +18,7 @@ import (
 //   - Adaptive Thresholds: Percentage-based failure detection that scales with traffic
 //   - Runtime Configuration: Update settings without restart via UpdateSettings()
 //   - Observability: Metrics() and Diagnostics() for monitoring and troubleshooting
-//   - Lock-Free: state and counts are atomic operations
+//   - Lock-Free: state and counts use atomic operations
 //   - Thread-Safe: All methods safe for concurrent use
 //   - Panic Recovery: Automatically handles panics as failures
 //

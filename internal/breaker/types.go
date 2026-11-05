@@ -211,7 +211,7 @@ type Settings struct {
 	// Common values: 10s-120s depending on service recovery time
 	Timeout time.Duration
 
-	// ReadyToTrip is called when counts are updated in Closed state after each request.
+	// ReadyToTrip is called when counts are updated in Closed state after each failed request.
 	// If it returns true, the circuit breaker transitions from Closed to Open (trips).
 	//
 	// This callback defines the failure detection policy. It receives current counts

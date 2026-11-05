@@ -34,7 +34,7 @@ Use AutoBreaker when your services handle variable traffic and you don't want to
 **Choose sony/gobreaker instead when:**
 - Static failure counts work for your traffic pattern (consistent, predictable load)
 - You need the widest possible community adoption and ecosystem integrations
-- You want a rolling window (`BucketPeriod`), generics, or two-step and distributed breakers (gobreaker v2)
+- You want a two-step breaker, or gobreaker v2's rolling window (`BucketPeriod`), generics or distributed breaker
 
 AutoBreaker follows the sony/gobreaker v1 API shape (`Execute`, `Settings`, `Counts`, state names); the constructor is `New`. Set `AdaptiveThreshold: true` to get percentage-based detection on top of the familiar interface.
 

@@ -53,10 +53,14 @@ func TestExecuteDoesNotAllocate(t *testing.T) {
 	}
 
 	t.Run("adaptive with interval", func(t *testing.T) {
-		cb := New(Settings{Name: "allocs", AdaptiveThreshold: true, Interval: time.Hour})
+		// MinimumObservations keeps it Closed; a 1ns Interval runs the window reset on every call.
 		for _, req := range []func() (interface{}, error){ok, fail} {
-			if allocs := testing.AllocsPerRun(10, func() { _, _ = cb.Execute(req) }); allocs != 0 {
+			cb := New(Settings{Name: "allocs", AdaptiveThreshold: true, Interval: time.Nanosecond, MinimumObservations: 1000})
+			if allocs := testing.AllocsPerRun(200, func() { _, _ = cb.Execute(req) }); allocs != 0 {
 				t.Errorf("Execute allocates %v times per call, want 0", allocs)
+			}
+			if got := cb.State(); got != StateClosed {
+				t.Errorf("state = %v, want closed", got)
 			}
 		}
 	})
