@@ -268,8 +268,8 @@ With `AdaptiveThreshold: true` and an `Interval`:
 3. **Predictive Tripping**: ML-based failure prediction
 4. **Federation**: Cross-service circuit coordination
 
-### Community RFC Process
-See [Roadmap & RFCs](/guides/roadmap/) for proposed features and community validation process.
+### Roadmap
+See the [Roadmap](/guides/roadmap/) for the next release theme.
 
 ## Conclusion
 

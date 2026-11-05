@@ -178,13 +178,12 @@ OnStateChange: func(name string, from, to State) {
 
 ## Status
 
-**Production-Ready** - v1.1.2
+**Production-ready.**
 
-- 102 tests, 97.1% coverage, race detector clean
 - Zero dependencies
 - Requires Go 1.26+
 
-See [Roadmap](https://1mb-dev.github.io/autobreaker/guides/roadmap/) for future plans.
+See the [Roadmap](https://1mb-dev.github.io/autobreaker/guides/roadmap/) for the next release theme.
 
 ## License
 
