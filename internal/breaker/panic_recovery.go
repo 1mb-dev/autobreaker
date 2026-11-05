@@ -174,7 +174,4 @@ func logCounterSaturation(counterName, circuitName string, currentValue uint32) 
 
 	fmt.Printf("[AUTOBREAKER WARNING] Circuit %q: %s counter saturated at %d (max uint32)\n",
 		circuitName, counterName, currentValue)
-
-	// TODO: In v1.2.0, integrate with user-provided logging/metrics
-	// TODO: Add metrics for saturation events
 }

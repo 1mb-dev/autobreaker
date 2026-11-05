@@ -112,9 +112,9 @@ func TestRetiredClaims(t *testing.T) {
 			t.Fatal(err)
 		}
 		for i, line := range strings.Split(string(data), "\n") {
-			for _, re := range pats {
+			for j, re := range pats {
 				if re.MatchString(line) {
-					t.Errorf("%s:%d: retired claim %q: %s", path, i+1, re.String()[4:], strings.TrimSpace(line))
+					t.Errorf("%s:%d: retired claim %q: %s", path, i+1, retiredClaims[j], strings.TrimSpace(line))
 				}
 			}
 		}
