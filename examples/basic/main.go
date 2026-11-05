@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	// Create circuit breaker with default settings
+	// Create circuit breaker with default (static) settings
 	breaker := autobreaker.New(autobreaker.Settings{
 		Name:    "example-service",
 		Timeout: 10 * time.Second,

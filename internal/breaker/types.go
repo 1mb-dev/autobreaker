@@ -113,7 +113,7 @@ type Counts struct {
 
 	// ConsecutiveFailures is the number of consecutive failures since the last success.
 	// Resets to 0 on any success.
-	// Used by default ReadyToTrip (trips after 5 consecutive failures).
+	// Used by default ReadyToTrip (trips on the 6th consecutive failure).
 	ConsecutiveFailures uint32
 }
 
@@ -157,6 +157,7 @@ type Counts struct {
 //	       Name:                 "api-client",
 //	       Timeout:              10 * time.Second,
 //	       AdaptiveThreshold:    true,
+//	       Interval:             10 * time.Second,
 //	       FailureRateThreshold: 0.05,  // 5% failure rate
 //	       MinimumObservations:  20,    // Need 20 requests before adapting
 //	   }
@@ -194,11 +195,13 @@ type Settings struct {
 	// Default: 1 if set to 0.
 	MaxRequests uint32
 
-	// Interval is the period to clear counts in closed state.
+	// Interval is the period to clear counts in closed state: a fixed window, not a
+	// sliding one.
 	//
 	// Valid range: >= 0 (negative values will panic)
-	// Default: 0 (counts are cleared only on state transitions)
-	// Common values: 60s for time-based windows, 0 for event-based
+	// Default: 0 (counts are cleared only on state transitions). With AdaptiveThreshold,
+	// 0 lets a long healthy run dilute later failures: after 100,000 successes it takes
+	// 5,264 failures to trip. Set an Interval when using AdaptiveThreshold.
 	Interval time.Duration
 
 	// Timeout is the duration to wait before transitioning from open to half-open.
@@ -208,7 +211,7 @@ type Settings struct {
 	// Common values: 10s-120s depending on service recovery time
 	Timeout time.Duration
 
-	// ReadyToTrip is called when counts are updated in Closed state after each request.
+	// ReadyToTrip is called when counts are updated in Closed state after each failed request.
 	// If it returns true, the circuit breaker transitions from Closed to Open (trips).
 	//
 	// This callback defines the failure detection policy. It receives current counts
@@ -227,8 +230,8 @@ type Settings struct {
 	// Thread-Safety: This callback must be thread-safe as it's called concurrently
 	// from Execute() without synchronization.
 	//
-	// Performance: Keep this callback fast (<1μs) as it's called on every request
-	// in Closed state. Avoid I/O, logging, or expensive computations.
+	// Performance: Keep this callback fast (<1μs) as it's called after each failed
+	// request in Closed state. Avoid I/O, logging, or expensive computations.
 	//
 	// Example - Custom Threshold:
 	//   ReadyToTrip: func(counts autobreaker.Counts) bool {
@@ -321,8 +324,8 @@ type Settings struct {
 	// Thread-Safety: This callback must be thread-safe as it's called concurrently
 	// from Execute() without synchronization.
 	//
-	// Performance: Keep this callback fast (<1μs) as it's called on every request.
-	// Avoid I/O, logging, or expensive computations.
+	// Performance: Keep this callback fast (<1μs) as it's called on each completed
+	// request. Avoid I/O, logging, or expensive computations.
 	//
 	// Note: Panics are always counted as failures, regardless of this callback.
 	//
@@ -344,16 +347,16 @@ type Settings struct {
 	// When true, the circuit breaker uses failure rate (percentage) instead of absolute failure counts.
 	// This makes the same configuration work across different traffic levels.
 	//
-	// Example: With 5% threshold:
-	//   Production (1000 req/s): Trips at 50 failures/s
-	//   Staging (10 req/s):      Trips at 0.5 failures/s
-	//   Dev (1 req/min):         Trips at 0.05 failures/min
+	// The rate is computed over the current window (see Interval). Example, 5% threshold,
+	// Interval 10s, failures arriving after the window's successes: at 100 req/s it trips
+	// on the 53rd failure, at 10 req/s on the 6th.
 	//
 	// Default: false (uses static ConsecutiveFailures > 5 for backward compatibility)
 	AdaptiveThreshold bool
 
 	// FailureRateThreshold is the failure rate (0.0-1.0) that triggers circuit open.
-	// Only used when AdaptiveThreshold is true.
+	// Ignored unless AdaptiveThreshold is true: setting it alone leaves the static
+	// ConsecutiveFailures > 5 rule in force.
 	//
 	// Valid range: (0, 1) exclusive - values outside this range will panic
 	// Default: 0.05 (5% failure rate) if set to 0
@@ -362,12 +365,15 @@ type Settings struct {
 	//   0.05 (5%)  = Balanced, good default for most services
 	//   0.10 (10%) = Lenient, for services with higher acceptable error rates
 	//
-	// The threshold is traffic-proportional: it works equally well at any request rate.
+	// The threshold is traffic-proportional, provided each window reaches MinimumObservations.
 	FailureRateThreshold float64
 
 	// MinimumObservations is the minimum number of requests before adaptive logic activates.
 	// Prevents false positives during low traffic periods.
-	// Only used when AdaptiveThreshold is true.
+	// Ignored unless AdaptiveThreshold is true.
+	//
+	// Counted per window (see Interval), with no consecutive-failure fallback: a window
+	// that never reaches MinimumObservations requests never trips, even at 100% failures.
 	//
 	// Valid range: > 0 recommended (though 0 will use default)
 	// Default: 20 requests if set to 0
@@ -390,7 +396,7 @@ var (
 	ErrTooManyRequests = errors.New("too many requests")
 )
 
-// DefaultReadyToTrip returns true after 5 consecutive failures.
+// DefaultReadyToTrip returns true on the 6th consecutive failure (ConsecutiveFailures > 5).
 //
 // This is the default ReadyToTrip implementation when AdaptiveThreshold is false (or not set).
 // It uses a simple consecutive failure threshold that's easy to understand and reason about.

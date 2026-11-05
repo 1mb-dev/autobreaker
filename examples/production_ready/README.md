@@ -13,7 +13,7 @@ This comprehensive example demonstrates how to use AutoBreaker's adaptive thresh
 
 ### Key Features Demonstrated
 
-- **Traffic-Proportional Protection**: Same config works from dev (5 req/s) to production (500 req/s)
+- **Traffic-Proportional Protection**: Same config works from dev (5 req/s) to production (500 req/s), as long as each `Interval` window holds `MinimumObservations` requests
 - **Distributed Failure Detection**: Catches failures that aren't consecutive
 - **Automatic Recovery**: Circuit closes when service health improves
 - **Observable Behavior**: Clear metrics and state transitions
@@ -30,6 +30,7 @@ go run main.go
 breaker := autobreaker.New(autobreaker.Settings{
     Name:                 "api-client",
     AdaptiveThreshold:    true,
+    Interval:             10 * time.Second, // counts reset every 10s (fixed window)
     FailureRateThreshold: 0.05,  // Trip at 5% failure rate
     MinimumObservations:  20,    // Need 20+ requests before evaluating
     Timeout:              1 * time.Second,
@@ -122,6 +123,7 @@ func NewAPIClient(baseURL string) *APIClient {
         breaker: autobreaker.New(autobreaker.Settings{
             Name:                 "api-client",
             AdaptiveThreshold:    true,
+            Interval:             10 * time.Second, // counts reset every 10s (fixed window)
             FailureRateThreshold: 0.05,
             MinimumObservations:  20,
             Timeout:              10 * time.Second,

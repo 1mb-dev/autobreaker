@@ -22,7 +22,8 @@ func main() {
 	breaker := autobreaker.New(autobreaker.Settings{
 		Name:                 "payment-api",
 		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.15, // 15% failure rate
+		Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+		FailureRateThreshold: 0.15,             // 15% failure rate
 		MinimumObservations:  20,
 		Timeout:              5 * time.Second,
 		OnStateChange: func(name string, from, to autobreaker.State) {
@@ -31,25 +32,25 @@ func main() {
 	})
 
 	// Scenario 1: Normal operation monitoring
-	fmt.Println("=== Scenario 1: Normal Operation Monitoring ===\n")
+	fmt.Print("=== Scenario 1: Normal Operation Monitoring ===\n\n")
 	scenario1(breaker)
 
 	time.Sleep(1 * time.Second)
 
 	// Scenario 2: Diagnostic troubleshooting
-	fmt.Println("\n=== Scenario 2: Diagnostic Troubleshooting ===\n")
+	fmt.Print("\n=== Scenario 2: Diagnostic Troubleshooting ===\n\n")
 	scenario2(breaker)
 
 	time.Sleep(1 * time.Second)
 
 	// Scenario 3: Real-time monitoring during failures
-	fmt.Println("\n=== Scenario 3: Real-Time Monitoring During Failures ===\n")
+	fmt.Print("\n=== Scenario 3: Real-Time Monitoring During Failures ===\n\n")
 	scenario3(breaker)
 
 	time.Sleep(1 * time.Second)
 
 	// Scenario 4: Recovery monitoring
-	fmt.Println("\n=== Scenario 4: Recovery Monitoring ===\n")
+	fmt.Print("\n=== Scenario 4: Recovery Monitoring ===\n\n")
 	scenario4(breaker)
 }
 

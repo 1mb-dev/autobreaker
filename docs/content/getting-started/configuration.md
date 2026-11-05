@@ -16,7 +16,7 @@ breaker := autobreaker.New(autobreaker.Settings{
 })
 ```
 
-Default behavior uses adaptive thresholds (5% failure rate, minimum 20 observations).
+With these settings the breaker trips on the 6th consecutive failure (static threshold, the default). For percentage-based tripping, set `AdaptiveThreshold: true` and an `Interval`, as in the advanced configuration below; the rate then defaults to 5% over at least 20 requests.
 
 ## Advanced Configuration
 
@@ -25,7 +25,7 @@ breaker := autobreaker.New(autobreaker.Settings{
     Name:                 "service-name",
     Timeout:              30 * time.Second,
     MaxRequests:          3,     // Concurrent requests in half-open state
-    Interval:             60 * time.Second, // Stats reset interval
+    Interval:             60 * time.Second, // Counts reset every 60s (fixed window)
 
     // Adaptive threshold settings
     AdaptiveThreshold:    true,
@@ -65,16 +65,16 @@ err := breaker.UpdateSettings(autobreaker.SettingsUpdate{
 | `Name` | `string` | Required | Circuit breaker identifier |
 | `Timeout` | `time.Duration` | `60 * time.Second` | Open → HalfOpen transition time |
 | `MaxRequests` | `uint32` | `1` | Concurrent requests in half-open state |
-| `Interval` | `time.Duration` | `0` (disabled) | Statistics reset interval |
-| `AdaptiveThreshold` | `bool` | `true` | Enable percentage-based thresholds |
-| `FailureRateThreshold` | `float64` | `0.05` | Trip at >5% error rate |
-| `MinimumObservations` | `uint32` | `20` | Minimum requests before evaluating |
+| `Interval` | `time.Duration` | `0` | Fixed window: counts reset every `Interval` in Closed state. `0` resets only on state changes, so old successes dilute new failures |
+| `AdaptiveThreshold` | `bool` | `false` | Enable percentage-based thresholds; when false, trips on the 6th consecutive failure |
+| `FailureRateThreshold` | `float64` | `0.05` | Trip at >5% error rate. Ignored unless `AdaptiveThreshold` is true |
+| `MinimumObservations` | `uint32` | `20` | Minimum requests before evaluating. Ignored unless `AdaptiveThreshold` is true |
 | `OnStateChange` | `func(string, State, State)` | `nil` | State change callback |
 | `IsSuccessful` | `func(error) bool` | `nil` | Custom error classification |
 
 ## Performance Considerations
 
-**Callback Performance**: `ReadyToTrip`, `OnStateChange`, and `IsSuccessful` callbacks execute synchronously on every request. Keep them <1μs.
+**Callback Performance**: Callbacks run synchronously inside `Execute()`: `IsSuccessful` on each completed request, `ReadyToTrip` after each failed request in Closed state, `OnStateChange` on every state change. Keep them <1μs.
 
 ```go
 // Good: Async logging

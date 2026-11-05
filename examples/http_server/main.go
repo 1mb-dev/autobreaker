@@ -83,7 +83,8 @@ func NewApplication() *Application {
 			Name:                 "database",
 			Timeout:              10 * time.Second,
 			AdaptiveThreshold:    true,
-			FailureRateThreshold: 0.10, // 10% failure rate
+			Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+			FailureRateThreshold: 0.10,             // 10% failure rate
 			MinimumObservations:  20,
 			OnStateChange: func(name string, from, to autobreaker.State) {
 				log.Printf("🔌 Circuit %s: %s → %s", name, from, to)
@@ -93,7 +94,8 @@ func NewApplication() *Application {
 			Name:                 "external-api",
 			Timeout:              15 * time.Second,
 			AdaptiveThreshold:    true,
-			FailureRateThreshold: 0.15, // 15% failure rate (more lenient)
+			Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+			FailureRateThreshold: 0.15,             // 15% failure rate (more lenient)
 			MinimumObservations:  10,
 			OnStateChange: func(name string, from, to autobreaker.State) {
 				log.Printf("🌐 Circuit %s: %s → %s", name, from, to)

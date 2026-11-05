@@ -54,17 +54,16 @@ Trip Condition: Failure Rate > Threshold (e.g., 5%)
 
 This single change makes the circuit breaker traffic-aware:
 
-**At 1000 requests/minute:**
-- 5% threshold = 50 failures before tripping
-- Protects against sustained 5%+ error rates
+The rate is computed over a fixed window: counts reset on every state change, and every `Interval` if one is set. With a 5% threshold and `Interval: 10s`:
+
+**At 100 requests/second** (1000 successes in the window):
+- Trips on the 53rd failure (53 / 1053 > 5%)
 - Ignores minor blips (<5% error rate)
 
-**At 10 requests/minute:**
-- 5% threshold = 0.5 failures (rounded to 1)
-- Trips on first sustained failure
-- Provides immediate protection
+**At 10 requests/second** (100 successes in the window):
+- Trips on the 6th failure (6 / 106 > 5%)
 
-The same configuration works correctly across all traffic levels without manual tuning.
+Below `MinimumObservations` requests in a window (default 20), the rate is not evaluated and the breaker does not trip. With `Interval: 0`, a long healthy run dilutes later failures: after 100,000 successes it takes 5,264 failures to trip.
 
 ## Architecture Overview
 
@@ -130,17 +129,15 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 func (b *Breaker) Execute(req func() (interface{}, error)) (interface{}, error) {
     // Fast path: check if open using atomic load
     if atomic.LoadUint32(&b.state) == uint32(StateOpen) {
-        return nil, ErrOpenState // ~0.34ns overhead
+        return nil, ErrOpenState
     }
     // ... execute with atomic updates
 }
 ```
 
-**Performance Impact:**
-- **Traditional**: 50-200ns overhead due to lock contention
-- **AutoBreaker**: <100ns overhead, zero contention
+Measured numbers are in the [Performance Guide](/guides/performance/).
 
-### Zero Allocations in Hot Path
+### No Allocations on the Request Path
 
 Memory allocations trigger GC pressure and reduce performance. AutoBreaker avoids allocations in the critical path:
 
@@ -152,10 +149,7 @@ metrics := &Metrics{Requests: 1, Failures: 0} // Allocation!
 atomic.AddUint64(&b.counters.requests, 1)
 ```
 
-**Memory Profile:**
-- **Execute()**: 0 allocations
-- **Metrics()**: 1 allocation (on demand, not in hot path)
-- **UpdateSettings()**: 0 allocations
+`Execute()` does not allocate, except the log line written when a callback panics or a counter saturates.
 
 ## Observability Architecture
 
@@ -191,17 +185,22 @@ type Diagnostics struct {
 
 ## Configuration Philosophy
 
-### Sensible Defaults
+### Defaults
 
 ```go
-// Default settings work for 80% of use cases
+// Zero values keep sony/gobreaker's static rule: trip on the 6th consecutive failure
 breaker := autobreaker.New(autobreaker.Settings{
     Name:    "service-name",
     Timeout: 30 * time.Second,
 })
-// Adaptive thresholds enabled by default
-// 5% failure rate threshold
-// 20 minimum observations
+
+// Percentage-based tripping is opt-in; rate defaults to 5% over at least 20 requests
+adaptive := autobreaker.New(autobreaker.Settings{
+    Name:              "service-name",
+    Timeout:           30 * time.Second,
+    AdaptiveThreshold: true,
+    Interval:          10 * time.Second, // counts reset every 10s
+})
 ```
 
 ### Runtime Updates
@@ -215,6 +214,8 @@ err := breaker.UpdateSettings(autobreaker.SettingsUpdate{
 ```
 
 ### Production Recommendations
+
+With `AdaptiveThreshold: true` and an `Interval`:
 
 | Scenario | Recommended Settings |
 |----------|---------------------|
@@ -243,9 +244,9 @@ err := breaker.UpdateSettings(autobreaker.SettingsUpdate{
 ## Deployment Considerations
 
 ### Version Compatibility
-- **Go 1.21+**: Required for generics and atomic features
+- **Go 1.26+**: Minimum version, set by `go.mod`
 - **Zero Dependencies**: Standard library only
-- **Backwards Compatibility**: Drop-in replacement for sony/gobreaker
+- **Familiar API**: Follows the sony/gobreaker v1 API shape
 
 ### Monitoring Setup
 1. **Metrics Collection**: Prometheus scraping every 15s
@@ -267,16 +268,16 @@ err := breaker.UpdateSettings(autobreaker.SettingsUpdate{
 3. **Predictive Tripping**: ML-based failure prediction
 4. **Federation**: Cross-service circuit coordination
 
-### Community RFC Process
-See [Roadmap & RFCs](/guides/roadmap/) for proposed features and community validation process.
+### Roadmap
+See the [Roadmap](/guides/roadmap/) for the next release theme.
 
 ## Conclusion
 
-AutoBreaker's architecture addresses the fundamental limitation of traditional circuit breakers: static thresholds that don't adapt to traffic patterns. By combining percentage-based adaptive thresholds with a lock-free, zero-allocation implementation, it provides both correct behavior across all traffic levels and production-grade performance.
+AutoBreaker's architecture addresses the fundamental limitation of traditional circuit breakers: static thresholds that don't adapt to traffic patterns. By combining percentage-based adaptive thresholds with a lock-free implementation, it gives traffic-proportional tripping with atomic state and counts.
 
 The design prioritizes:
-1. **Correctness**: Adaptive thresholds work at any traffic volume
-2. **Performance**: <100ns overhead, zero allocations in hot path
+1. **Correctness**: Adaptive thresholds scale with traffic volume, given enough requests per window
+2. **Performance**: lock-free, no allocations in `Execute()`
 3. **Observability**: Built-in metrics and diagnostics
 4. **Operability**: Runtime configuration, sensible defaults
 

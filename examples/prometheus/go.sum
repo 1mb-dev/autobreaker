@@ -1,5 +1,3 @@
-github.com/1mb-dev/autobreaker v1.1.2 h1:OFiuFWoU9LPQAsi/x1L/3pbpHB9OKDf5I07UbPkbfsQ=
-github.com/1mb-dev/autobreaker v1.1.2/go.mod h1:oxoNOyrJ++m3DhhgtUCqdwpshrAOqC494r/C1Nd1vUs=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/cespare/xxhash/v2 v2.2.0 h1:DC2CZ1Ep5Y4k3ZQ899DldepgrayRUGE6BBZ/cd9Cj44=

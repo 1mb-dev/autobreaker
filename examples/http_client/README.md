@@ -91,6 +91,7 @@ breaker := autobreaker.New(autobreaker.Settings{
     Name:                 "my-api",
     Timeout:              10 * time.Second,
     AdaptiveThreshold:    true,
+    Interval:             10 * time.Second, // counts reset every 10s (fixed window)
     FailureRateThreshold: 0.10, // 10% failure rate
     MinimumObservations:  20,
     OnStateChange: func(name string, from, to autobreaker.State) {
@@ -138,12 +139,12 @@ breaker := autobreaker.New(autobreaker.Settings{
 
 ## Benefits
 
-****Fail Fast**: Reject requests immediately when service is down
-****Automatic Recovery**: Test recovery automatically after timeout
-****Context Aware**: Proper cancellation and deadline support
-****Adaptive**: Same config works at any traffic level
-****Observable**: State change callbacks for monitoring
-****Drop-in**: Works with existing `http.Client` code
+- **Fail Fast**: Reject requests immediately when service is down
+- **Automatic Recovery**: Test recovery automatically after timeout
+- **Context Aware**: Proper cancellation and deadline support
+- **Adaptive**: Same config scales with traffic once each window holds `MinimumObservations` requests
+- **Observable**: State change callbacks for monitoring
+- **Wraps existing code**: Works with existing `http.Client` code
 
 ## See Also
 

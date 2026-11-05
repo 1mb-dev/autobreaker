@@ -5,7 +5,7 @@ weight: 1
 
 # AutoBreaker
 
-Adaptive circuit breaker for Go with percentage-based thresholds that automatically adjust to traffic patterns.
+Circuit breaker for Go with percentage-based (adaptive) thresholds, runtime settings updates and built-in metrics.
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/1mb-dev/autobreaker.svg)](https://pkg.go.dev/github.com/1mb-dev/autobreaker)
 [![CI](https://github.com/1mb-dev/autobreaker/workflows/CI/badge.svg)](https://github.com/1mb-dev/autobreaker/actions)
@@ -15,7 +15,7 @@ Adaptive circuit breaker for Go with percentage-based thresholds that automatica
 
 Traditional circuit breakers use static failure thresholds (e.g., "trip after 10 failures"). This creates problems: at high traffic, 10 failures may represent <1% error rate (too sensitive), while at low traffic, 10 failures may be 100% error rate (too slow to protect).
 
-AutoBreaker uses **percentage-based thresholds** that adapt to request volume automatically. Configure once, works correctly across all traffic levels and environments.
+AutoBreaker uses **percentage-based thresholds** that adapt to request volume automatically. One threshold works across traffic levels, as long as each `Interval` window holds at least `MinimumObservations` requests.
 
 ## Quick Start
 
@@ -23,42 +23,15 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 go get github.com/1mb-dev/autobreaker
 ```
 
-```go
-package main
-
-import (
-    "fmt"
-    "time"
-    "github.com/1mb-dev/autobreaker"
-)
-
-func main() {
-    breaker := autobreaker.New(autobreaker.Settings{
-        Name:    "api-client",
-        Timeout: 10 * time.Second,
-    })
-
-    result, err := breaker.Execute(func() (interface{}, error) {
-        return httpClient.Get("https://api.example.com/data")
-    })
-
-    if err == autobreaker.ErrOpenState {
-        fmt.Println("Circuit open, using fallback")
-        return
-    }
-
-    fmt.Printf("Result: %v\n", result)
-}
-```
+The Quick Start is in the [README](https://github.com/1mb-dev/autobreaker#quick-start); the same code is compiled as the package [`Example`](https://pkg.go.dev/github.com/1mb-dev/autobreaker#example-package).
 
 ## Key Features
 
 - **Adaptive Thresholds** - Percentage-based failure detection scales with traffic
 - **Runtime Configuration** - Update settings without restart
 - **Zero Dependencies** - Standard library only
-- **High Performance** - <100ns overhead per request, zero allocations
 - **Observability** - Metrics() and Diagnostics() APIs built-in
-- **Thread-Safe** - Lock-free atomic operations throughout
+- **Thread-Safe** - State and counts are atomic; all methods are safe for concurrent use
 
 ## Documentation
 
@@ -84,15 +57,7 @@ func main() {
 
 ## Performance
 
-Benchmarks (Go 1.21+, Apple M1):
-
-| Operation | Latency | Allocations |
-|-----------|---------|-------------|
-| Execute (Closed) | 78.5 ns | 0 allocs |
-| Execute (Open) | 0.34 ns | 0 allocs |
-| UpdateSettings() | 89.2 ns | 0 allocs |
-
-See [Performance Guide](/guides/performance/) for detailed analysis.
+Per-state latency and allocations, with the CPU and Go version they were measured on, are in the [Performance Guide](/guides/performance/).
 
 ## Examples
 

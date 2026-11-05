@@ -189,12 +189,13 @@ func compareAdaptiveVsStatic() {
 	adaptive := autobreaker.New(autobreaker.Settings{
 		Name:                 "adaptive",
 		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.05, // 5%
+		Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+		FailureRateThreshold: 0.05,             // 5%
 		MinimumObservations:  20,
 		Timeout:              500 * time.Millisecond,
 	})
 
-	// Static breaker: 5 consecutive failures
+	// Static breaker: trips on the 6th consecutive failure
 	static := autobreaker.New(autobreaker.Settings{
 		Name:    "static",
 		Timeout: 500 * time.Millisecond,
@@ -263,8 +264,9 @@ func main() {
 	breaker := autobreaker.New(autobreaker.Settings{
 		Name:                 "api-client",
 		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.05, // Trip at 5% failure rate
-		MinimumObservations:  20,   // Need 20+ requests before evaluating
+		Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+		FailureRateThreshold: 0.05,             // Trip at 5% failure rate
+		MinimumObservations:  20,               // Need 20+ requests before evaluating
 		Timeout:              1 * time.Second,
 	})
 
@@ -272,7 +274,7 @@ func main() {
 	fmt.Println("  - Adaptive threshold: 5% failure rate")
 	fmt.Println("  - Minimum observations: 20 requests")
 	fmt.Println("  - Timeout: 1 second")
-	fmt.Println("  - Same config works for all environments! 🎯")
+	fmt.Println("  - Same config works across environments once each window has enough requests 🎯")
 
 	// Run scenarios across different environments
 	env := environments[2] // Production
@@ -292,7 +294,7 @@ func main() {
 	fmt.Println("✓ All scenarios complete!")
 	fmt.Println(strings.Repeat("=", 70))
 	fmt.Println("\nKey Takeaways:")
-	fmt.Println("  1. Same config works across all traffic levels (dev → production)")
+	fmt.Println("  1. Same config scales with traffic (dev → production) once each window has enough requests")
 	fmt.Println("  2. Automatically adapts to your traffic patterns")
 	fmt.Println("  3. Catches distributed failures that static thresholds miss")
 	fmt.Println("  4. Protects downstream services during degradation")

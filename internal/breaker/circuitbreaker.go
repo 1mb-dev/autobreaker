@@ -18,7 +18,7 @@ import (
 //   - Adaptive Thresholds: Percentage-based failure detection that scales with traffic
 //   - Runtime Configuration: Update settings without restart via UpdateSettings()
 //   - Observability: Metrics() and Diagnostics() for monitoring and troubleshooting
-//   - Lock-Free: Uses atomic operations for high performance (<100ns overhead)
+//   - Lock-Free: state and counts use atomic operations
 //   - Thread-Safe: All methods safe for concurrent use
 //   - Panic Recovery: Automatically handles panics as failures
 //
@@ -60,6 +60,7 @@ import (
 //	    Name:                 "api-client",
 //	    Timeout:              10 * time.Second,
 //	    AdaptiveThreshold:    true,
+//	    Interval:             10 * time.Second,
 //	    FailureRateThreshold: 0.05, // 5%
 //	})
 //
@@ -157,7 +158,7 @@ type CircuitBreaker struct {
 //	breaker := autobreaker.New(autobreaker.Settings{
 //	    Name:    "api-client",
 //	    Timeout: 10 * time.Second,
-//	    // Uses default: trip after 5 consecutive failures
+//	    // Uses default: trip on the 6th consecutive failure
 //	})
 //
 // Example - Adaptive Threshold:
@@ -166,8 +167,9 @@ type CircuitBreaker struct {
 //	    Name:                 "user-service",
 //	    Timeout:              10 * time.Second,
 //	    AdaptiveThreshold:    true,
-//	    FailureRateThreshold: 0.05,  // 5% failure rate
-//	    MinimumObservations:  20,    // Need 20 requests before adapting
+//	    Interval:             10 * time.Second, // counts reset every 10s
+//	    FailureRateThreshold: 0.05,             // 5% failure rate
+//	    MinimumObservations:  20,               // Need 20 requests before adapting
 //	})
 //
 // Example - Custom Callbacks:
@@ -192,8 +194,7 @@ type CircuitBreaker struct {
 //	breaker := autobreaker.New(autobreaker.Settings{
 //	    Name:     "analytics",
 //	    Timeout:  30 * time.Second,
-//	    Interval: 60 * time.Second, // Reset counts every 60s
-//	    // Evaluate failure rate within rolling 60s window
+//	    Interval: 60 * time.Second, // Reset counts every 60s (fixed window, not sliding)
 //	})
 func New(settings Settings) *CircuitBreaker {
 	// Validate adaptive threshold settings
@@ -383,7 +384,7 @@ func (cb *CircuitBreaker) Counts() Counts {
 //   - Too Many Requests: Returns (nil, ErrTooManyRequests) in half-open with exceeded MaxRequests
 //   - Application Error: Returns (result, err) unchanged; isSuccessful determines if counted as failure
 //
-// Performance: <100ns overhead in Closed state (hot path). Uses lock-free atomic operations.
+// Performance: lock-free atomic operations; does not allocate.
 //
 // Thread-safe: Can be called concurrently from multiple goroutines. State transitions
 // are serialized internally.
@@ -540,7 +541,7 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 //   - Too Many Requests: Returns (nil, ErrTooManyRequests) in half-open with exceeded MaxRequests
 //   - Application Error: Returns (result, err) unchanged; isSuccessful determines if counted as failure
 //
-// Performance: Same as Execute() (~<100ns overhead in Closed state).
+// Performance: same as Execute().
 //
 // Thread-safe: Can be called concurrently from multiple goroutines with different contexts.
 //

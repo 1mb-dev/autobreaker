@@ -174,7 +174,8 @@ func main() {
 	breaker := autobreaker.New(autobreaker.Settings{
 		Name:                 "api-client",
 		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.10, // Trip at 10% failure rate
+		Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+		FailureRateThreshold: 0.10,             // Trip at 10% failure rate
 		MinimumObservations:  20,
 		Timeout:              5 * time.Second,
 	})

@@ -5,7 +5,7 @@ weight: 1
 
 # Getting Started with AutoBreaker
 
-AutoBreaker is an adaptive circuit breaker for Go that uses percentage-based thresholds to automatically adjust to traffic patterns.
+AutoBreaker is a circuit breaker for Go with percentage-based (adaptive) thresholds, runtime settings updates and built-in metrics.
 
 ## Why AutoBreaker?
 
@@ -14,7 +14,7 @@ Traditional circuit breakers use static failure thresholds (e.g., "trip after 10
 - **High traffic**: 10 failures may represent <1% error rate (too sensitive)
 - **Low traffic**: 10 failures may be 100% error rate (too slow to protect)
 
-AutoBreaker uses **percentage-based thresholds** that adapt to request volume automatically. Configure once, works correctly across all traffic levels.
+AutoBreaker uses **percentage-based thresholds** that adapt to request volume automatically. One threshold works across traffic levels, as long as each `Interval` window holds at least `MinimumObservations` requests.
 
 ## Installation
 
@@ -22,59 +22,34 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 go get github.com/1mb-dev/autobreaker
 ```
 
-Requires Go 1.21 or later.
+Requires Go 1.26 or later.
 
 ## Quick Start
 
-```go
-package main
-
-import (
-    "fmt"
-    "time"
-    "github.com/1mb-dev/autobreaker"
-)
-
-func main() {
-    breaker := autobreaker.New(autobreaker.Settings{
-        Name:    "api-client",
-        Timeout: 10 * time.Second,
-    })
-
-    result, err := breaker.Execute(func() (interface{}, error) {
-        return httpClient.Get("https://api.example.com/data")
-    })
-
-    if err == autobreaker.ErrOpenState {
-        fmt.Println("Circuit open, using fallback")
-        return
-    }
-
-    fmt.Printf("Result: %v\n", result)
-}
-```
+The Quick Start is in the [README](https://github.com/1mb-dev/autobreaker#quick-start); the same code is compiled as the package [`Example`](https://pkg.go.dev/github.com/1mb-dev/autobreaker#example-package).
 
 ## How It Works
 
-AutoBreaker calculates failure rate as a percentage of recent requests:
+With `AdaptiveThreshold: true`, AutoBreaker trips when the failure rate in the current window exceeds the threshold. Counts reset on every state change, and every `Interval` if one is set: a fixed window, not a sliding one.
 
 ```
-Adaptive: "Trip when error rate > 5%"
+AdaptiveThreshold: true, Interval: 10s, threshold 5% (default)
 
-At 100 RPS → trips at 50 failures (5% of 1000 req/10s)
-At 10 RPS  → trips at 5 failures  (5% of 100 req/10s)
-
-Same config, correct behavior at any traffic level.
+At 100 RPS (1000 successes in the window) → trips on the 53rd failure
+At 10 RPS  (100 successes in the window)  → trips on the 6th failure
 ```
+
+With `Interval: 0`, counts reset only on state changes, so a long healthy run dilutes later failures: after 100,000 successes it takes 5,264 failures to trip.
+
+The rate is checked only once a window holds `MinimumObservations` requests (default 20), with no consecutive-failure fallback. At `Interval: 10s`, a service under 2 RPS never trips, even if every request fails; lengthen `Interval` or lower `MinimumObservations` so one window sees enough requests.
 
 ## Key Features
 
 - **Adaptive Thresholds** - Percentage-based failure detection scales with traffic
 - **Runtime Configuration** - Update settings without restart
 - **Zero Dependencies** - Standard library only
-- **High Performance** - <100ns overhead per request, zero allocations
 - **Observability** - Metrics() and Diagnostics() APIs built-in
-- **Thread-Safe** - Lock-free atomic operations throughout
+- **Thread-Safe** - State and counts are atomic; all methods are safe for concurrent use
 
 ## Next Steps
 

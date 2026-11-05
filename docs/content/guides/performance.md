@@ -5,41 +5,43 @@ weight: 4
 
 # Performance
 
-AutoBreaker achieves exceptional performance with zero allocations in the hot path.
+Measured 2026-11-05 on an Intel Core i5-8257U @ 1.40GHz (darwin/amd64) with Go 1.27.3, running the suite five times:
 
-## Benchmark Results
+```bash
+go test -run '^$' -bench . -benchmem ./internal/breaker/
+```
 
-| Operation | Latency | Target | Status | Allocations |
-|-----------|---------|--------|--------|-------------|
-| State check | 0.34 ns | <10 ns | **30x better** | 0 |
-| Counts snapshot | 0.87 ns | <50 ns | **57x better** | 0 |
-| Execute (success) | 33.62 ns | <100 ns | **3x better** | 0 |
-| Execute (failure) | 79.44 ns | <100 ns | **20% better** | 0 |
-| Execute (open) | 82.35 ns | <50 ns | **65% over** | 0 |
-| Concurrent Execute | 96.47 ns | comparable | **Good** | 0 |
+Each figure is the median of the five passes; the range shows the fastest and slowest pass. On this laptop the same benchmark varied by up to 2x between passes (CPU frequency scaling), so compare rows rather than reading the numbers as exact. Run `make bench` on your own hardware.
 
-## Overhead Analysis
+## Execute, per state
 
-**Baseline** (no circuit breaker): 1.33 ns  
-**Execute (success)**: 33.62 ns  
-**Net overhead**: ~32 ns per request
+| State | Benchmark | ns/op (median) | range | B/op | allocs/op |
+|-------|-----------|------:|------:|-----:|----------:|
+| Closed | `Execute_Closed` | 61.1 | 49.5–82.0 | 0 | 0 |
+| Closed (`ExecuteContext`) | `ExecuteContext_Closed` | 63.1 | 55.0–81.9 | 0 | 0 |
+| Closed, failing request | `ExecuteFailure` | 76.7 | 66.5–137.4 | 0 | 0 |
+| Closed, 8 goroutines (`b.RunParallel`) | `ConcurrentExecute` | 164.4 | 136.5–181.8 | 0 | 0 |
+| Open (request rejected) | `Execute_Open` | 112.2 | 91.6–148.7 | 0 | 0 |
+| HalfOpen: trip, probe, close | `Execute_HalfOpen` | 624.3 | 521.1–958.9 | 0 | 0 |
 
-This is exceptional for a circuit breaker with:
-- Thread-safe atomic operations
-- State machine logic
-- Count tracking
-- Panic recovery
-- Callback support
+A HalfOpen probe always changes state (one success closes the breaker), so the HalfOpen row times a full cycle on one breaker: a failing request that trips it, the move to HalfOpen, and the probe that closes it.
 
-## Zero Allocations
+The function being wrapped costs 1.0 ns when called directly (`CompareBaseline`).
 
-All hot-path operations allocate **zero bytes**:
-- `State()` - 0 allocs
-- `Counts()` - 0 allocs
-- `Execute()` - 0 allocs
-- `ReadyToTrip` - 0 allocs
+## Other operations
 
-Only `New()` allocates (one-time, 128 bytes for the circuit breaker struct).
+| Operation | Benchmark | ns/op (median) | range | B/op | allocs/op |
+|-----------|-----------|------:|------:|-----:|----------:|
+| `State()` | `State` | 0.3 | 0.3–0.4 | 0 | 0 |
+| `Counts()` | `Counts` | 0.9 | 0.8–1.2 | 0 | 0 |
+| `Metrics()` | `Metrics` | 18.2 | 16.0–26.5 | 0 | 0 |
+| `Diagnostics()` | `Diagnostics` | 40.4 | 36.5–56.4 | 0 | 0 |
+| `UpdateSettings()` | `UpdateSettings` | 12.9 | 11.8–20.2 | 0 | 0 |
+| `New()` | `New` | 215.9 | 166.4–292.4 | 144 | 1 |
+
+## Allocations
+
+`Execute()` does not allocate in Closed, Open or HalfOpen state, including the call that changes state (trip, probe success, probe failure); `TestExecuteDoesNotAllocate` checks this with `testing.AllocsPerRun`. The exception is the log line written when a callback panics or a counter saturates. `New()` allocates once. Callbacks you supply run inside `Execute()`, so any allocation they make is added to the calls that run them.
 
 ## Lock-Free Design
 
@@ -53,42 +55,12 @@ type CircuitBreaker struct {
 }
 ```
 
-**Why atomic operations:**
-- No mutex locks in hot path
-- Minimal contention under high concurrency
-- Cache-friendly separate fields
+The request path uses atomic loads, adds and compare-and-swap. The only mutex serializes the log lines written when a callback panics or a counter saturates. There is no background goroutine.
 
-## Performance Under Load
+## Keep Callbacks Fast
 
-### Concurrent Access
-- Tested with 10,000+ concurrent goroutines
-- Minimal performance degradation
-- Race detector clean
+`ReadyToTrip`, `OnStateChange` and `IsSuccessful` run synchronously inside `Execute()`.
 
-### Memory Usage
-- <200 bytes per breaker instance
-- No background goroutines
-- No unbounded growth
-
-## Comparison to Targets
-
-| Metric | Target | Actual | Result |
-|--------|--------|--------|--------|
-| State check | <10 ns | 0.34 ns | **30x faster** |
-| Count update | <20 ns | ~1 ns | **20x faster** |
-| Execute overhead | <100 ns | 32 ns | **3x faster** |
-
-## Platform Details
-
-```
-OS: darwin
-Arch: amd64
-CPU: Intel Core i5-8257U @ 1.40GHz
-```
-
-## Best Practices for Performance
-
-### 1. Keep Callbacks Fast
 ```go
 // Good: Async logging
 OnStateChange: func(name string, from, to State) {
@@ -100,24 +72,3 @@ OnStateChange: func(name string, from, to State) {
     db.SaveStateChange(name, from, to) // Blocks!
 }
 ```
-
-### 2. Use Atomic Operations
-- State checks: `state.Load()` (0.34 ns)
-- Count updates: `counter.Add(1)` (~1 ns)
-- State transitions: `state.CompareAndSwap()` (~50 ns)
-
-### 3. Avoid Allocations in Hot Path
-- No string formatting in callbacks
-- No slice allocations in `IsSuccessful`
-- Use sync.Pool if needed (not needed for AutoBreaker)
-
-## Production Readiness
-
-**Validated performance:**
-- ✅ Sub-nanosecond state reads
-- ✅ ~30ns request overhead  
-- ✅ Zero allocations
-- ✅ Scales under concurrency
-- ✅ Race detector clean
-
-**Production deployment ready.**

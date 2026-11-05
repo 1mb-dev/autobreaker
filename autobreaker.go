@@ -1,5 +1,5 @@
-// Package autobreaker provides an adaptive circuit breaker for Go that automatically
-// adjusts failure thresholds based on traffic patterns.
+// Package autobreaker provides a circuit breaker for Go with percentage-based (adaptive)
+// failure thresholds, runtime settings updates and built-in metrics.
 //
 // # Overview
 //
@@ -18,10 +18,10 @@
 // # The Solution
 //
 // AutoBreaker uses percentage-based thresholds:
-//   - Same configuration works across 10x+ traffic variance
-//   - Automatically adapts: at 100 RPS, 5% threshold = 50 failures/10s
-//   - Automatically adapts: at 10 RPS, 5% threshold = 5 failures/10s
-//   - One config for all environments
+//   - Same configuration works across traffic levels, as long as each Interval window
+//     holds MinimumObservations requests
+//   - With a 5% threshold and Interval 10s, after 1000 successes in a window (100 RPS)
+//     it trips on the 53rd failure; after 100 (10 RPS), on the 6th
 //
 // # Quick Start
 //
@@ -31,8 +31,9 @@
 //	    Name:                 "api-client",
 //	    Timeout:              10 * time.Second,
 //	    AdaptiveThreshold:    true,
-//	    FailureRateThreshold: 0.05, // 5% failure rate trips circuit
-//	    MinimumObservations:  20,   // Require 20 requests before adapting
+//	    Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+//	    FailureRateThreshold: 0.05,             // 5% failure rate trips circuit
+//	    MinimumObservations:  20,               // Require 20 requests before adapting
 //	})
 //
 // Wrap operations with the circuit breaker:
@@ -51,9 +52,9 @@
 //   - Runtime Configuration: Update settings without restart via UpdateSettings()
 //   - Rich Observability: Metrics() and Diagnostics() APIs for monitoring
 //   - Zero Dependencies: Only standard library
-//   - High Performance: <100ns overhead per request, lock-free design
+//   - Lock-Free: state and counts use atomic operations
 //   - Thread-Safe: All methods safe for concurrent use
-//   - Drop-in Replacement: Compatible with sony/gobreaker API
+//   - Familiar API: follows the sony/gobreaker v1 API shape
 //
 // # Circuit States
 //
@@ -108,10 +109,9 @@
 //
 // # Performance
 //
-//   - Execute() overhead: <100ns per request (in Closed state)
-//   - Zero allocations in hot path
-//   - Lock-free design, no contention
-//   - Scales linearly with concurrent requests
+//   - Execute() does not allocate, except the log line written when a callback panics or a
+//     counter saturates
+//   - Measured numbers per state: https://1mb-dev.github.io/autobreaker/guides/performance/
 //
 // # Examples
 //
@@ -150,14 +150,15 @@
 //
 // # Compatibility
 //
-// AutoBreaker is compatible with sony/gobreaker API for easy migration:
+// AutoBreaker follows the sony/gobreaker v1 API shape. The constructor is New, and
+// State values are numbered differently (compare against the constants):
 //
 //	// sony/gobreaker
 //	breaker := gobreaker.NewCircuitBreaker(gobreaker.Settings{
 //	    Name: "api",
 //	})
 //
-//	// autobreaker (drop-in replacement)
+//	// autobreaker
 //	breaker := autobreaker.New(autobreaker.Settings{
 //	    Name: "api",
 //	})
@@ -280,6 +281,7 @@ var (
 //	    Name:                 "api-client",
 //	    Timeout:              10 * time.Second,
 //	    AdaptiveThreshold:    true,
+//	    Interval:             10 * time.Second,
 //	    FailureRateThreshold: 0.05,
 //	    MinimumObservations:  20,
 //	})

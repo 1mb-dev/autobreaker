@@ -13,6 +13,8 @@ Choosing the right circuit breaker configuration depends on your specific use ca
 
 ### ✅ Good Use Cases
 
+The recommended configs below assume `AdaptiveThreshold: true` (without it the rate settings are ignored) and an `Interval`.
+
 **1. Microservices Communication**
 - **Scenario**: Service-to-service calls in distributed systems
 - **Why AutoBreaker**: Adaptive thresholds handle varying traffic between services
@@ -43,7 +45,7 @@ Choosing the right circuit breaker configuration depends on your specific use ca
 **2. Very Low Traffic Services**
 - **Scenario**: <10 requests per minute
 - **Consideration**: Adaptive thresholds need minimum observations
-- **Recommendation**: Set `MinimumObservations: 5` and monitor closely
+- **Recommendation**: Make one `Interval` see at least `MinimumObservations` requests (e.g. `Interval: 2 * time.Minute`, `MinimumObservations: 5` at 5 RPM); a window below it never trips. Alternatively, keep the static default.
 
 **3. Batch Processing**
 - **Scenario**: Background jobs, data processing pipelines
@@ -83,9 +85,9 @@ graph TD
     F --> H
     G --> H
     
-    H -->|High >100 RPM| I[MinimumObservations: 20]
-    H -->|Medium 10-100 RPM| J[MinimumObservations: 10]
-    H -->|Low <10 RPM| K[MinimumObservations: 5<br/>Monitor Closely]
+    H -->|High >100 RPM| I[MinimumObservations: 20<br/>Interval: 1m]
+    H -->|Medium 10-100 RPM| J[MinimumObservations: 10<br/>Interval: 1m]
+    H -->|Low <10 RPM| K[MinimumObservations: 5<br/>Interval: 5m or longer]
     
     I --> L[Deploy & Monitor]
     J --> L
@@ -140,10 +142,12 @@ graph TD
 - You want runtime configuration updates
 
 **Migration Strategy:**
-1. Start with same absolute threshold converted to percentage
+1. Replace the trip rule you have with a rate. gobreaker's default trips when `ConsecutiveFailures > 5` (`MaxRequests` is the HalfOpen probe limit, not a trip threshold):
    ```go
-   // sony/gobreaker: MaxRequests: 10
-   // AutoBreaker equivalent: ~5% at 200 RPM
+   // Trip when more than 5% of the requests in a 1-minute window fail,
+   // once the window holds at least 20 requests
+   AdaptiveThreshold: true
+   Interval: time.Minute
    FailureRateThreshold: 0.05
    MinimumObservations: 20
    ```
@@ -203,12 +207,14 @@ graph TD
 breaker := autobreaker.New(autobreaker.Settings{
     Name:                 "performance-critical",
     Timeout:              5 * time.Second,          // Fast recovery
+    AdaptiveThreshold:    true,
+    Interval:             10 * time.Second,
     FailureRateThreshold: 0.10,                     // High threshold
     MinimumObservations:  50,                       // Stable evaluation
     // No callbacks to avoid overhead
 })
 ```
-**Impact**: <50ns overhead, slower failure detection
+**Impact**: slower failure detection, no callback cost
 
 ### Protection-First Configuration
 
@@ -216,6 +222,8 @@ breaker := autobreaker.New(autobreaker.Settings{
 breaker := autobreaker.New(autobreaker.Settings{
     Name:                 "protection-critical",
     Timeout:              60 * time.Second,         // Conservative recovery
+    AdaptiveThreshold:    true,
+    Interval:             10 * time.Second,
     FailureRateThreshold: 0.02,                     // Low threshold
     MinimumObservations:  10,                       // Sensitive evaluation
     OnStateChange: func(name string, from, to State) {
@@ -223,7 +231,7 @@ breaker := autobreaker.New(autobreaker.Settings{
     },
 })
 ```
-**Impact**: ~100ns overhead, fast failure detection
+**Impact**: fast failure detection; the callback runs on every state change
 
 ## Common Decision Pitfalls
 

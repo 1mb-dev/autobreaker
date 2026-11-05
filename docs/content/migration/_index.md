@@ -5,7 +5,7 @@ weight: 7
 
 # Migration from sony/gobreaker
 
-AutoBreaker is a drop-in replacement for [sony/gobreaker](https://github.com/sony/gobreaker) with enhanced features.
+AutoBreaker follows the [sony/gobreaker](https://github.com/sony/gobreaker) v1 API shape. Most code moves over by changing the import and the constructor; the differences are listed below.
 
 ## Quick Migration
 
@@ -29,15 +29,21 @@ breaker := autobreaker.New(autobreaker.Settings{
 
 ## API Compatibility
 
-### Identical APIs
-- `Execute(func() (interface{}, error))`
-- `State()` returns same enum values (0=Closed, 1=Open, 2=HalfOpen)
-- `ErrOpenState`, `ErrTooManyRequests` error types
-- `Counts()` struct with same fields
-- `Settings` struct with same field names/types
+### Same as gobreaker v1
+- `Execute(func() (interface{}, error))`, `Name()`, `State()`, `Counts()`
+- `ErrOpenState`, `ErrTooManyRequests`
+- `Counts` fields and types
+- `Settings` field names and types (`MaxRequests` behaves differently, below)
+- State constants `StateClosed`, `StateOpen`, `StateHalfOpen`
+
+### Different
+- **Constructor:** `New` instead of `NewCircuitBreaker`
+- **State values:** `StateOpen` is 1 and `StateHalfOpen` is 2; gobreaker numbers them the other way round. Compare against the constants, never stored integers
+- **`MaxRequests`:** caps concurrent HalfOpen probes, and the first successful probe closes the breaker. In gobreaker it caps total HalfOpen requests and the breaker closes after `MaxRequests` consecutive successes, so a breaker with `MaxRequests: 3` recovers sooner here
+- **No `TwoStepCircuitBreaker`**
 
 ### Enhanced Features
-- **Adaptive thresholds** (percentage-based, enabled by default)
+- **Adaptive thresholds** (percentage-based, opt-in with `AdaptiveThreshold: true`)
 - **Runtime updates** via `UpdateSettings()`
 - **Better observability** with `Metrics()` and `Diagnostics()`
 - **Callback safety** with panic recovery
@@ -47,28 +53,27 @@ breaker := autobreaker.New(autobreaker.Settings{
 | sony/gobreaker | AutoBreaker | Notes |
 |----------------|-------------|-------|
 | `Name` | `Name` | Same |
-| `MaxRequests` | `MaxRequests` | Same |
+| `MaxRequests` | `MaxRequests` | Different: concurrent probe limit; first success closes |
 | `Interval` | `Interval` | Same |
 | `Timeout` | `Timeout` | Same |
 | `ReadyToTrip` | `ReadyToTrip` | Enhanced with adaptive logic |
 | `OnStateChange` | `OnStateChange` | Same, plus panic recovery |
+| `IsSuccessful` | `IsSuccessful` | Same |
 | - | `AdaptiveThreshold` | New: Enable percentage-based thresholds |
 | - | `FailureRateThreshold` | New: Trip at >X% error rate |
 | - | `MinimumObservations` | New: Minimum requests before evaluating |
-| - | `IsSuccessful` | New: Custom error classification |
 
 ## Behavior Differences
 
-### 1. Adaptive Thresholds (Default)
-sony/gobreaker uses absolute counts: `ConsecutiveFailures > 5`
+### 1. Adaptive Thresholds (Opt-in)
+By default both libraries trip on `ConsecutiveFailures > 5`.
 
-AutoBreaker uses percentage-based: `(TotalFailures / Requests) > 0.05`
-
-**To match sony/gobreaker behavior:**
+With `AdaptiveThreshold: true`, AutoBreaker trips on `(TotalFailures / Requests) > FailureRateThreshold` (default 0.05) once `Requests >= MinimumObservations` (default 20):
 ```go
 breaker := autobreaker.New(autobreaker.Settings{
-    Name: "service-name",
-    AdaptiveThreshold: false, // Disable adaptive thresholds
+    Name:              "service-name",
+    AdaptiveThreshold: true,
+    Interval:          10 * time.Second, // counts reset every 10s
 })
 ```
 
@@ -83,7 +88,7 @@ AutoBreaker supports updating settings without recreating the breaker.
 1. **Update imports**
 2. **Update constructor** (`NewCircuitBreaker` → `New`)
 3. **Review settings** (enable/disable adaptive thresholds as needed)
-4. **Test thoroughly** (behavior may differ with adaptive thresholds)
+4. **Test thoroughly** (behavior differs once adaptive thresholds are on)
 5. **Consider enhancements** (runtime updates, better observability)
 
 ## Example Migration
@@ -115,7 +120,6 @@ settings := autobreaker.Settings{
     MaxRequests:   3,
     Interval:      60 * time.Second,
     Timeout:       30 * time.Second,
-    AdaptiveThreshold: false, // Match sony/gobreaker behavior
     ReadyToTrip: func(counts autobreaker.Counts) bool {
         return counts.ConsecutiveFailures > 5
     },
@@ -129,7 +133,7 @@ breaker := autobreaker.New(settings)
 
 ## Benefits of Migration
 
-1. **Adaptive thresholds** - Works correctly at any traffic level
+1. **Adaptive thresholds** - One threshold across traffic levels (each window needs `MinimumObservations` requests)
 2. **Runtime updates** - Change settings without restart
 3. **Better observability** - More metrics and diagnostics
 4. **Callback safety** - Panics won't break the circuit

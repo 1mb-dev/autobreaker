@@ -153,7 +153,7 @@ Same error should always be classified the same way.
 Classification should be a pure function of the error, not depend on external state.
 
 ### 4. Keep It Fast
-`IsSuccessful` executes on every request - keep it <1μs.
+`IsSuccessful` runs on each completed request - keep it <1μs.
 
 ## Testing
 
