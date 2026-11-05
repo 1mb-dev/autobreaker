@@ -1,6 +1,6 @@
 baseURL = 'https://1mb-dev.github.io/autobreaker/'
 languageCode = 'en-us'
-title = 'AutoBreaker - Production-Ready Circuit Breaker for Go'
+title = 'AutoBreaker - Circuit Breaker for Go'
 theme = 'hugo-book'
 
 # SEO Configuration

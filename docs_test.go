@@ -74,6 +74,8 @@ var retiredClaims = []string{
 	`HealthScore`,
 	`Grafana template`,
 	`pre-configured prometheus alerts`,
+	`adaptive by default`,
+	`awaiting community feedback`,
 }
 
 // TestRetiredClaims fails when a retired claim reappears in the docs, the docs

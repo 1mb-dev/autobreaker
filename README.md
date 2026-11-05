@@ -171,14 +171,12 @@ OnStateChange: func(name string, from, to State) {
 
 **Compatibility:** Follows the sony/gobreaker v1 API shape; the [Migration Guide](https://1mb-dev.github.io/autobreaker/migration/) lists what differs.
 
-## Status
+## Stability
 
-**Production-ready.**
-
-- Zero dependencies
-- Requires Go 1.26+
-
-See the [Roadmap](https://1mb-dev.github.io/autobreaker/guides/roadmap/) for the next release theme.
+- **API:** v1 is stable. No breaking changes and no change to default behavior within v1; additions only when they change no existing behavior.
+- **Maintenance:** bug and security fixes, dependency and CI upkeep; CI runs daily. Responses are best effort, and there is no release cadence.
+- **Go versions:** requires Go 1.26 or later.
+- **Dependencies:** none outside the standard library.
 
 ## License
 
