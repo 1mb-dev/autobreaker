@@ -34,7 +34,7 @@ Use AutoBreaker when your services handle variable traffic and you don't want to
 - Static failure counts work for your traffic pattern (consistent, predictable load)
 - You need the widest possible community adoption and ecosystem integrations
 
-AutoBreaker is API-compatible with sony/gobreaker. Set `AdaptiveThreshold: true` to get percentage-based detection on top of the familiar interface.
+AutoBreaker follows the sony/gobreaker v1 API shape (`Execute`, `Settings`, `Counts`, state names); the constructor is `New`. Set `AdaptiveThreshold: true` to get percentage-based detection on top of the familiar interface.
 
 ## Installation
 
@@ -174,7 +174,7 @@ OnStateChange: func(name string, from, to State) {
 }
 ```
 
-**Compatibility:** Drop-in replacement for sony/gobreaker API. Enable adaptive thresholds with `AdaptiveThreshold: true`.
+**Compatibility:** Follows the sony/gobreaker v1 API shape; the [Migration Guide](https://1mb-dev.github.io/autobreaker/migration/) lists what differs.
 
 ## Status
 

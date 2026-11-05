@@ -246,7 +246,7 @@ With `AdaptiveThreshold: true` and an `Interval`:
 ### Version Compatibility
 - **Go 1.21+**: Required for generics and atomic features
 - **Zero Dependencies**: Standard library only
-- **Backwards Compatibility**: Drop-in replacement for sony/gobreaker
+- **Familiar API**: Follows the sony/gobreaker v1 API shape
 
 ### Monitoring Setup
 1. **Metrics Collection**: Prometheus scraping every 15s

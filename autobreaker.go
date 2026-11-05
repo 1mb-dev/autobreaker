@@ -54,7 +54,7 @@
 //   - Zero Dependencies: Only standard library
 //   - Lock-Free: atomic operations, no mutex on the request path
 //   - Thread-Safe: All methods safe for concurrent use
-//   - Drop-in Replacement: Compatible with sony/gobreaker API
+//   - Familiar API: follows the sony/gobreaker v1 API shape
 //
 // # Circuit States
 //
@@ -150,14 +150,15 @@
 //
 // # Compatibility
 //
-// AutoBreaker is compatible with sony/gobreaker API for easy migration:
+// AutoBreaker follows the sony/gobreaker v1 API shape. The constructor is New, and
+// State values are numbered differently (compare against the constants):
 //
 //	// sony/gobreaker
 //	breaker := gobreaker.NewCircuitBreaker(gobreaker.Settings{
 //	    Name: "api",
 //	})
 //
-//	// autobreaker (drop-in replacement)
+//	// autobreaker
 //	breaker := autobreaker.New(autobreaker.Settings{
 //	    Name: "api",
 //	})

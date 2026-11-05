@@ -142,11 +142,12 @@ graph TD
 - You want runtime configuration updates
 
 **Migration Strategy:**
-1. Start with same absolute threshold converted to percentage
+1. Replace the trip rule you have with a rate. gobreaker's default trips when `ConsecutiveFailures > 5` (`MaxRequests` is the HalfOpen probe limit, not a trip threshold):
    ```go
-   // sony/gobreaker: MaxRequests: 10
-   // AutoBreaker equivalent: ~5% at 200 RPM
+   // Trip when more than 5% of the requests in a 1-minute window fail,
+   // once the window holds at least 20 requests
    AdaptiveThreshold: true
+   Interval: time.Minute
    FailureRateThreshold: 0.05
    MinimumObservations: 20
    ```
