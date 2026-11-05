@@ -1,6 +1,6 @@
 module github.com/1mb-dev/autobreaker/examples/prometheus
 
-go 1.21
+go 1.26.0
 
 replace github.com/1mb-dev/autobreaker => ../..
 

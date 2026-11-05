@@ -186,7 +186,7 @@ func (cm *ConfigManager) HTTPHandler() http.Handler {
 }
 
 func main() {
-	fmt.Println("=== Runtime Configuration Example ===\n")
+	fmt.Print("=== Runtime Configuration Example ===\n\n")
 
 	// Create initial circuit breaker with default settings
 	breaker := autobreaker.New(autobreaker.Settings{
