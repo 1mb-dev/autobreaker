@@ -19,7 +19,7 @@ const (
 	// In this state:
 	//   - All requests are allowed to pass through
 	//   - Failures are counted against the threshold
-	//   - When failure rate exceeds threshold, transitions to StateOpen
+	//   - When ReadyToTrip returns true (by default after 6 consecutive failures), transitions to StateOpen
 	//   - Counts reset periodically (if Interval is configured)
 	//
 	// This is the initial state when a circuit breaker is created.

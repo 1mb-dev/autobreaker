@@ -10,7 +10,7 @@ Circuit breaker for Go with percentage-based (adaptive) thresholds, runtime sett
 
 ## Why AutoBreaker
 
-A fixed failure count means different things at different traffic levels: ten failures is noise at 1,000 requests per second and a full outage at one. AutoBreaker can trip on the failure rate instead, over a window you choose, behind the familiar sony/gobreaker v1 API. One rate holds across traffic levels as long as each window sees at least `MinimumObservations` requests; see [How It Works](#how-it-works).
+A fixed failure count means different things at different traffic levels: ten failures is noise at 1,000 requests per second and a full outage at one. AutoBreaker can trip on the failure rate instead, over a window you choose, with an API that follows the sony/gobreaker v1 shape. One rate holds across traffic levels as long as each window sees at least `MinimumObservations` requests; see [How It Works](#how-it-works).
 
 It stays small on purpose: no dependencies, no allocations in `Execute`, settings you can change at runtime with `UpdateSettings`, and `Metrics()`/`Diagnostics()` snapshots for monitoring. All methods are safe for concurrent use. The default is the classic static rule; percentage-based tripping is one setting away.
 
@@ -98,10 +98,10 @@ This code is compiled by the test suite as the package [`Example`](https://pkg.g
 
 The documentation includes:
 - **Getting Started** - Installation, basic usage, configuration
-- **Guides** - Architecture, state machine, concurrency, error classification, performance, decision guide
+- **Guides** - State machine, concurrency, error classification, performance, decision guide
 - **Migration** - From sony/gobreaker
 - **API Reference** - Complete API documentation
-- **Examples** - Production-ready code examples
+- **Examples** - Runnable code examples
 
 ### Quick Links
 - [Getting Started Guide](https://1mb-dev.github.io/autobreaker/getting-started/)
@@ -145,7 +145,7 @@ Per-state latency and allocations (Closed, Open, HalfOpen), with the CPU and Go 
 
 ## Examples
 
-Production-ready examples in [`examples/`](examples/):
+Examples in [`examples/`](examples/):
 
 - [**production_ready**](examples/production_ready/) - HTTP client integration, recommended starting point
 - [**runtime_config**](examples/runtime_config/) - Dynamic configuration updates (file, API, signals)

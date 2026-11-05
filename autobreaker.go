@@ -3,10 +3,10 @@
 //
 // # Overview
 //
-// AutoBreaker implements the circuit breaker pattern with automatic adaptation to request
-// volume. Unlike traditional circuit breakers that use static failure thresholds (e.g.,
-// "trip after 10 failures"), AutoBreaker uses percentage-based thresholds that work across
-// different traffic levels without manual tuning.
+// AutoBreaker implements the circuit breaker pattern with an API that follows the
+// sony/gobreaker v1 shape. By default it trips on 6 consecutive failures, as gobreaker does.
+// With AdaptiveThreshold: true it trips on the failure rate in a window instead, so one
+// threshold can serve different traffic levels.
 //
 // # The Problem
 //
@@ -17,7 +17,7 @@
 //
 // # The Solution
 //
-// AutoBreaker uses percentage-based thresholds:
+// With AdaptiveThreshold: true, AutoBreaker uses percentage-based thresholds:
 //   - Same configuration works across traffic levels, as long as each Interval window
 //     holds MinimumObservations requests
 //   - With a 5% threshold and Interval 10s, after 1000 successes in a window (100 RPS)
@@ -48,7 +48,7 @@
 //
 // # Key Features
 //
-//   - Adaptive Thresholds: Percentage-based thresholds adapt to traffic volume
+//   - Adaptive Thresholds (opt-in): with AdaptiveThreshold: true, trips on the failure rate instead of 6 consecutive failures
 //   - Runtime Configuration: Update settings without restart via UpdateSettings()
 //   - Rich Observability: Metrics() and Diagnostics() APIs for monitoring
 //   - Zero Dependencies: Only standard library
@@ -65,7 +65,7 @@
 //   - HalfOpen: Testing recovery, limited requests probe backend health
 //
 // State transitions:
-//   - Closed → Open: When failure rate exceeds threshold
+//   - Closed → Open: When ReadyToTrip returns true (by default after 6 consecutive failures)
 //   - Open → HalfOpen: After timeout duration expires
 //   - HalfOpen → Closed: When probe requests succeed (recovery detected)
 //   - HalfOpen → Open: When probe requests fail (still unhealthy)

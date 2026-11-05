@@ -25,18 +25,10 @@ The Quick Start is in the [README](https://github.com/1mb-dev/autobreaker#quick-
 
 The README explains the window, `Interval: 0` and low-traffic behavior: see [How It Works](https://github.com/1mb-dev/autobreaker#how-it-works).
 
-## Key Features
-
-- **Adaptive Thresholds** - Percentage-based failure detection scales with traffic
-- **Runtime Configuration** - Update settings without restart
-- **Zero Dependencies** - Standard library only
-- **Observability** - Metrics() and Diagnostics() APIs built-in
-- **Thread-Safe** - State and counts are atomic; all methods are safe for concurrent use
-
 ## Next Steps
 
 - [Configuration](#configuration) - Detailed settings and options
-- [Examples](#examples) - Production-ready code examples
+- [Examples](#examples) - Runnable code examples
 - [API Reference](https://pkg.go.dev/github.com/1mb-dev/autobreaker) - Complete API documentation
 - [Migration Guide](/migration/) - Moving from sony/gobreaker
 
@@ -46,4 +38,4 @@ For detailed configuration options and advanced settings, see the [Configuration
 
 ## Examples
 
-Production-ready code examples are available in the [examples directory](https://github.com/1mb-dev/autobreaker/tree/main/examples) on GitHub.
+Code examples are in the [examples directory](https://github.com/1mb-dev/autobreaker/tree/main/examples) on GitHub.

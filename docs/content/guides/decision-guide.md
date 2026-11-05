@@ -15,7 +15,7 @@ Whatever calls the breaker needs a plan for `ErrOpenState` and `ErrTooManyReques
 
 ## Static or Adaptive
 
-The default is static: the breaker trips when `ConsecutiveFailures > 5`, the same rule as sony/gobreaker. It needs no tuning and works at any traffic level, including a few requests a minute.
+The default is static: the breaker trips when `ConsecutiveFailures > 5`, the same rule as sony/gobreaker. It needs no tuning. At low traffic, leave `Interval` at 0, or make each `Interval` long enough to hold six failures in a row: every `Interval` resets the counts.
 
 Set `AdaptiveThreshold: true` to trip on the failure rate instead: the breaker opens when more than `FailureRateThreshold` of the requests in the current window fail, once the window holds at least `MinimumObservations` requests.
 

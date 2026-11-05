@@ -295,9 +295,8 @@ func main() {
 	fmt.Println(strings.Repeat("=", 70))
 	fmt.Println("\nKey Takeaways:")
 	fmt.Println("  1. Same config scales with traffic (dev → production) once each window has enough requests")
-	fmt.Println("  2. Automatically adapts to your traffic patterns")
-	fmt.Println("  3. Catches distributed failures that static thresholds miss")
-	fmt.Println("  4. Protects downstream services during degradation")
-	fmt.Println("  5. Recovers automatically when service improves")
-	fmt.Println("\n💡 Use adaptive thresholds to eliminate manual tuning!")
+	fmt.Println("  2. Catches distributed failures that static thresholds miss")
+	fmt.Println("  3. Protects downstream services during degradation")
+	fmt.Println("  4. Recovers automatically when service improves")
+	fmt.Println("\n💡 Use adaptive thresholds when traffic varies across services or environments")
 }

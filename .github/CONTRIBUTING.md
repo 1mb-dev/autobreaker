@@ -20,7 +20,7 @@ make test-race    # full suite with the race detector; run before a PR
 - **No dependencies.** The root module imports the standard library only.
 - **No breaking changes.** Exported signatures and default behavior are fixed within v1.
 - **Tests with the change.** CI requires 95% coverage on `internal/...`; `Execute` must not allocate (`TestExecuteDoesNotAllocate`).
-- **Docs with the change.** A fact stated in the README, godoc and `docs/content` changes in all of them. The README Quick Start must match `Example` in `example_test.go`.
+- **Docs with the change.** A change to a documented fact updates every copy: README, godoc and `docs/content`. The README Quick Start must match `Example` in `example_test.go`.
 
 ## Commits and pull requests
 

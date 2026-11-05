@@ -11,11 +11,7 @@ Circuit breaker for Go with percentage-based (adaptive) thresholds, runtime sett
 [![CI](https://github.com/1mb-dev/autobreaker/workflows/CI/badge.svg)](https://github.com/1mb-dev/autobreaker/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/1mb-dev/autobreaker)](https://goreportcard.com/report/github.com/1mb-dev/autobreaker)
 
-## Why AutoBreaker?
-
-Traditional circuit breakers use static failure thresholds (e.g., "trip after 10 failures"). This creates problems: at high traffic, 10 failures may represent <1% error rate (too sensitive), while at low traffic, 10 failures may be 100% error rate (too slow to protect).
-
-AutoBreaker uses **percentage-based thresholds** that adapt to request volume automatically. One threshold works across traffic levels, as long as each `Interval` window holds at least `MinimumObservations` requests.
+See [Why AutoBreaker](https://github.com/1mb-dev/autobreaker#why-autobreaker) in the README.
 
 ## Quick Start
 
@@ -24,14 +20,6 @@ go get github.com/1mb-dev/autobreaker
 ```
 
 The Quick Start is in the [README](https://github.com/1mb-dev/autobreaker#quick-start); the same code is compiled as the package [`Example`](https://pkg.go.dev/github.com/1mb-dev/autobreaker#example-package).
-
-## Key Features
-
-- **Adaptive Thresholds** - Percentage-based failure detection scales with traffic
-- **Runtime Configuration** - Update settings without restart
-- **Zero Dependencies** - Standard library only
-- **Observability** - Metrics() and Diagnostics() APIs built-in
-- **Thread-Safe** - State and counts are atomic; all methods are safe for concurrent use
 
 ## Documentation
 
@@ -49,7 +37,7 @@ The Quick Start is in the [README](https://github.com/1mb-dev/autobreaker#quick-
 
 ### Reference
 - [API Reference](https://pkg.go.dev/github.com/1mb-dev/autobreaker) - Complete API documentation
-- [Examples](https://github.com/1mb-dev/autobreaker/tree/main/examples) - Production-ready examples
+- [Examples](https://github.com/1mb-dev/autobreaker/tree/main/examples) - Runnable examples
 - [Contributing](https://github.com/1mb-dev/autobreaker/blob/main/.github/CONTRIBUTING.md) - How to contribute
 - [Security](https://github.com/1mb-dev/autobreaker/security/policy) - Reporting a vulnerability
 - [Changelog](/changelog/) - Release history
@@ -60,7 +48,7 @@ Per-state latency and allocations, with the CPU and Go version they were measure
 
 ## Examples
 
-Production-ready examples in the [`examples/`](https://github.com/1mb-dev/autobreaker/tree/main/examples) directory:
+Examples in the [`examples/`](https://github.com/1mb-dev/autobreaker/tree/main/examples) directory:
 
 - **production_ready** - HTTP client integration, recommended starting point
 - **runtime_config** - Dynamic configuration updates (file, API, signals)

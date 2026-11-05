@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// CircuitBreaker implements an adaptive circuit breaker pattern.
+// CircuitBreaker implements the circuit breaker pattern.
 //
 // CircuitBreaker protects services from cascading failures by temporarily blocking
 // requests to unhealthy backends. It uses a three-state machine (Closed, Open, HalfOpen)
@@ -15,7 +15,7 @@ import (
 //
 // Key Features:
 //
-//   - Adaptive Thresholds: Percentage-based failure detection that scales with traffic
+//   - Adaptive Thresholds (opt-in): with AdaptiveThreshold: true, trips on the failure rate instead of 6 consecutive failures
 //   - Runtime Configuration: Update settings without restart via UpdateSettings()
 //   - Observability: Metrics() and Diagnostics() for monitoring and troubleshooting
 //   - Lock-Free: state and counts use atomic operations

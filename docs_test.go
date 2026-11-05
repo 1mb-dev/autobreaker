@@ -76,6 +76,8 @@ var retiredClaims = []string{
 	`pre-configured prometheus alerts`,
 	`adaptive by default`,
 	`awaiting community feedback`,
+	`eliminate manual tuning`,
+	`without manual tuning`,
 }
 
 // TestRetiredClaims fails when a retired claim reappears in the docs, the docs
