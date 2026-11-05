@@ -30,6 +30,7 @@ go run main.go
 breaker := autobreaker.New(autobreaker.Settings{
     Name:                 "api-client",
     AdaptiveThreshold:    true,
+    Interval:             10 * time.Second, // counts reset every 10s (fixed window)
     FailureRateThreshold: 0.05,  // Trip at 5% failure rate
     MinimumObservations:  20,    // Need 20+ requests before evaluating
     Timeout:              1 * time.Second,
@@ -122,6 +123,7 @@ func NewAPIClient(baseURL string) *APIClient {
         breaker: autobreaker.New(autobreaker.Settings{
             Name:                 "api-client",
             AdaptiveThreshold:    true,
+            Interval:             10 * time.Second, // counts reset every 10s (fixed window)
             FailureRateThreshold: 0.05,
             MinimumObservations:  20,
             Timeout:              10 * time.Second,

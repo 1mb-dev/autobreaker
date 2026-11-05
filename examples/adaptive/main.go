@@ -15,8 +15,9 @@ func main() {
 		Name:                 "adaptive-service",
 		Timeout:              10 * time.Second,
 		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.10, // Trip at 10% failure rate
-		MinimumObservations:  20,   // Need 20+ requests before adapting
+		Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+		FailureRateThreshold: 0.10,             // Trip at 10% failure rate
+		MinimumObservations:  20,               // Need 20+ requests before adapting
 	})
 
 	fmt.Println("=== Adaptive Threshold Example ===")
@@ -54,6 +55,7 @@ func main() {
 		Name:                 "adaptive-service-2",
 		Timeout:              10 * time.Second,
 		AdaptiveThreshold:    true,
+		Interval:             10 * time.Second, // counts reset every 10s (fixed window)
 		FailureRateThreshold: 0.10,
 		MinimumObservations:  20,
 	})

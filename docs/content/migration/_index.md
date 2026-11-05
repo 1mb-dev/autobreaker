@@ -37,7 +37,7 @@ breaker := autobreaker.New(autobreaker.Settings{
 - `Settings` struct with same field names/types
 
 ### Enhanced Features
-- **Adaptive thresholds** (percentage-based, enabled by default)
+- **Adaptive thresholds** (percentage-based, opt-in with `AdaptiveThreshold: true`)
 - **Runtime updates** via `UpdateSettings()`
 - **Better observability** with `Metrics()` and `Diagnostics()`
 - **Callback safety** with panic recovery
@@ -59,16 +59,15 @@ breaker := autobreaker.New(autobreaker.Settings{
 
 ## Behavior Differences
 
-### 1. Adaptive Thresholds (Default)
-sony/gobreaker uses absolute counts: `ConsecutiveFailures > 5`
+### 1. Adaptive Thresholds (Opt-in)
+By default both libraries trip on `ConsecutiveFailures > 5`.
 
-AutoBreaker uses percentage-based: `(TotalFailures / Requests) > 0.05`
-
-**To match sony/gobreaker behavior:**
+With `AdaptiveThreshold: true`, AutoBreaker trips on `(TotalFailures / Requests) > FailureRateThreshold` (default 0.05) once `Requests >= MinimumObservations` (default 20):
 ```go
 breaker := autobreaker.New(autobreaker.Settings{
-    Name: "service-name",
-    AdaptiveThreshold: false, // Disable adaptive thresholds
+    Name:              "service-name",
+    AdaptiveThreshold: true,
+    Interval:          10 * time.Second, // counts reset every 10s
 })
 ```
 
@@ -83,7 +82,7 @@ AutoBreaker supports updating settings without recreating the breaker.
 1. **Update imports**
 2. **Update constructor** (`NewCircuitBreaker` → `New`)
 3. **Review settings** (enable/disable adaptive thresholds as needed)
-4. **Test thoroughly** (behavior may differ with adaptive thresholds)
+4. **Test thoroughly** (behavior differs once adaptive thresholds are on)
 5. **Consider enhancements** (runtime updates, better observability)
 
 ## Example Migration
@@ -115,7 +114,6 @@ settings := autobreaker.Settings{
     MaxRequests:   3,
     Interval:      60 * time.Second,
     Timeout:       30 * time.Second,
-    AdaptiveThreshold: false, // Match sony/gobreaker behavior
     ReadyToTrip: func(counts autobreaker.Counts) bool {
         return counts.ConsecutiveFailures > 5
     },

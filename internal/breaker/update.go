@@ -87,6 +87,7 @@ import (
 //
 //	// Start conservative
 //	breaker := autobreaker.New(autobreaker.Settings{
+//	    AdaptiveThreshold:    true,
 //	    FailureRateThreshold: 0.01, // 1%
 //	})
 //

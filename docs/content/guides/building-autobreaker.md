@@ -191,17 +191,21 @@ type Diagnostics struct {
 
 ## Configuration Philosophy
 
-### Sensible Defaults
+### Defaults
 
 ```go
-// Default settings work for 80% of use cases
+// Zero values keep sony/gobreaker's static rule: trip on the 6th consecutive failure
 breaker := autobreaker.New(autobreaker.Settings{
     Name:    "service-name",
     Timeout: 30 * time.Second,
 })
-// Adaptive thresholds enabled by default
-// 5% failure rate threshold
-// 20 minimum observations
+
+// Percentage-based tripping is opt-in; rate defaults to 5% over at least 20 requests
+adaptive := autobreaker.New(autobreaker.Settings{
+    Name:              "service-name",
+    Timeout:           30 * time.Second,
+    AdaptiveThreshold: true,
+})
 ```
 
 ### Runtime Updates
@@ -215,6 +219,8 @@ err := breaker.UpdateSettings(autobreaker.SettingsUpdate{
 ```
 
 ### Production Recommendations
+
+With `AdaptiveThreshold: true`:
 
 | Scenario | Recommended Settings |
 |----------|---------------------|

@@ -22,7 +22,8 @@ func main() {
 	breaker := autobreaker.New(autobreaker.Settings{
 		Name:                 "payment-api",
 		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.15, // 15% failure rate
+		Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+		FailureRateThreshold: 0.15,             // 15% failure rate
 		MinimumObservations:  20,
 		Timeout:              5 * time.Second,
 		OnStateChange: func(name string, from, to autobreaker.State) {

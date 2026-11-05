@@ -353,7 +353,8 @@ type Settings struct {
 	AdaptiveThreshold bool
 
 	// FailureRateThreshold is the failure rate (0.0-1.0) that triggers circuit open.
-	// Only used when AdaptiveThreshold is true.
+	// Ignored unless AdaptiveThreshold is true: setting it alone leaves the static
+	// ConsecutiveFailures > 5 rule in force.
 	//
 	// Valid range: (0, 1) exclusive - values outside this range will panic
 	// Default: 0.05 (5% failure rate) if set to 0
@@ -367,7 +368,7 @@ type Settings struct {
 
 	// MinimumObservations is the minimum number of requests before adaptive logic activates.
 	// Prevents false positives during low traffic periods.
-	// Only used when AdaptiveThreshold is true.
+	// Ignored unless AdaptiveThreshold is true.
 	//
 	// Valid range: > 0 recommended (though 0 will use default)
 	// Default: 20 requests if set to 0

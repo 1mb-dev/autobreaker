@@ -91,6 +91,7 @@ breaker := autobreaker.New(autobreaker.Settings{
     Name:                 "my-api",
     Timeout:              10 * time.Second,
     AdaptiveThreshold:    true,
+    Interval:             10 * time.Second, // counts reset every 10s (fixed window)
     FailureRateThreshold: 0.10, // 10% failure rate
     MinimumObservations:  20,
     OnStateChange: func(name string, from, to autobreaker.State) {

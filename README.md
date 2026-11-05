@@ -1,6 +1,6 @@
 # AutoBreaker
 
-Adaptive circuit breaker for Go with percentage-based thresholds that automatically adjust to traffic patterns.
+Circuit breaker for Go with optional percentage-based (adaptive) thresholds that scale with traffic.
 
 [![CI](https://github.com/1mb-dev/autobreaker/workflows/CI/badge.svg)](https://github.com/1mb-dev/autobreaker/actions)
 [![Go Reference](https://pkg.go.dev/badge/github.com/1mb-dev/autobreaker.svg)](https://pkg.go.dev/github.com/1mb-dev/autobreaker)
@@ -124,7 +124,7 @@ breaker := autobreaker.New(autobreaker.Settings{
 })
 ```
 
-Default behavior uses adaptive thresholds (5% failure rate, minimum 20 observations).
+With these settings the breaker trips on the 6th consecutive failure (static threshold, the default). For percentage-based tripping, set `AdaptiveThreshold: true` and an `Interval`, as in the Quick Start; the rate then defaults to 5% over at least 20 requests.
 
 For advanced configuration, runtime updates, and complete settings reference, see the [Configuration Guide](https://1mb-dev.github.io/autobreaker/getting-started/#configuration).
 

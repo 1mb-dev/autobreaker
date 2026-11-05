@@ -73,7 +73,8 @@ func NewProtectedHTTPClient(serviceName string) *http.Client {
 		Name:                 serviceName,
 		Timeout:              10 * time.Second,
 		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.10, // 10% failure rate
+		Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+		FailureRateThreshold: 0.10,             // 10% failure rate
 		MinimumObservations:  20,
 		OnStateChange: func(name string, from, to autobreaker.State) {
 			log.Printf("Circuit %s: %s → %s", name, from, to)

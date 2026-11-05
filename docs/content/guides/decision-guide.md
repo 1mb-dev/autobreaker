@@ -13,6 +13,8 @@ Choosing the right circuit breaker configuration depends on your specific use ca
 
 ### ✅ Good Use Cases
 
+The recommended configs below assume `AdaptiveThreshold: true`; without it the rate settings are ignored.
+
 **1. Microservices Communication**
 - **Scenario**: Service-to-service calls in distributed systems
 - **Why AutoBreaker**: Adaptive thresholds handle varying traffic between services
@@ -144,6 +146,7 @@ graph TD
    ```go
    // sony/gobreaker: MaxRequests: 10
    // AutoBreaker equivalent: ~5% at 200 RPM
+   AdaptiveThreshold: true
    FailureRateThreshold: 0.05
    MinimumObservations: 20
    ```
@@ -203,6 +206,7 @@ graph TD
 breaker := autobreaker.New(autobreaker.Settings{
     Name:                 "performance-critical",
     Timeout:              5 * time.Second,          // Fast recovery
+    AdaptiveThreshold:    true,
     FailureRateThreshold: 0.10,                     // High threshold
     MinimumObservations:  50,                       // Stable evaluation
     // No callbacks to avoid overhead
@@ -216,6 +220,7 @@ breaker := autobreaker.New(autobreaker.Settings{
 breaker := autobreaker.New(autobreaker.Settings{
     Name:                 "protection-critical",
     Timeout:              60 * time.Second,         // Conservative recovery
+    AdaptiveThreshold:    true,
     FailureRateThreshold: 0.02,                     // Low threshold
     MinimumObservations:  10,                       // Sensitive evaluation
     OnStateChange: func(name string, from, to State) {

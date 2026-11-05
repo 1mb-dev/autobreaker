@@ -189,7 +189,8 @@ func compareAdaptiveVsStatic() {
 	adaptive := autobreaker.New(autobreaker.Settings{
 		Name:                 "adaptive",
 		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.05, // 5%
+		Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+		FailureRateThreshold: 0.05,             // 5%
 		MinimumObservations:  20,
 		Timeout:              500 * time.Millisecond,
 	})
@@ -263,8 +264,9 @@ func main() {
 	breaker := autobreaker.New(autobreaker.Settings{
 		Name:                 "api-client",
 		AdaptiveThreshold:    true,
-		FailureRateThreshold: 0.05, // Trip at 5% failure rate
-		MinimumObservations:  20,   // Need 20+ requests before evaluating
+		Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+		FailureRateThreshold: 0.05,             // Trip at 5% failure rate
+		MinimumObservations:  20,               // Need 20+ requests before evaluating
 		Timeout:              1 * time.Second,
 	})
 

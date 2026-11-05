@@ -16,7 +16,7 @@ breaker := autobreaker.New(autobreaker.Settings{
 })
 ```
 
-Default behavior uses adaptive thresholds (5% failure rate, minimum 20 observations).
+With these settings the breaker trips on the 6th consecutive failure (static threshold, the default). For percentage-based tripping, set `AdaptiveThreshold: true` and an `Interval`, as in the advanced configuration below; the rate then defaults to 5% over at least 20 requests.
 
 ## Advanced Configuration
 
@@ -66,9 +66,9 @@ err := breaker.UpdateSettings(autobreaker.SettingsUpdate{
 | `Timeout` | `time.Duration` | `60 * time.Second` | Open → HalfOpen transition time |
 | `MaxRequests` | `uint32` | `1` | Concurrent requests in half-open state |
 | `Interval` | `time.Duration` | `0` (disabled) | Statistics reset interval |
-| `AdaptiveThreshold` | `bool` | `true` | Enable percentage-based thresholds |
-| `FailureRateThreshold` | `float64` | `0.05` | Trip at >5% error rate |
-| `MinimumObservations` | `uint32` | `20` | Minimum requests before evaluating |
+| `AdaptiveThreshold` | `bool` | `false` | Enable percentage-based thresholds; when false, trips on the 6th consecutive failure |
+| `FailureRateThreshold` | `float64` | `0.05` | Trip at >5% error rate. Ignored unless `AdaptiveThreshold` is true |
+| `MinimumObservations` | `uint32` | `20` | Minimum requests before evaluating. Ignored unless `AdaptiveThreshold` is true |
 | `OnStateChange` | `func(string, State, State)` | `nil` | State change callback |
 | `IsSuccessful` | `func(error) bool` | `nil` | Custom error classification |
 

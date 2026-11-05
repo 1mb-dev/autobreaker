@@ -1,5 +1,5 @@
-// Package autobreaker provides an adaptive circuit breaker for Go that automatically
-// adjusts failure thresholds based on traffic patterns.
+// Package autobreaker provides a circuit breaker for Go with optional percentage-based
+// (adaptive) failure thresholds that scale with traffic.
 //
 // # Overview
 //
