@@ -159,11 +159,15 @@ func (cb *CircuitBreaker) UpdateSettings(update SettingsUpdate) error {
 	// Update FailureRateThreshold (simple field update)
 	if update.FailureRateThreshold != nil {
 		cb.setFailureRateThreshold(*update.FailureRateThreshold)
+		if *update.FailureRateThreshold != 0 {
+			cb.rateSettingsSet.Store(true)
+		}
 	}
 
 	// Update MinimumObservations (simple field update)
 	if update.MinimumObservations != nil {
 		cb.setMinimumObservations(*update.MinimumObservations)
+		cb.rateSettingsSet.Store(true)
 	}
 
 	// Apply smart resets after all settings are updated

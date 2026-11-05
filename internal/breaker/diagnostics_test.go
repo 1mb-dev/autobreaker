@@ -325,3 +325,41 @@ func TestDiagnosticsWillTripNextInNonClosedState(t *testing.T) {
 		t.Error("Open state: WillTripNext should be false (only relevant in Closed)")
 	}
 }
+
+func TestDiagnosticsRateSettingsIgnored(t *testing.T) {
+	trip := func(c Counts) bool { return c.ConsecutiveFailures > 2 }
+	tests := []struct {
+		name     string
+		settings Settings
+		update   *SettingsUpdate
+		want     bool
+	}{
+		{"static default", Settings{}, nil, false},
+		{"static with FailureRateThreshold", Settings{FailureRateThreshold: 0.1}, nil, true},
+		{"static with MinimumObservations", Settings{MinimumObservations: 5}, nil, true},
+		{"static with custom ReadyToTrip", Settings{ReadyToTrip: trip}, nil, false},
+		{"adaptive default", Settings{AdaptiveThreshold: true}, nil, false},
+		{"adaptive with rate settings", Settings{AdaptiveThreshold: true, FailureRateThreshold: 0.1, MinimumObservations: 5}, nil, false},
+		{"adaptive with custom ReadyToTrip", Settings{AdaptiveThreshold: true, ReadyToTrip: trip}, nil, false},
+		{"adaptive with custom ReadyToTrip and rate settings", Settings{AdaptiveThreshold: true, ReadyToTrip: trip, FailureRateThreshold: 0.1}, nil, true},
+		{"static after UpdateSettings", Settings{}, &SettingsUpdate{FailureRateThreshold: Float64Ptr(0.1)}, true},
+		{"static after UpdateSettings to zero", Settings{}, &SettingsUpdate{FailureRateThreshold: Float64Ptr(0)}, false},
+		{"static cleared by UpdateSettings", Settings{FailureRateThreshold: 0.1}, &SettingsUpdate{FailureRateThreshold: Float64Ptr(0)}, false},
+		{"static with one field cleared", Settings{MinimumObservations: 5}, &SettingsUpdate{FailureRateThreshold: Float64Ptr(0)}, true},
+		{"static with custom ReadyToTrip and rate settings", Settings{ReadyToTrip: trip, FailureRateThreshold: 0.1}, nil, true},
+		{"adaptive custom after UpdateSettings", Settings{AdaptiveThreshold: true, ReadyToTrip: trip}, &SettingsUpdate{MinimumObservations: Uint32Ptr(5)}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cb := New(tt.settings)
+			if tt.update != nil {
+				if err := cb.UpdateSettings(*tt.update); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if got := cb.Diagnostics().RateSettingsIgnored; got != tt.want {
+				t.Errorf("RateSettingsIgnored = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

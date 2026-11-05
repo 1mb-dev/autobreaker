@@ -72,6 +72,8 @@ err := breaker.UpdateSettings(autobreaker.SettingsUpdate{
 | `OnStateChange` | `func(string, State, State)` | `nil` | State change callback |
 | `IsSuccessful` | `func(error) bool` | `nil` | Custom error classification |
 
+`Diagnostics().RateSettingsIgnored` is true when `FailureRateThreshold` or `MinimumObservations` is set (in `Settings` or through `UpdateSettings`) but has no effect: `AdaptiveThreshold` is false, or a custom `ReadyToTrip` replaces the adaptive rule.
+
 ## Performance Considerations
 
 **Callback Performance**: Callbacks run synchronously inside `Execute()`: `IsSuccessful` on each completed request, `ReadyToTrip` after each failed request in Closed state, `OnStateChange` on every state change. Keep them <1μs.
