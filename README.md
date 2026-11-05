@@ -8,18 +8,11 @@ Circuit breaker for Go with percentage-based (adaptive) thresholds, runtime sett
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-1mb-dev.github.io/autobreaker-blue)](https://1mb-dev.github.io/autobreaker/)
 
-## Overview
+## Why AutoBreaker
 
-Traditional circuit breakers use static failure thresholds (e.g., "trip after 10 failures"). This creates problems: at high traffic, 10 failures may represent <1% error rate (too sensitive), while at low traffic, 10 failures may be 100% error rate (too slow to protect).
+A fixed failure count means different things at different traffic levels: ten failures is noise at 1,000 requests per second and a full outage at one. AutoBreaker can trip on the failure rate instead, over a window you choose, behind the familiar sony/gobreaker v1 API. One rate holds across traffic levels as long as each window sees at least `MinimumObservations` requests; see [How It Works](#how-it-works).
 
-AutoBreaker uses **percentage-based thresholds** that adapt to request volume automatically. One threshold works across traffic levels, as long as each `Interval` window holds at least `MinimumObservations` requests. See [How It Works](#how-it-works).
-
-**Features:**
-- **Adaptive Thresholds** - Percentage-based failure detection scales with traffic
-- **Runtime Configuration** - Update settings without restart
-- **Zero Dependencies** - Standard library only
-- **Observability** - Metrics() and Diagnostics() APIs built-in
-- **Thread-Safe** - State and counts are atomic; all methods are safe for concurrent use
+It stays small on purpose: no dependencies, no allocations in `Execute`, settings you can change at runtime with `UpdateSettings`, and `Metrics()`/`Diagnostics()` snapshots for monitoring. All methods are safe for concurrent use. The default is the classic static rule; percentage-based tripping is one setting away.
 
 ## When to Use This
 

@@ -93,12 +93,6 @@ home = ['HTML', 'RSS', 'JSON']
   
     [[menu.main]]
       parent = 'Guides'
-      name = 'Building AutoBreaker'
-      url = '/guides/building-autobreaker/'
-      weight = 1
-    
-    [[menu.main]]
-      parent = 'Guides'
       name = 'State Machine'
       url = '/guides/state-machine/'
       weight = 2

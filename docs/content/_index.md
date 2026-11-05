@@ -40,7 +40,6 @@ The Quick Start is in the [README](https://github.com/1mb-dev/autobreaker#quick-
 - [Configuration options](/getting-started/#configuration)
 
 ### Guides
-- [Building AutoBreaker](/guides/building-autobreaker/) - Architecture and design decisions
 - [State Machine](/guides/state-machine/) - State transition specification
 - [Concurrency](/guides/concurrency/) - Lock-free implementation details
 - [Error Classification](/guides/error-classification/) - Custom error handling

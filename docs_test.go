@@ -70,6 +70,10 @@ var retiredClaims = []string{
 	`default behavior uses adaptive`,
 	`adaptive thresholds enabled by default`,
 	`works correctly (across|at) (all|any) traffic`,
+	`TimeToTrip`,
+	`HealthScore`,
+	`Grafana template`,
+	`pre-configured prometheus alerts`,
 }
 
 // TestRetiredClaims fails when a retired claim reappears in the docs, the docs
