@@ -23,33 +23,7 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 go get github.com/1mb-dev/autobreaker
 ```
 
-```go
-package main
-
-import (
-    "fmt"
-    "time"
-    "github.com/1mb-dev/autobreaker"
-)
-
-func main() {
-    breaker := autobreaker.New(autobreaker.Settings{
-        Name:    "api-client",
-        Timeout: 10 * time.Second,
-    })
-
-    result, err := breaker.Execute(func() (interface{}, error) {
-        return httpClient.Get("https://api.example.com/data")
-    })
-
-    if err == autobreaker.ErrOpenState {
-        fmt.Println("Circuit open, using fallback")
-        return
-    }
-
-    fmt.Printf("Result: %v\n", result)
-}
-```
+The Quick Start is in the [README](https://github.com/1mb-dev/autobreaker#quick-start); the same code is compiled as the package [`Example`](https://pkg.go.dev/github.com/1mb-dev/autobreaker#example-package).
 
 ## Key Features
 

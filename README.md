@@ -51,29 +51,52 @@ Requires Go 1.24 or later.
 package main
 
 import (
+    "errors"
     "fmt"
+    "net/http"
     "time"
+
     "github.com/1mb-dev/autobreaker"
 )
 
 func main() {
+    client := &http.Client{Timeout: 5 * time.Second}
+
     breaker := autobreaker.New(autobreaker.Settings{
-        Name:    "api-client",
-        Timeout: 10 * time.Second,
+        Name:              "api-client",
+        Timeout:           10 * time.Second, // Open -> HalfOpen after 10s
+        AdaptiveThreshold: true,             // trip on failure rate instead of 6 consecutive failures
+        Interval:          10 * time.Second, // rate measured over fixed 10s windows
     })
 
     result, err := breaker.Execute(func() (interface{}, error) {
-        return httpClient.Get("https://api.example.com/data")
+        resp, err := client.Get("https://api.example.com/data")
+        if err != nil {
+            return nil, err
+        }
+        if resp.StatusCode >= 500 {
+            _ = resp.Body.Close()
+            return nil, fmt.Errorf("server error: %s", resp.Status)
+        }
+        return resp, nil
     })
 
-    if err == autobreaker.ErrOpenState {
-        fmt.Println("Circuit open, using fallback")
+    switch {
+    case errors.Is(err, autobreaker.ErrOpenState), errors.Is(err, autobreaker.ErrTooManyRequests):
+        fmt.Println("circuit open, using fallback")
+        return
+    case err != nil:
+        fmt.Println("request failed:", err)
         return
     }
 
-    fmt.Printf("Result: %v\n", result)
+    resp := result.(*http.Response)
+    defer func() { _ = resp.Body.Close() }()
+    fmt.Println("status:", resp.Status)
 }
 ```
+
+This code is compiled by the test suite as the package [`Example`](https://pkg.go.dev/github.com/1mb-dev/autobreaker#example-package).
 
 ## Documentation
 
