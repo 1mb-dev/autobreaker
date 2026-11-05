@@ -236,6 +236,5 @@ go func() {
 
 ## Learn More
 
-- See `examples/prometheus/` for Prometheus integration
 - See `examples/production_ready/` for comprehensive scenarios
 - See main README for API documentation

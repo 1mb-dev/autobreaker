@@ -66,6 +66,11 @@ type Diagnostics struct {
 	// Only used when AdaptiveEnabled is true.
 	MinimumObservations uint32
 
+	// RateSettingsIgnored reports that FailureRateThreshold or MinimumObservations is set,
+	// in Settings or through UpdateSettings, but has no effect on tripping: AdaptiveThreshold
+	// is false, or a custom ReadyToTrip replaces the adaptive rule.
+	RateSettingsIgnored bool
+
 	// --- Predictive Diagnostics ---
 	// These fields provide forward-looking insights about circuit behavior.
 
@@ -171,6 +176,15 @@ func (cb *CircuitBreaker) Diagnostics() Diagnostics {
 	// Calculate diagnostic predictions
 	willTripNext := cb.wouldTripOnNextFailure(metrics.Counts)
 
+	// Adaptive New fills zero rate fields with defaults; only rateSettingsSet records what
+	// the user set.
+	var rateSettingsIgnored bool
+	if cb.adaptiveThreshold {
+		rateSettingsIgnored = cb.customReadyToTrip && cb.rateSettingsSet.Load()
+	} else {
+		rateSettingsIgnored = cb.getFailureRateThreshold() != 0 || cb.getMinimumObservations() != 0
+	}
+
 	var timeUntilHalfOpen time.Duration
 	if state == StateOpen {
 		openedAt := cb.openedAt.Load()
@@ -195,6 +209,7 @@ func (cb *CircuitBreaker) Diagnostics() Diagnostics {
 		AdaptiveEnabled:      cb.adaptiveThreshold,
 		FailureRateThreshold: cb.getFailureRateThreshold(),
 		MinimumObservations:  cb.getMinimumObservations(),
+		RateSettingsIgnored:  rateSettingsIgnored,
 
 		// Predictions
 		WillTripNext:      willTripNext,

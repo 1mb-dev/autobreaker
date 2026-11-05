@@ -59,6 +59,68 @@ func TestDocumentedGoVersion(t *testing.T) {
 	}
 }
 
+// Claims the code no longer backs. Matched case-insensitively; CHANGELOG.md is
+// history and is not scanned.
+var retiredClaims = []string{
+	`drop-in`,
+	`api-compatible`,
+	`<100ns`,
+	`0\.34 ?ns`,
+	`zero allocations`,
+	`default behavior uses adaptive`,
+	`adaptive thresholds enabled by default`,
+	`works correctly (across|at) (all|any) traffic`,
+	`TimeToTrip`,
+	`HealthScore`,
+	`Grafana template`,
+	`pre-configured prometheus alerts`,
+	`adaptive by default`,
+	`awaiting community feedback`,
+	`eliminate manual tuning`,
+	`without manual tuning`,
+}
+
+// TestRetiredClaims fails when a retired claim reappears in the docs, the docs
+// site config, the examples or godoc.
+func TestRetiredClaims(t *testing.T) {
+	pats := make([]*regexp.Regexp, len(retiredClaims))
+	for i, p := range retiredClaims {
+		pats[i] = regexp.MustCompile(`(?i)` + p)
+	}
+
+	var files []string
+	for _, root := range []string{"README.md", "autobreaker.go", ".github", "docs/content", "docs/hugo.toml", "examples", "internal"} {
+		err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			name := d.Name()
+			if !d.IsDir() && (strings.HasSuffix(name, ".md") || strings.HasSuffix(name, ".toml") ||
+				strings.HasSuffix(name, ".go") && !strings.HasSuffix(name, "_test.go")) {
+				files = append(files, path)
+			}
+			return nil
+		})
+		if err != nil && !os.IsNotExist(err) {
+			t.Fatal(err)
+		}
+	}
+
+	for _, path := range files {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i, line := range strings.Split(string(data), "\n") {
+			for j, re := range pats {
+				if re.MatchString(line) {
+					t.Errorf("%s:%d: retired claim %q: %s", path, i+1, retiredClaims[j], strings.TrimSpace(line))
+				}
+			}
+		}
+	}
+}
+
 func goModVersion(t *testing.T) string {
 	t.Helper()
 	data, err := os.ReadFile("go.mod")

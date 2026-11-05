@@ -303,5 +303,4 @@ All updates use atomic operations - no locks needed.
 ## Learn More
 
 - See `examples/observability/` for monitoring patterns
-- See `examples/prometheus/` for metrics integration
 - See main README for API documentation

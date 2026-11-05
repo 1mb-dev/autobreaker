@@ -19,7 +19,7 @@ const (
 	// In this state:
 	//   - All requests are allowed to pass through
 	//   - Failures are counted against the threshold
-	//   - When failure rate exceeds threshold, transitions to StateOpen
+	//   - When ReadyToTrip returns true (by default after 6 consecutive failures), transitions to StateOpen
 	//   - Counts reset periodically (if Interval is configured)
 	//
 	// This is the initial state when a circuit breaker is created.
@@ -356,7 +356,7 @@ type Settings struct {
 
 	// FailureRateThreshold is the failure rate (0.0-1.0) that triggers circuit open.
 	// Ignored unless AdaptiveThreshold is true: setting it alone leaves the static
-	// ConsecutiveFailures > 5 rule in force.
+	// ConsecutiveFailures > 5 rule in force. Diagnostics().RateSettingsIgnored reports it.
 	//
 	// Valid range: (0, 1) exclusive - values outside this range will panic
 	// Default: 0.05 (5% failure rate) if set to 0
@@ -370,7 +370,7 @@ type Settings struct {
 
 	// MinimumObservations is the minimum number of requests before adaptive logic activates.
 	// Prevents false positives during low traffic periods.
-	// Ignored unless AdaptiveThreshold is true.
+	// Ignored unless AdaptiveThreshold is true; Diagnostics().RateSettingsIgnored reports it.
 	//
 	// Counted per window (see Interval), with no consecutive-failure fallback: a window
 	// that never reaches MinimumObservations requests never trips, even at 100% failures.

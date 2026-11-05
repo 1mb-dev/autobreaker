@@ -1,6 +1,6 @@
 baseURL = 'https://1mb-dev.github.io/autobreaker/'
 languageCode = 'en-us'
-title = 'AutoBreaker - Production-Ready Circuit Breaker for Go'
+title = 'AutoBreaker - Circuit Breaker for Go'
 theme = 'hugo-book'
 
 # SEO Configuration
@@ -93,12 +93,6 @@ home = ['HTML', 'RSS', 'JSON']
   
     [[menu.main]]
       parent = 'Guides'
-      name = 'Building AutoBreaker'
-      url = '/guides/building-autobreaker/'
-      weight = 1
-    
-    [[menu.main]]
-      parent = 'Guides'
       name = 'State Machine'
       url = '/guides/state-machine/'
       weight = 2
@@ -147,16 +141,6 @@ home = ['HTML', 'RSS', 'JSON']
     name = 'GitHub'
     url = 'https://github.com/1mb-dev/autobreaker'
     weight = 6
-  
-  [[menu.main]]
-    name = 'Contributing'
-    url = '/contributing/'
-    weight = 7
-  
-  [[menu.main]]
-    name = 'Security'
-    url = '/security/'
-    weight = 8
   
   [[menu.main]]
     name = 'Changelog'

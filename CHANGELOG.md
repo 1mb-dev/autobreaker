@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-05
+
+No breaking changes.
+
+### Added
+
+- `Diagnostics.RateSettingsIgnored`: true when `FailureRateThreshold` or `MinimumObservations` is set but unused (`AdaptiveThreshold` is false, or a custom `ReadyToTrip` replaces the adaptive rule).
+
+### Removed
+
+- `examples/prometheus`.
+- The "Building AutoBreaker" and roadmap pages. Adaptive-by-default is not planned; v1 keeps the static default.
+- The repository `SECURITY.md` (the 1mb-dev policy applies) and the docs-site contributing and security pages.
+
+### Documentation
+
+- README: Why and Stability sections.
+- The docs home and getting-started link to the README; the decision and contributing guides are trimmed.
+
 ## [1.2.0] - 2026-11-05
 
 ### Changed
@@ -300,82 +319,9 @@ Tagged without release notes; recorded here.
 - **Drop-in**: Compatible with sony/gobreaker API
 - **Dependencies**: Zero external dependencies (stdlib only)
 
-## Development History
-
-### Phase 4A: Runtime Configuration
-*Completed: [Date]*
-
-- Implemented `UpdateSettings()` method for dynamic configuration
-- Added `SettingsUpdate` type with pointer semantics for partial updates
-- Made all updateable settings atomic for thread-safety
-- Smart reset behavior (interval changes reset counts, timeout changes restart timer)
-- Comprehensive tests for concurrent updates
-- Runtime configuration example
-
-### Phase 3A: Observability
-*Completed: [Date]*
-
-- Implemented `Metrics()` API with computed failure/success rates
-- Implemented `Diagnostics()` API with predictive insights
-- Added `WillTripNext` prediction for proactive alerting
-- Added `TimeUntilHalfOpen` for recovery timing
-- Observability and monitoring examples
-- Prometheus integration example
-
-### Phase 2A: Adaptive Thresholds
-*Completed: [Date]*
-
-- Implemented adaptive threshold algorithm (percentage-based)
-- Added `AdaptiveThreshold`, `FailureRateThreshold`, `MinimumObservations` settings
-- Traffic-proportional failure detection
-- Comprehensive tests for adaptive logic
-- Adaptive vs static threshold comparison example
-
-### Phase 1: Core Circuit Breaker
-*Completed: [Date]*
-
-- Three-state machine (Closed, Open, HalfOpen)
-- State transitions with automatic recovery probing
-- Request counting and statistics
-- Panic handling and recovery
-- Thread-safe atomic operations
-- Basic settings and callbacks
-- Comprehensive test suite (98%+ coverage)
-- Basic usage examples
-
-## [Unreleased]
-
-No unreleased changes.
-
 ---
 
-## Versioning Strategy
-
-AutoBreaker follows [Semantic Versioning](https://semver.org/):
-
-- **MAJOR** version (v2.0.0): Incompatible API changes
-- **MINOR** version (v1.1.0): Backward-compatible new features
-- **PATCH** version (v1.0.1): Backward-compatible bug fixes
-
-### v1.x Compatibility Promise
-
-Within v1.x releases:
-- **No breaking API changes
-- **Additive changes only (new methods, fields)
-- **Behavior changes will be opt-in
-- **Deprecations will be marked and documented for at least 2 minor versions
-
-### When v2.0 Would Happen
-
-A major version bump to v2.0.0 would only occur for:
-- Breaking API changes (removing/renaming public methods)
-- Significant behavior changes affecting existing users
-- Fundamental architecture changes
-
-We are committed to long-term v1.x stability for production use.
-
----
-
+[1.3.0]: https://github.com/1mb-dev/autobreaker/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/1mb-dev/autobreaker/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/1mb-dev/autobreaker/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/1mb-dev/autobreaker/releases/tag/v1.1.1

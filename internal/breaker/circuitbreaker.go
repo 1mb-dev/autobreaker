@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// CircuitBreaker implements an adaptive circuit breaker pattern.
+// CircuitBreaker implements the circuit breaker pattern.
 //
 // CircuitBreaker protects services from cascading failures by temporarily blocking
 // requests to unhealthy backends. It uses a three-state machine (Closed, Open, HalfOpen)
@@ -15,7 +15,7 @@ import (
 //
 // Key Features:
 //
-//   - Adaptive Thresholds: Percentage-based failure detection that scales with traffic
+//   - Adaptive Thresholds (opt-in): with AdaptiveThreshold: true, trips on the failure rate instead of 6 consecutive failures
 //   - Runtime Configuration: Update settings without restart via UpdateSettings()
 //   - Observability: Metrics() and Diagnostics() for monitoring and troubleshooting
 //   - Lock-Free: state and counts use atomic operations
@@ -79,6 +79,7 @@ type CircuitBreaker struct {
 	onStateChange     func(string, State, State)
 	isSuccessful      func(error) bool
 	adaptiveThreshold bool
+	customReadyToTrip bool // Settings.ReadyToTrip was set; it replaces the adaptive rule
 
 	// Settings (atomic - updateable at runtime)
 	maxRequests          atomic.Uint32 // uint32
@@ -86,6 +87,7 @@ type CircuitBreaker struct {
 	timeout              atomic.Int64  // time.Duration (int64)
 	failureRateThreshold atomic.Uint64 // float64 (stored as bits)
 	minimumObservations  atomic.Uint32 // uint32
+	rateSettingsSet      atomic.Bool   // user gave a nonzero rate setting; never cleared, so read only in adaptive mode
 
 	// State (atomic)
 	state atomic.Int32 // State (0=Closed, 1=Open, 2=HalfOpen)
@@ -218,6 +220,7 @@ func New(settings Settings) *CircuitBreaker {
 		onStateChange:     settings.OnStateChange,
 		isSuccessful:      settings.IsSuccessful,
 		adaptiveThreshold: settings.AdaptiveThreshold,
+		customReadyToTrip: settings.ReadyToTrip != nil,
 	}
 
 	// Set atomic fields using setters
@@ -226,6 +229,7 @@ func New(settings Settings) *CircuitBreaker {
 	cb.setTimeout(settings.Timeout)
 	cb.setFailureRateThreshold(settings.FailureRateThreshold)
 	cb.setMinimumObservations(settings.MinimumObservations)
+	cb.rateSettingsSet.Store(setsRate(settings))
 
 	// Apply defaults
 	if cb.getMaxRequests() == 0 {
@@ -263,6 +267,11 @@ func New(settings Settings) *CircuitBreaker {
 	cb.stateChangedAt.Store(now)
 
 	return cb
+}
+
+// setsRate reports whether settings give either rate setting a nonzero value.
+func setsRate(settings Settings) bool {
+	return settings.FailureRateThreshold != 0 || settings.MinimumObservations != 0
 }
 
 // Name returns the circuit breaker name.
