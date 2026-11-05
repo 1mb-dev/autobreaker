@@ -65,7 +65,6 @@ Production-ready examples in the [`examples/`](https://github.com/1mb-dev/autobr
 - **production_ready** - HTTP client integration, recommended starting point
 - **runtime_config** - Dynamic configuration updates (file, API, signals)
 - **observability** - Monitoring, metrics, and diagnostics
-- **prometheus** - Prometheus collector integration
 - **adaptive** - Adaptive vs static threshold comparison
 - **custom_errors** - Custom error classification
 

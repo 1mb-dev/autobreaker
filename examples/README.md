@@ -111,31 +111,7 @@ go run examples/observability/main.go
 
 ---
 
-### 6. Prometheus Integration (`prometheus/`)
-
-Shows how to expose circuit breaker metrics to Prometheus:
-- Custom Prometheus collector
-- 8 metrics exported (state, counts, rates)
-- HTTP metrics endpoint
-- Example PromQL queries and alerts
-
-**Run:**
-```bash
-go run examples/prometheus/main.go
-# Visit http://localhost:8080/metrics
-```
-
-**Key Concepts:**
-- Prometheus integration pattern
-- Metric types (gauges vs counters)
-- Alert rules
-- Dashboard design
-
-**Good for:** Prometheus users, production monitoring
-
----
-
-### 7. Runtime Configuration (`runtime_config/`) - Recommended
+### 6. Runtime Configuration (`runtime_config/`) - Recommended
 
 Demonstrates runtime configuration updates without restart:
 - Programmatic updates via UpdateSettings() API
@@ -186,5 +162,4 @@ done
 3. **Observability:** `observability/` - Learn monitoring and troubleshooting
 4. **Basics:** `basic/` - Understand core concepts
 5. **Adaptive:** `adaptive/` - Learn why adaptive thresholds matter
-6. **Integration:** `prometheus/` - Connect to monitoring systems
-7. **Customization:** `custom_errors/` - Tailor to your error types
+6. **Customization:** `custom_errors/` - Tailor to your error types

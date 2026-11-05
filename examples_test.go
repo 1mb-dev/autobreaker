@@ -9,7 +9,7 @@ import (
 
 // TestExampleModules vets the examples that are separate Go modules: go test ./... in the
 // root module does not reach them, so a stale go.mod or a vet error would otherwise ship.
-// Needs module downloads (prometheus) on a cold cache; skipped under -short.
+// Skipped under -short.
 func TestExampleModules(t *testing.T) {
 	if testing.Short() {
 		t.Skip("runs the go command per example module")

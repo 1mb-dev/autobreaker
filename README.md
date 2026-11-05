@@ -150,7 +150,6 @@ Production-ready examples in [`examples/`](examples/):
 - [**production_ready**](examples/production_ready/) - HTTP client integration, recommended starting point
 - [**runtime_config**](examples/runtime_config/) - Dynamic configuration updates (file, API, signals)
 - [**observability**](examples/observability/) - Monitoring, metrics, and diagnostics
-- [**prometheus**](examples/prometheus/) - Prometheus collector integration
 - [**adaptive**](examples/adaptive/) - Adaptive vs static threshold comparison
 - [**custom_errors**](examples/custom_errors/) - Custom error classification
 

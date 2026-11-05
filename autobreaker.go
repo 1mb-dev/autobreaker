@@ -120,7 +120,6 @@
 //   - examples/adaptive/ - Adaptive vs static threshold comparison
 //   - examples/observability/ - Monitoring and diagnostics
 //   - examples/runtime_config/ - Runtime configuration updates
-//   - examples/prometheus/ - Prometheus integration
 //   - examples/production_ready/ - Production deployment patterns
 //
 // # Error Handling
