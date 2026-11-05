@@ -143,16 +143,6 @@ home = ['HTML', 'RSS', 'JSON']
     weight = 6
   
   [[menu.main]]
-    name = 'Contributing'
-    url = '/contributing/'
-    weight = 7
-  
-  [[menu.main]]
-    name = 'Security'
-    url = '/security/'
-    weight = 8
-  
-  [[menu.main]]
     name = 'Changelog'
     url = '/changelog/'
     weight = 9

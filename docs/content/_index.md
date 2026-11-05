@@ -50,8 +50,8 @@ The Quick Start is in the [README](https://github.com/1mb-dev/autobreaker#quick-
 ### Reference
 - [API Reference](https://pkg.go.dev/github.com/1mb-dev/autobreaker) - Complete API documentation
 - [Examples](https://github.com/1mb-dev/autobreaker/tree/main/examples) - Production-ready examples
-- [Contributing](/contributing/) - How to contribute
-- [Security](/security/) - Security policy
+- [Contributing](https://github.com/1mb-dev/autobreaker/blob/main/.github/CONTRIBUTING.md) - How to contribute
+- [Security](https://github.com/1mb-dev/autobreaker/security/policy) - Reporting a vulnerability
 - [Changelog](/changelog/) - Release history
 
 ## Performance
@@ -74,4 +74,4 @@ MIT License - see [LICENSE](https://github.com/1mb-dev/autobreaker/blob/main/LIC
 
 ## Contributing
 
-Contributions welcome! Please see [Contributing Guide](/contributing/) for guidelines.
+Open an issue before submitting a change; see the [Contributing Guide](https://github.com/1mb-dev/autobreaker/blob/main/.github/CONTRIBUTING.md).
