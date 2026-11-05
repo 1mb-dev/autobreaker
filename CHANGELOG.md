@@ -7,9 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-05
+
 ### Changed
 
-- Requires Go 1.26 or later (was 1.24; 1.24 and 1.25 are end of life). CI tests Go 1.26 and 1.27.
+- **Requires Go 1.26 or later.** v1.1.2's `go.mod` declared Go 1.21; upgrading raises your module's `go` line to 1.26. Go 1.24 and 1.25 are end of life. CI tests Go 1.26 and 1.27.
+
+### Documentation
+
+Claims that did not match the code are corrected. Library behavior is unchanged.
+
+- **`State` values differ from sony/gobreaker.** AutoBreaker numbers Open 1 and HalfOpen 2; gobreaker numbers HalfOpen 1 and Open 2. Earlier docs said they matched. If you migrated from gobreaker and store, export or chart the raw value (as the Prometheus and StatsD examples do), Open and HalfOpen are swapped; compare against the constants instead.
+- The default is a static threshold: the breaker trips on the 6th consecutive failure. Percentage-based tripping needs `AdaptiveThreshold: true`; `FailureRateThreshold` and `MinimumObservations` are ignored without it. Every example meant to be adaptive now sets it and an `Interval`.
+- `Interval` sets a fixed window, not a sliding one. With `Interval: 0`, old successes dilute new failures; a window with fewer than `MinimumObservations` requests never trips.
+- The README Quick Start compiles, handles every error, and is checked by the test suite as the package `Example`.
+- Performance numbers are re-measured per state, labelled with CPU and Go version, and kept only in the performance guide. The HalfOpen and failure benchmarks now measure what their names say. The "<100ns, zero allocations" claim and the 0.34 ns Open-state figure are removed. `Execute()` does not allocate in any state, apart from the log line written when a callback panics or a counter saturates.
+- AutoBreaker follows the sony/gobreaker v1 API shape but is not a drop-in replacement: the constructor is `New`, `MaxRequests` limits concurrent HalfOpen probes and the first success closes (gobreaker needs `MaxRequests` consecutive successes), and there is no `TwoStepCircuitBreaker`.
+
+### Added
+
+- Tests that keep the README Quick Start equal to the package `Example` and building, that `Execute()` does not allocate, the documented Go version equal to `go.mod`, and the example modules (each with its own `go.mod`) building and vetting cleanly.
+
+## [1.1.2] - 2026-02-15
+
+Tagged without release notes; recorded here.
+
+### Changed
+
+- **Module path is `github.com/1mb-dev/autobreaker`** (was `github.com/vnykmshr/autobreaker`). Update your imports.
+- A canceled `ExecuteContext` call is no longer counted in `Requests`, keeping `Requests == TotalSuccesses + TotalFailures`.
+- Counter saturation warnings are logged once per counter until counts are cleared.
+- Dependency and Go toolchain updates.
 
 ## [1.1.1] - 2026-01-23
 
@@ -348,6 +376,8 @@ We are committed to long-term v1.x stability for production use.
 
 ---
 
+[1.2.0]: https://github.com/1mb-dev/autobreaker/compare/v1.1.2...v1.2.0
+[1.1.2]: https://github.com/1mb-dev/autobreaker/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/1mb-dev/autobreaker/releases/tag/v1.1.1
 [1.1.0]: https://github.com/1mb-dev/autobreaker/releases/tag/v1.1.0
 [1.0.0]: https://github.com/1mb-dev/autobreaker/releases/tag/v1.0.0
