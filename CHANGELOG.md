@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-05
+
+No breaking changes.
+
+### Added
+
+- `Diagnostics.RateSettingsIgnored`: true when `FailureRateThreshold` or `MinimumObservations` is set but unused (`AdaptiveThreshold` is false, or a custom `ReadyToTrip` replaces the adaptive rule).
+
+### Removed
+
+- `examples/prometheus`.
+- The "Building AutoBreaker" and roadmap pages. Adaptive-by-default is not planned; v1 keeps the static default.
+- The repository `SECURITY.md` (the 1mb-dev policy applies) and the docs-site contributing and security pages.
+
+### Documentation
+
+- README: Why and Stability sections.
+- The docs home and getting-started link to the README; the decision and contributing guides are trimmed.
+
 ## [1.2.0] - 2026-11-05
 
 ### Changed
@@ -302,6 +321,7 @@ Tagged without release notes; recorded here.
 
 ---
 
+[1.3.0]: https://github.com/1mb-dev/autobreaker/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/1mb-dev/autobreaker/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/1mb-dev/autobreaker/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/1mb-dev/autobreaker/releases/tag/v1.1.1
