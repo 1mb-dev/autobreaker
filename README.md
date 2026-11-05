@@ -1,6 +1,6 @@
 # AutoBreaker
 
-Circuit breaker for Go with optional percentage-based (adaptive) thresholds that scale with traffic.
+Circuit breaker for Go with percentage-based (adaptive) thresholds, runtime settings updates and built-in metrics.
 
 [![CI](https://github.com/1mb-dev/autobreaker/workflows/CI/badge.svg)](https://github.com/1mb-dev/autobreaker/actions)
 [![Go Reference](https://pkg.go.dev/badge/github.com/1mb-dev/autobreaker.svg)](https://pkg.go.dev/github.com/1mb-dev/autobreaker)
@@ -26,13 +26,15 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 Use AutoBreaker when your services handle variable traffic and you don't want to tune circuit breaker thresholds per environment.
 
 **Choose AutoBreaker over [sony/gobreaker](https://github.com/sony/gobreaker) when:**
-- Your traffic varies 10x+ between environments or time of day -- adaptive thresholds scale with it
-- You need to change thresholds at runtime without restarting (`UpdateSettings` API)
-- You want built-in observability without wiring up custom callbacks (`Metrics`/`Diagnostics` APIs)
+- Your traffic varies 10x+ and you want failure-rate tripping built in, with a minimum-observations guard, rather than a hand-written `ReadyToTrip`
+- You need to change thresholds at runtime without building a new breaker (`UpdateSettings`)
+- You want built-in observability without wiring up custom callbacks (`Metrics`/`Diagnostics`)
+- You want callbacks that cannot take the breaker down (panic recovery) and a context-aware `ExecuteContext`
 
 **Choose sony/gobreaker instead when:**
 - Static failure counts work for your traffic pattern (consistent, predictable load)
 - You need the widest possible community adoption and ecosystem integrations
+- You want a rolling window (`BucketPeriod`), generics, or two-step and distributed breakers (gobreaker v2)
 
 AutoBreaker follows the sony/gobreaker v1 API shape (`Execute`, `Settings`, `Counts`, state names); the constructor is `New`. Set `AdaptiveThreshold: true` to get percentage-based detection on top of the familiar interface.
 

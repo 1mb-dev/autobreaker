@@ -37,7 +37,7 @@ home = ['HTML', 'RSS', 'JSON']
 # Hugo-book theme configuration
 [params]
   # SEO Meta tags
-  description = 'AutoBreaker is a production-ready circuit breaker for Go with adaptive thresholds, runtime configuration, and built-in metrics and diagnostics. Follows the sony/gobreaker v1 API shape.'
+  description = 'AutoBreaker is a circuit breaker for Go with percentage-based (adaptive) thresholds, runtime settings updates and built-in metrics. Follows the sony/gobreaker v1 API shape.'
   keywords = ['golang', 'circuit-breaker', 'resiliency', 'microservices', 'go', 'autobreaker', 'fault-tolerance']
   author = 'AutoBreaker Contributors'
   generator = 'Hugo'

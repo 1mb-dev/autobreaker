@@ -5,7 +5,7 @@ weight: 1
 
 # Getting Started with AutoBreaker
 
-AutoBreaker is an adaptive circuit breaker for Go that uses percentage-based thresholds to automatically adjust to traffic patterns.
+AutoBreaker is a circuit breaker for Go with percentage-based (adaptive) thresholds, runtime settings updates and built-in metrics.
 
 ## Why AutoBreaker?
 

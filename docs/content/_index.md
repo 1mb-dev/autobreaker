@@ -5,7 +5,7 @@ weight: 1
 
 # AutoBreaker
 
-Adaptive circuit breaker for Go with percentage-based thresholds that automatically adjust to traffic patterns.
+Circuit breaker for Go with percentage-based (adaptive) thresholds, runtime settings updates and built-in metrics.
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/1mb-dev/autobreaker.svg)](https://pkg.go.dev/github.com/1mb-dev/autobreaker)
 [![CI](https://github.com/1mb-dev/autobreaker/workflows/CI/badge.svg)](https://github.com/1mb-dev/autobreaker/actions)
