@@ -19,7 +19,7 @@ func TestExampleModules(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(mods) == 0 {
-		t.Fatal("no example modules found")
+		t.Skip("no example modules: the module zip omits nested modules, so this runs only in the repo")
 	}
 	for _, mod := range mods {
 		dir := filepath.Dir(mod)
