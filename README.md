@@ -42,7 +42,7 @@ AutoBreaker follows the sony/gobreaker v1 API shape (`Execute`, `Settings`, `Cou
 go get github.com/1mb-dev/autobreaker
 ```
 
-Requires Go 1.24 or later.
+Requires Go 1.26 or later.
 
 ## Quick Start
 
@@ -182,7 +182,7 @@ OnStateChange: func(name string, from, to State) {
 
 - 102 tests, 97.1% coverage, race detector clean
 - Zero dependencies
-- Compatible with Go 1.24+
+- Requires Go 1.26+
 
 See [Roadmap](https://1mb-dev.github.io/autobreaker/guides/roadmap/) for future plans.
 

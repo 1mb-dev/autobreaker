@@ -30,7 +30,7 @@ Example:
 ### Circuit breaker doesn't open with adaptive threshold
 
 **Environment:**
-- Go 1.23
+- `go version`: go1.26.0 darwin/arm64
 - AutoBreaker v1.0.0
 - macOS 14.0
 
@@ -221,7 +221,7 @@ How this was tested
 
 ### Prerequisites
 
-- Go 1.21 or later
+- Go 1.26 or later
 - Git
 - (Optional) golangci-lint for linting
 

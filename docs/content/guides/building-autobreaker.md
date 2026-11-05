@@ -244,7 +244,7 @@ With `AdaptiveThreshold: true` and an `Interval`:
 ## Deployment Considerations
 
 ### Version Compatibility
-- **Go 1.21+**: Required for generics and atomic features
+- **Go 1.26+**: Minimum version, set by `go.mod`
 - **Zero Dependencies**: Standard library only
 - **Familiar API**: Follows the sony/gobreaker v1 API shape
 

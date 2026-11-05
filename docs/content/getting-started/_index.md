@@ -22,7 +22,7 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 go get github.com/1mb-dev/autobreaker
 ```
 
-Requires Go 1.21 or later.
+Requires Go 1.26 or later.
 
 ## Quick Start
 
