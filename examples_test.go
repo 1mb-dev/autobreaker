@@ -1,6 +1,7 @@
 package autobreaker_test
 
 import (
+	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
@@ -25,6 +26,7 @@ func TestExampleModules(t *testing.T) {
 		t.Run(filepath.Base(dir), func(t *testing.T) {
 			cmd := exec.Command("go", "vet", "./...")
 			cmd.Dir = dir
+			cmd.Env = append(os.Environ(), "GOFLAGS=", "GOWORK=off")
 			if out, err := cmd.CombinedOutput(); err != nil {
 				t.Errorf("go vet in %s: %v\n%s", dir, err, out)
 			}

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -82,7 +83,7 @@ func TestReadmeQuickStart(t *testing.T) {
 	dir := t.TempDir()
 	goLine := regexp.MustCompile(`(?m)^go .*$`).FindString(readFile(t, "go.mod"))
 	gomod := "module quickstart\n\n" + goLine + "\n\nrequire github.com/1mb-dev/autobreaker v0.0.0\n\n" +
-		"replace github.com/1mb-dev/autobreaker => " + root + "\n"
+		"replace github.com/1mb-dev/autobreaker => " + strconv.Quote(root) + "\n"
 	for name, data := range map[string]string{"go.mod": gomod, "main.go": block} {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(data), 0o600); err != nil {
 			t.Fatal(err)
@@ -90,6 +91,7 @@ func TestReadmeQuickStart(t *testing.T) {
 	}
 	cmd := exec.Command("go", "vet", ".")
 	cmd.Dir = dir
+	cmd.Env = append(os.Environ(), "GOFLAGS=", "GOWORK=off")
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Errorf("README Quick Start does not build: %v\n%s", err, out)
 	}

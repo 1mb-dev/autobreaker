@@ -1,6 +1,9 @@
 package breaker
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 // TestExecuteDoesNotAllocate backs the documented claim; it excludes the log lines written
 // when a callback panics or a counter saturates.
@@ -48,6 +51,35 @@ func TestExecuteDoesNotAllocate(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("adaptive with interval", func(t *testing.T) {
+		cb := New(Settings{Name: "allocs", AdaptiveThreshold: true, Interval: time.Hour})
+		for _, req := range []func() (interface{}, error){ok, fail} {
+			if allocs := testing.AllocsPerRun(10, func() { _, _ = cb.Execute(req) }); allocs != 0 {
+				t.Errorf("Execute allocates %v times per call, want 0", allocs)
+			}
+		}
+	})
+
+	t.Run("timeout moves open to half-open inside Execute", func(t *testing.T) {
+		cbs := make([]*CircuitBreaker, 202)
+		for i := range cbs {
+			cbs[i] = New(Settings{Name: "allocs", ReadyToTrip: tripOnFirst, Timeout: time.Nanosecond})
+			_, _ = cbs[i].Execute(fail)
+		}
+		time.Sleep(time.Millisecond)
+		i := 0
+		allocs := testing.AllocsPerRun(200, func() {
+			_, _ = cbs[i].Execute(ok)
+			i++
+		})
+		if allocs != 0 {
+			t.Errorf("Execute allocates %v times per call, want 0", allocs)
+		}
+		if got := cbs[0].State(); got != StateClosed {
+			t.Errorf("state after probe = %v, want closed (Open -> HalfOpen -> Closed)", got)
+		}
+	})
 
 	t.Run("closed failure, no trip", func(t *testing.T) {
 		cb := New(Settings{Name: "allocs", ReadyToTrip: func(Counts) bool { return false }})
