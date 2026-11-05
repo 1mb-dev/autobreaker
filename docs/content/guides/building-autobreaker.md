@@ -54,17 +54,16 @@ Trip Condition: Failure Rate > Threshold (e.g., 5%)
 
 This single change makes the circuit breaker traffic-aware:
 
-**At 1000 requests/minute:**
-- 5% threshold = 50 failures before tripping
-- Protects against sustained 5%+ error rates
+The rate is computed over a fixed window: counts reset on every state change, and every `Interval` if one is set. With a 5% threshold and `Interval: 10s`:
+
+**At 100 requests/second** (1000 successes in the window):
+- Trips on the 53rd failure (53 / 1053 > 5%)
 - Ignores minor blips (<5% error rate)
 
-**At 10 requests/minute:**
-- 5% threshold = 0.5 failures (rounded to 1)
-- Trips on first sustained failure
-- Provides immediate protection
+**At 10 requests/second** (100 successes in the window):
+- Trips on the 6th failure (6 / 106 > 5%)
 
-The same configuration works correctly across all traffic levels without manual tuning.
+Below `MinimumObservations` requests in a window (default 20), the rate is not evaluated and the breaker does not trip. With `Interval: 0`, a long healthy run dilutes later failures: after 100,000 successes it takes 5,264 failures to trip.
 
 ## Architecture Overview
 
@@ -205,6 +204,7 @@ adaptive := autobreaker.New(autobreaker.Settings{
     Name:              "service-name",
     Timeout:           30 * time.Second,
     AdaptiveThreshold: true,
+    Interval:          10 * time.Second, // counts reset every 10s
 })
 ```
 
@@ -220,7 +220,7 @@ err := breaker.UpdateSettings(autobreaker.SettingsUpdate{
 
 ### Production Recommendations
 
-With `AdaptiveThreshold: true`:
+With `AdaptiveThreshold: true` and an `Interval`:
 
 | Scenario | Recommended Settings |
 |----------|---------------------|

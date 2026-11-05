@@ -127,7 +127,7 @@ breaker := autobreaker.New(settings)
 
 ## Benefits of Migration
 
-1. **Adaptive thresholds** - Works correctly at any traffic level
+1. **Adaptive thresholds** - One threshold across traffic levels (each window needs `MinimumObservations` requests)
 2. **Runtime updates** - Change settings without restart
 3. **Better observability** - More metrics and diagnostics
 4. **Callback safety** - Panics won't break the circuit

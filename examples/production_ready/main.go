@@ -195,7 +195,7 @@ func compareAdaptiveVsStatic() {
 		Timeout:              500 * time.Millisecond,
 	})
 
-	// Static breaker: 5 consecutive failures
+	// Static breaker: trips on the 6th consecutive failure
 	static := autobreaker.New(autobreaker.Settings{
 		Name:    "static",
 		Timeout: 500 * time.Millisecond,
@@ -294,7 +294,7 @@ func main() {
 	fmt.Println("✓ All scenarios complete!")
 	fmt.Println(strings.Repeat("=", 70))
 	fmt.Println("\nKey Takeaways:")
-	fmt.Println("  1. Same config works across all traffic levels (dev → production)")
+	fmt.Println("  1. Same config scales with traffic (dev → production) once each window has enough requests")
 	fmt.Println("  2. Automatically adapts to your traffic patterns")
 	fmt.Println("  3. Catches distributed failures that static thresholds miss")
 	fmt.Println("  4. Protects downstream services during degradation")

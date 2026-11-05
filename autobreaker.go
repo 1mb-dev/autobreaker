@@ -18,10 +18,10 @@
 // # The Solution
 //
 // AutoBreaker uses percentage-based thresholds:
-//   - Same configuration works across 10x+ traffic variance
-//   - Automatically adapts: at 100 RPS, 5% threshold = 50 failures/10s
-//   - Automatically adapts: at 10 RPS, 5% threshold = 5 failures/10s
-//   - One config for all environments
+//   - Same configuration works across traffic levels, as long as each Interval window
+//     holds MinimumObservations requests
+//   - With a 5% threshold and Interval 10s, after 1000 successes in a window (100 RPS)
+//     it trips on the 53rd failure; after 100 (10 RPS), on the 6th
 //
 // # Quick Start
 //
@@ -31,8 +31,9 @@
 //	    Name:                 "api-client",
 //	    Timeout:              10 * time.Second,
 //	    AdaptiveThreshold:    true,
-//	    FailureRateThreshold: 0.05, // 5% failure rate trips circuit
-//	    MinimumObservations:  20,   // Require 20 requests before adapting
+//	    Interval:             10 * time.Second, // counts reset every 10s (fixed window)
+//	    FailureRateThreshold: 0.05,             // 5% failure rate trips circuit
+//	    MinimumObservations:  20,               // Require 20 requests before adapting
 //	})
 //
 // Wrap operations with the circuit breaker:
@@ -280,6 +281,7 @@ var (
 //	    Name:                 "api-client",
 //	    Timeout:              10 * time.Second,
 //	    AdaptiveThreshold:    true,
+//	    Interval:             10 * time.Second,
 //	    FailureRateThreshold: 0.05,
 //	    MinimumObservations:  20,
 //	})
