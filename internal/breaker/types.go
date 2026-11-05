@@ -230,8 +230,8 @@ type Settings struct {
 	// Thread-Safety: This callback must be thread-safe as it's called concurrently
 	// from Execute() without synchronization.
 	//
-	// Performance: Keep this callback fast (<1μs) as it's called on every request
-	// in Closed state. Avoid I/O, logging, or expensive computations.
+	// Performance: Keep this callback fast (<1μs) as it's called after each failed
+	// request in Closed state. Avoid I/O, logging, or expensive computations.
 	//
 	// Example - Custom Threshold:
 	//   ReadyToTrip: func(counts autobreaker.Counts) bool {
@@ -324,8 +324,8 @@ type Settings struct {
 	// Thread-Safety: This callback must be thread-safe as it's called concurrently
 	// from Execute() without synchronization.
 	//
-	// Performance: Keep this callback fast (<1μs) as it's called on every request.
-	// Avoid I/O, logging, or expensive computations.
+	// Performance: Keep this callback fast (<1μs) as it's called on each completed
+	// request. Avoid I/O, logging, or expensive computations.
 	//
 	// Note: Panics are always counted as failures, regardless of this callback.
 	//

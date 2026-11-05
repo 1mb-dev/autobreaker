@@ -49,7 +49,7 @@ The rate is checked only once a window holds `MinimumObservations` requests (def
 - **Runtime Configuration** - Update settings without restart
 - **Zero Dependencies** - Standard library only
 - **Observability** - Metrics() and Diagnostics() APIs built-in
-- **Thread-Safe** - Lock-free atomic operations throughout
+- **Thread-Safe** - State and counts are atomic; all methods are safe for concurrent use
 
 ## Next Steps
 

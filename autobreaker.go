@@ -52,7 +52,7 @@
 //   - Runtime Configuration: Update settings without restart via UpdateSettings()
 //   - Rich Observability: Metrics() and Diagnostics() APIs for monitoring
 //   - Zero Dependencies: Only standard library
-//   - Lock-Free: atomic operations, no mutex on the request path
+//   - Lock-Free: state and counts are atomic operations
 //   - Thread-Safe: All methods safe for concurrent use
 //   - Familiar API: follows the sony/gobreaker v1 API shape
 //

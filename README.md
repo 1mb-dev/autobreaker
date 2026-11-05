@@ -19,7 +19,7 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 - **Runtime Configuration** - Update settings without restart
 - **Zero Dependencies** - Standard library only
 - **Observability** - Metrics() and Diagnostics() APIs built-in
-- **Thread-Safe** - Lock-free atomic operations throughout
+- **Thread-Safe** - State and counts are atomic; all methods are safe for concurrent use
 
 ## When to Use This
 
@@ -168,7 +168,7 @@ go run examples/production_ready/main.go
 
 ## Important Notes
 
-**Callback Performance:** Callbacks run synchronously inside `Execute()`: `IsSuccessful` on every request that runs, `ReadyToTrip` after each failed request in Closed state, `OnStateChange` on every state change. Keep them <1μs. Use goroutines for slow operations:
+**Callback Performance:** Callbacks run synchronously inside `Execute()`: `IsSuccessful` on each completed request, `ReadyToTrip` after each failed request in Closed state, `OnStateChange` on every state change. Keep them <1μs. Use goroutines for slow operations:
 
 ```go
 OnStateChange: func(name string, from, to State) {

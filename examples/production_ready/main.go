@@ -274,7 +274,7 @@ func main() {
 	fmt.Println("  - Adaptive threshold: 5% failure rate")
 	fmt.Println("  - Minimum observations: 20 requests")
 	fmt.Println("  - Timeout: 1 second")
-	fmt.Println("  - Same config works for all environments! 🎯")
+	fmt.Println("  - Same config works across environments once each window has enough requests 🎯")
 
 	// Run scenarios across different environments
 	env := environments[2] // Production

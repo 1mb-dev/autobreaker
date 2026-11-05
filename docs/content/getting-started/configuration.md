@@ -74,7 +74,7 @@ err := breaker.UpdateSettings(autobreaker.SettingsUpdate{
 
 ## Performance Considerations
 
-**Callback Performance**: Callbacks run synchronously inside `Execute()`: `IsSuccessful` on every request that runs, `ReadyToTrip` after each failed request in Closed state, `OnStateChange` on every state change. Keep them <1μs.
+**Callback Performance**: Callbacks run synchronously inside `Execute()`: `IsSuccessful` on each completed request, `ReadyToTrip` after each failed request in Closed state, `OnStateChange` on every state change. Keep them <1μs.
 
 ```go
 // Good: Async logging

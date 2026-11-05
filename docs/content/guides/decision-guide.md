@@ -13,7 +13,7 @@ Choosing the right circuit breaker configuration depends on your specific use ca
 
 ### ✅ Good Use Cases
 
-The recommended configs below assume `AdaptiveThreshold: true` and an `Interval`; without it the rate settings are ignored.
+The recommended configs below assume `AdaptiveThreshold: true` (without it the rate settings are ignored) and an `Interval`.
 
 **1. Microservices Communication**
 - **Scenario**: Service-to-service calls in distributed systems
@@ -45,7 +45,7 @@ The recommended configs below assume `AdaptiveThreshold: true` and an `Interval`
 **2. Very Low Traffic Services**
 - **Scenario**: <10 requests per minute
 - **Consideration**: Adaptive thresholds need minimum observations
-- **Recommendation**: Make one `Interval` see at least `MinimumObservations` requests (e.g. `Interval: 2 * time.Minute`, `MinimumObservations: 5` at 5 RPM); a window below it never trips, or keep the static default.
+- **Recommendation**: Make one `Interval` see at least `MinimumObservations` requests (e.g. `Interval: 2 * time.Minute`, `MinimumObservations: 5` at 5 RPM); a window below it never trips. Alternatively, keep the static default.
 
 **3. Batch Processing**
 - **Scenario**: Background jobs, data processing pipelines

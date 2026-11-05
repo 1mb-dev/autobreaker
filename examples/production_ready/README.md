@@ -13,7 +13,7 @@ This comprehensive example demonstrates how to use AutoBreaker's adaptive thresh
 
 ### Key Features Demonstrated
 
-- **Traffic-Proportional Protection**: Same config works from dev (5 req/s) to production (500 req/s)
+- **Traffic-Proportional Protection**: Same config works from dev (5 req/s) to production (500 req/s), as long as each `Interval` window holds `MinimumObservations` requests
 - **Distributed Failure Detection**: Catches failures that aren't consecutive
 - **Automatic Recovery**: Circuit closes when service health improves
 - **Observable Behavior**: Clear metrics and state transitions

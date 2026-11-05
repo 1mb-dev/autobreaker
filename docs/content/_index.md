@@ -31,7 +31,7 @@ The Quick Start is in the [README](https://github.com/1mb-dev/autobreaker#quick-
 - **Runtime Configuration** - Update settings without restart
 - **Zero Dependencies** - Standard library only
 - **Observability** - Metrics() and Diagnostics() APIs built-in
-- **Thread-Safe** - Lock-free atomic operations throughout
+- **Thread-Safe** - State and counts are atomic; all methods are safe for concurrent use
 
 ## Documentation
 

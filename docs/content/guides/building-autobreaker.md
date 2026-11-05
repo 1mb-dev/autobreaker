@@ -273,7 +273,7 @@ See the [Roadmap](/guides/roadmap/) for the next release theme.
 
 ## Conclusion
 
-AutoBreaker's architecture addresses the fundamental limitation of traditional circuit breakers: static thresholds that don't adapt to traffic patterns. By combining percentage-based adaptive thresholds with a lock-free implementation, it gives traffic-proportional tripping without a mutex on the request path.
+AutoBreaker's architecture addresses the fundamental limitation of traditional circuit breakers: static thresholds that don't adapt to traffic patterns. By combining percentage-based adaptive thresholds with a lock-free implementation, it gives traffic-proportional tripping with atomic state and counts.
 
 The design prioritizes:
 1. **Correctness**: Adaptive thresholds scale with traffic volume, given enough requests per window
