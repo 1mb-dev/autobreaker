@@ -297,8 +297,7 @@ When contributing, keep these principles in mind:
 - Benefits multiple users
 
 ### 4. Performance
-- <100ns overhead in hot path
-- Zero allocations where possible
+- No allocations in `Execute()` (check with `make bench`)
 - Lock-free where practical
 
 ### 5. Backward Compatible

@@ -52,7 +52,7 @@
 //   - Runtime Configuration: Update settings without restart via UpdateSettings()
 //   - Rich Observability: Metrics() and Diagnostics() APIs for monitoring
 //   - Zero Dependencies: Only standard library
-//   - High Performance: <100ns overhead per request, lock-free design
+//   - Lock-Free: atomic operations, no mutex on the request path
 //   - Thread-Safe: All methods safe for concurrent use
 //   - Drop-in Replacement: Compatible with sony/gobreaker API
 //
@@ -109,10 +109,9 @@
 //
 // # Performance
 //
-//   - Execute() overhead: <100ns per request (in Closed state)
-//   - Zero allocations in hot path
-//   - Lock-free design, no contention
-//   - Scales linearly with concurrent requests
+//   - Execute() does not allocate, except the log line written when a callback panics or a
+//     counter saturates
+//   - Measured numbers per state: https://1mb-dev.github.io/autobreaker/guides/performance/
 //
 // # Examples
 //

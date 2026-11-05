@@ -141,8 +141,4 @@ Allowed - fail-fast recovery. Future versions may add exponential backoff.
 
 ## Performance
 
-- **State Check Latency:** <50ns (lock-free atomic read)
-- **Transition Latency:** <1μs (atomic CAS + callback)
-- **Count Update Latency:** <20ns (atomic increment)
-- **Memory Overhead:** <200 bytes per breaker instance
-- **Concurrency:** Handles 1M+ RPS on modern hardware
+State checks, count updates and transitions are atomic operations. Measured numbers are in the [Performance Guide](/guides/performance/).

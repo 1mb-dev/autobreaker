@@ -18,7 +18,6 @@ AutoBreaker uses **percentage-based thresholds** that adapt to request volume au
 - **Adaptive Thresholds** - Percentage-based failure detection scales with traffic
 - **Runtime Configuration** - Update settings without restart
 - **Zero Dependencies** - Standard library only
-- **High Performance** - <100ns overhead per request, zero allocations
 - **Observability** - Metrics() and Diagnostics() APIs built-in
 - **Thread-Safe** - Lock-free atomic operations throughout
 
@@ -147,15 +146,7 @@ The implementation uses a three-state machine (Closed → Open → HalfOpen → 
 
 ## Performance
 
-Benchmarks (Go 1.21, Apple M1):
-
-| Operation          | Latency | Allocations |
-|--------------------|---------|-------------|
-| Execute (Closed)   | 78.5 ns | 0 allocs    |
-| Execute (Open)     | 0.34 ns | 0 allocs    |
-| UpdateSettings()   | 89.2 ns | 0 allocs    |
-
-See [Performance Guide](https://1mb-dev.github.io/autobreaker/guides/performance/) for detailed analysis.
+Per-state latency and allocations (Closed, Open, HalfOpen), with the CPU and Go version they were measured on, are in the [Performance Guide](https://1mb-dev.github.io/autobreaker/guides/performance/).
 
 ## Examples
 
@@ -175,7 +166,7 @@ go run examples/production_ready/main.go
 
 ## Important Notes
 
-**Callback Performance:** `ReadyToTrip`, `OnStateChange`, and `IsSuccessful` callbacks execute synchronously on every request. Keep them <1μs. Use goroutines for slow operations:
+**Callback Performance:** Callbacks run synchronously inside `Execute()`: `IsSuccessful` on every request that runs, `ReadyToTrip` after each failed request in Closed state, `OnStateChange` on every state change. Keep them <1μs. Use goroutines for slow operations:
 
 ```go
 OnStateChange: func(name string, from, to State) {
@@ -190,7 +181,7 @@ OnStateChange: func(name string, from, to State) {
 **Production-Ready** - v1.1.2
 
 - 102 tests, 97.1% coverage, race detector clean
-- Zero dependencies, zero allocations in hot path
+- Zero dependencies
 - Compatible with Go 1.24+
 
 See [Roadmap](https://1mb-dev.github.io/autobreaker/guides/roadmap/) for future plans.

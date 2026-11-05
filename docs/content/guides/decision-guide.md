@@ -213,7 +213,7 @@ breaker := autobreaker.New(autobreaker.Settings{
     // No callbacks to avoid overhead
 })
 ```
-**Impact**: <50ns overhead, slower failure detection
+**Impact**: slower failure detection, no callback cost
 
 ### Protection-First Configuration
 
@@ -230,7 +230,7 @@ breaker := autobreaker.New(autobreaker.Settings{
     },
 })
 ```
-**Impact**: ~100ns overhead, fast failure detection
+**Impact**: fast failure detection; the callback runs on every state change
 
 ## Common Decision Pitfalls
 

@@ -18,7 +18,7 @@ import (
 //   - Adaptive Thresholds: Percentage-based failure detection that scales with traffic
 //   - Runtime Configuration: Update settings without restart via UpdateSettings()
 //   - Observability: Metrics() and Diagnostics() for monitoring and troubleshooting
-//   - Lock-Free: Uses atomic operations for high performance (<100ns overhead)
+//   - Lock-Free: Uses atomic operations, no mutex on the request path
 //   - Thread-Safe: All methods safe for concurrent use
 //   - Panic Recovery: Automatically handles panics as failures
 //
@@ -384,7 +384,7 @@ func (cb *CircuitBreaker) Counts() Counts {
 //   - Too Many Requests: Returns (nil, ErrTooManyRequests) in half-open with exceeded MaxRequests
 //   - Application Error: Returns (result, err) unchanged; isSuccessful determines if counted as failure
 //
-// Performance: <100ns overhead in Closed state (hot path). Uses lock-free atomic operations.
+// Performance: lock-free atomic operations; does not allocate.
 //
 // Thread-safe: Can be called concurrently from multiple goroutines. State transitions
 // are serialized internally.
@@ -541,7 +541,7 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 //   - Too Many Requests: Returns (nil, ErrTooManyRequests) in half-open with exceeded MaxRequests
 //   - Application Error: Returns (result, err) unchanged; isSuccessful determines if counted as failure
 //
-// Performance: Same as Execute() (~<100ns overhead in Closed state).
+// Performance: same as Execute().
 //
 // Thread-safe: Can be called concurrently from multiple goroutines with different contexts.
 //

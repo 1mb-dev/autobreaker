@@ -129,17 +129,15 @@ func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{},
 func (b *Breaker) Execute(req func() (interface{}, error)) (interface{}, error) {
     // Fast path: check if open using atomic load
     if atomic.LoadUint32(&b.state) == uint32(StateOpen) {
-        return nil, ErrOpenState // ~0.34ns overhead
+        return nil, ErrOpenState
     }
     // ... execute with atomic updates
 }
 ```
 
-**Performance Impact:**
-- **Traditional**: 50-200ns overhead due to lock contention
-- **AutoBreaker**: <100ns overhead, zero contention
+Measured numbers are in the [Performance Guide](/guides/performance/).
 
-### Zero Allocations in Hot Path
+### No Allocations on the Request Path
 
 Memory allocations trigger GC pressure and reduce performance. AutoBreaker avoids allocations in the critical path:
 
@@ -151,10 +149,7 @@ metrics := &Metrics{Requests: 1, Failures: 0} // Allocation!
 atomic.AddUint64(&b.counters.requests, 1)
 ```
 
-**Memory Profile:**
-- **Execute()**: 0 allocations
-- **Metrics()**: 1 allocation (on demand, not in hot path)
-- **UpdateSettings()**: 0 allocations
+`Execute()` does not allocate, except the log line written when a callback panics or a counter saturates.
 
 ## Observability Architecture
 
@@ -278,11 +273,11 @@ See [Roadmap & RFCs](/guides/roadmap/) for proposed features and community valid
 
 ## Conclusion
 
-AutoBreaker's architecture addresses the fundamental limitation of traditional circuit breakers: static thresholds that don't adapt to traffic patterns. By combining percentage-based adaptive thresholds with a lock-free, zero-allocation implementation, it provides both correct behavior across all traffic levels and production-grade performance.
+AutoBreaker's architecture addresses the fundamental limitation of traditional circuit breakers: static thresholds that don't adapt to traffic patterns. By combining percentage-based adaptive thresholds with a lock-free implementation, it gives traffic-proportional tripping without a mutex on the request path.
 
 The design prioritizes:
-1. **Correctness**: Adaptive thresholds work at any traffic volume
-2. **Performance**: <100ns overhead, zero allocations in hot path
+1. **Correctness**: Adaptive thresholds scale with traffic volume, given enough requests per window
+2. **Performance**: lock-free, no allocations in `Execute()`
 3. **Observability**: Built-in metrics and diagnostics
 4. **Operability**: Runtime configuration, sensible defaults
 

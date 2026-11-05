@@ -48,7 +48,6 @@ The rate is checked only once a window holds `MinimumObservations` requests (def
 - **Adaptive Thresholds** - Percentage-based failure detection scales with traffic
 - **Runtime Configuration** - Update settings without restart
 - **Zero Dependencies** - Standard library only
-- **High Performance** - <100ns overhead per request, zero allocations
 - **Observability** - Metrics() and Diagnostics() APIs built-in
 - **Thread-Safe** - Lock-free atomic operations throughout
 

@@ -10,6 +10,7 @@ import (
 var (
 	benchResult interface{}
 	benchError  error
+	errBench    = errors.New("failure")
 )
 
 // testContext returns a background context for benchmarks.
@@ -56,11 +57,11 @@ func BenchmarkExecuteSuccess(b *testing.B) {
 	}
 }
 
-// BenchmarkExecuteFailure measures overhead when operations fail.
+// BenchmarkExecuteFailure measures a failing request in Closed state (the breaker never trips).
 func BenchmarkExecuteFailure(b *testing.B) {
-	cb := New(Settings{Name: "bench"})
+	cb := New(Settings{Name: "bench", ReadyToTrip: func(Counts) bool { return false }})
 	operation := func() (interface{}, error) {
-		return nil, errors.New("failure")
+		return nil, errBench
 	}
 
 	b.ResetTimer()
@@ -219,8 +220,19 @@ func BenchmarkExecute_Open(b *testing.B) {
 	}
 }
 
-// BenchmarkExecute_HalfOpen measures Execute() performance in half-open state.
+// BenchmarkExecute_HalfOpen measures one trip-and-recover cycle on a single breaker: a failing
+// Execute that trips it, the move to HalfOpen, and the successful probe that closes it. A probe
+// always changes state (one success closes), so it cannot be timed in isolation.
 func BenchmarkExecute_HalfOpen(b *testing.B) {
+	cb := New(Settings{
+		Name: "bench",
+		ReadyToTrip: func(counts Counts) bool {
+			return counts.ConsecutiveFailures >= 1
+		},
+	})
+	failOp := func() (interface{}, error) {
+		return nil, errBench
+	}
 	operation := func() (interface{}, error) {
 		return "result", nil
 	}
@@ -229,22 +241,9 @@ func BenchmarkExecute_HalfOpen(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		// Create new breaker for each iteration to keep it in half-open
-		cb := New(Settings{
-			Name: "bench",
-			ReadyToTrip: func(counts Counts) bool {
-				return counts.ConsecutiveFailures >= 1
-			},
-			Timeout: 0,
-		})
-
-		// Trip and immediately transition to half-open
-		_, _ = cb.Execute(func() (interface{}, error) {
-			return nil, errors.New("error")
-		})
+		_, _ = cb.Execute(failOp) // Closed -> Open
 		cb.transitionToHalfOpen()
-
-		benchResult, benchError = cb.Execute(operation)
+		benchResult, benchError = cb.Execute(operation) // HalfOpen -> Closed
 	}
 }
 
@@ -417,16 +416,3 @@ func BenchmarkStateTransitions(b *testing.B) {
 		benchResult, benchError = cb.Execute(operation)
 	}
 }
-
-// Performance targets (documented for v1.0.0 validation):
-//
-// - State():              < 5 ns/op, 0 allocs/op
-// - Counts():             < 10 ns/op, 0 allocs/op
-// - Metrics():            < 20 ns/op, 0 allocs/op
-// - Diagnostics():        < 200 ns/op, 0 allocs/op
-// - Execute (closed):     < 100 ns/op, 0 allocs/op
-// - Execute (open):       < 50 ns/op, 0 allocs/op
-// - ExecuteContext:       < 100 ns/op, 0 allocs/op
-// - UpdateSettings:       < 100 ns/op, 0 allocs/op
-// - Concurrent scaling:   Linear with cores
-// - Zero allocations:     All hot paths

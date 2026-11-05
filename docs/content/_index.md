@@ -30,7 +30,6 @@ The Quick Start is in the [README](https://github.com/1mb-dev/autobreaker#quick-
 - **Adaptive Thresholds** - Percentage-based failure detection scales with traffic
 - **Runtime Configuration** - Update settings without restart
 - **Zero Dependencies** - Standard library only
-- **High Performance** - <100ns overhead per request, zero allocations
 - **Observability** - Metrics() and Diagnostics() APIs built-in
 - **Thread-Safe** - Lock-free atomic operations throughout
 
@@ -58,15 +57,7 @@ The Quick Start is in the [README](https://github.com/1mb-dev/autobreaker#quick-
 
 ## Performance
 
-Benchmarks (Go 1.21+, Apple M1):
-
-| Operation | Latency | Allocations |
-|-----------|---------|-------------|
-| Execute (Closed) | 78.5 ns | 0 allocs |
-| Execute (Open) | 0.34 ns | 0 allocs |
-| UpdateSettings() | 89.2 ns | 0 allocs |
-
-See [Performance Guide](/guides/performance/) for detailed analysis.
+Per-state latency and allocations, with the CPU and Go version they were measured on, are in the [Performance Guide](/guides/performance/).
 
 ## Examples
 
